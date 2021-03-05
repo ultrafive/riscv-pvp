@@ -1,5 +1,6 @@
 import pytest
 from tests.cases.case import *
+from tests.cases.params import *
 from isa.simulate import *
 from isa.rvi.addi import *
 from isa.rvi.ori import *
@@ -30,18 +31,18 @@ class BaseTest_rvi_imm(BaseTest):
         ( 0x00000003, 0x007 ),
     ])
     def test_arithmetic(self, rs1, imm):
-        simulate(Case_imm_op, self.inst, rs1=rs1, imm=imm)
+        simulate(self, Case_imm_op, rs1=rs1, imm=imm)
 
-    def test_cov(self):
-        for x in range(128):
-            for y in range(8):
-                simulate(Case_imm_op, self.inst, rs1=x, imm=y)
+    def test_cov(self, workdir):
+        for x in range(2):
+            for y in range(2):
+                simulate(self, Case_imm_op, rs1=x, imm=y)
 
     @pytest.mark.parametrize('rs1, imm', [
         ( 13, 11 ),
     ])
     def test_src1_eq_dest(self, rs1, imm):
-        simulate(Case_src1_eq_dest, self.inst, rs1=rs1, imm=imm)
+        simulate(self, Case_src1_eq_dest, rs1=rs1, imm=imm)
 
     @pytest.mark.parametrize('rs1, imm, nop_cycles', [
         ( 13, 11 , 0 ),
@@ -49,7 +50,7 @@ class BaseTest_rvi_imm(BaseTest):
         ( 13,  9 , 2 ),
     ])
     def test_dest_bypass(self, rs1, imm, nop_cycles):
-        simulate(Case_dest_bypass, self.inst, rs1=rs1, imm=imm, nop_cycles=nop_cycles)
+        simulate(self, Case_dest_bypass, rs1=rs1, imm=imm, nop_cycles=nop_cycles)
 
     @pytest.mark.parametrize('rs1, imm, nop_cycles', [
         ( 13, 11 , 0 ),
@@ -57,14 +58,14 @@ class BaseTest_rvi_imm(BaseTest):
         ( 13,  9 , 2 ),
     ])
     def test_src1_bypass(self, rs1, imm, nop_cycles):
-        simulate(Case_src1_bypass, self.inst, rs1=rs1, imm=imm, nop_cycles=nop_cycles)
+        simulate(self, Case_src1_bypass, rs1=rs1, imm=imm, nop_cycles=nop_cycles)
 
     @pytest.mark.parametrize('imm', [
         ( 32 ),
         ( 50 ),
     ])
     def test_zerosrc1(self, imm):
-        simulate(Case_imm_zerosrc1, self.inst, rs1=0, imm=imm)
+        simulate(self, Case_imm_zerosrc1, rs1=0, imm=imm)
         
 class Test_addi(BaseTest_rvi_imm):
     inst = Addi

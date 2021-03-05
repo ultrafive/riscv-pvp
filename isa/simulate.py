@@ -1,5 +1,4 @@
 
-from .source import Source
 from string import Template
 import os
 import numpy as np
@@ -25,13 +24,6 @@ RVTEST_DATA_BEGIN
     $data
 RVTEST_DATA_END
 '''
-
-def prepare_workdir():
-    global case_num
-    case_num += 1
-    workdir = f'build/{case_num}'
-    os.makedirs(workdir, exist_ok=True)
-    return workdir
 
 def array_data(prefix, k, vv):
     lines = []
@@ -103,8 +95,9 @@ def diff(resmap, golden, memfile):
     for symbol in resmap:
         assert golden[symbol] == readmem(memfile, symbol)
 
-def simulate(caseclass, instclass, **kw):
-    workdir = prepare_workdir()
+def simulate(testcase, caseclass, **kw):
+    workdir = testcase.workdir
+    instclass = testcase.inst
 
     source = f'{workdir}/test.S'
     binary = f'{workdir}/test.elf'

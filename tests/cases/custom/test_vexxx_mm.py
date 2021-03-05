@@ -16,7 +16,7 @@ class BaseTest_vexxx_mm(BaseTest):
         linspace_mm(np.half, 10, 1),
     ])
     def test_basic_shapes(self, rs1, rs2):
-        simulate(Case_basic_shapes, self.inst, rs1=rs1, rs2=rs2)
+        simulate(self, Case_basic_shapes, rs1=rs1, rs2=rs2)
 
 class Test_veadd_mm(BaseTest_vexxx_mm):
     inst = Veadd_mm
