@@ -80,13 +80,13 @@ def generate_source(source, case, inst, **kw):
     content = Template(template).substitute(code = code, data = data)
     print(content,  file=open(source, 'w'))
 
-CC = '/home/pascal/opt/riscv/bin/clang'
+CC = 'clang'
 ARCH_FLAGS = '-march=rv32g -mabi=ilp32'
 TARGET_FLAGS = '--target=riscv32npu -static -nostdlib -nostartfiles'
 INCS = '-I env/b -Imacros/scalar -Imacros/vector -Imacros/stc'
 LINKFLAGS = '-Tenv/b/link.ld'
 
-SIM = '/home/pascal/opt/riscv/bin/spike'
+SIM = 'spike'
 
 def compile(binary, mapfile, source, **kw):
     cmd = f'{CC} {ARCH_FLAGS} {TARGET_FLAGS} {INCS} {LINKFLAGS} -Wl,-Map,{mapfile} {source} -o {binary}'
