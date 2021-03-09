@@ -8,12 +8,14 @@ case_num = 0
 template = '''
 #include "riscv_test.h"
 #include "test_macros.h"
-#include "vexxx_mm.h"
+$head
 
 RVTEST_RV32STC
 RVTEST_CODE_BEGIN
     $code
     TEST_PASSFAIL
+
+    TEST_EXCEPTION_HANDLER
 
 RVTEST_CODE_END
 
@@ -50,7 +52,6 @@ def array_data(prefix, k, vv):
     return '\n'.join(lines) + '\n'
 
 def generate_source(source, case, inst, **kw):
-   
 
     data = ''
     kw_extra = {}
@@ -69,13 +70,13 @@ def generate_source(source, case, inst, **kw):
         out = "test_rd"
     code = case.template(2, inst.name, out, *args)
 
-    content = Template(template).substitute(code = code, data = data)
+    content = Template(template).substitute(head=case.head, code = code, data = data)
     print(content,  file=open(source, 'w'))
 
 CC = 'clang'
 ARCH_FLAGS = '-march=rv32g -mabi=ilp32'
 TARGET_FLAGS = '--target=riscv32npu -static -nostdlib -nostartfiles'
-INCS = '-I env/b -Imacros/scalar -Imacros/vector -Imacros/stc'
+INCS = '-Ienv/b -Imacros/scalar -Imacros/vector -Imacros/stc'
 LINKFLAGS = '-Tenv/b/link.ld'
 
 SIM = 'spike'
@@ -86,6 +87,7 @@ def compile(binary, mapfile, source, **kw):
 
 def run(memfile, logfile, binary, **kw):
     cmd = f'{SIM} {binary} > {logfile} 2>&1'
+    print(cmd)
     assert os.system(cmd) == 0
 
 def readmem(memfile, symbol):
