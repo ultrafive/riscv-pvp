@@ -4,49 +4,45 @@ from tests.cases.params import *
 from isa.simulate import *
 from isa.custom.veadd_mm import *
 from isa.custom.vesub_mm import *
+from isa.custom.veemul_mm import *
+from isa.custom.vemax_mm import *
 
-class Case_basic_shapes(BaseCase):
+class BaseCase_vexxx_mm(BaseCase):
     head = '#include "vexxx_mm.h"'
+
+class Case_basic_shapes(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
         return f'TEST_VEXXX_MM_INTERNAL({num}, {name}, {rd}, {rs1_data}, {rs2_data}, {rs1_shape[0]}, {rs1_shape[1]});'
 
-class Case_stride(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_stride(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, dstride, sstride1, sstride2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
         return f'TEST_VEXXX_MM_STRIDE_INTERNAL( {num}, {name}, {rd}, {rs1_data}, {rs2_data}, {rs1_shape[0]}, {rs1_shape[1]}, {dstride}, {sstride1}, {sstride2} );'
 
-class Case_inplace_rs1(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_inplace_rs1(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
         return f'TEST_VEXXX_MM_INPLACE_RS1_INTERNAL( {num}, {name}, {rd}, {rs1_data}, {rs2_data}, {rs1_shape[0]}, {rs1_shape[1]} );'
 
-class Case_inplace_rs2(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_inplace_rs2(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
         return f'TEST_VEXXX_MM_INPLACE_RS2_INTERNAL( {num}, {name}, {rd}, {rs1_data}, {rs2_data}, {rs1_shape[0]}, {rs1_shape[1]} );'
 
-class Case_rs1_eq_rs2(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_rs1_eq_rs2(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
         return f'TEST_VEXXX_MM_INPLACE_RS1_EQ_RS2_INTERNAL( {num}, {name}, {rd}, {rs1_data}, {rs1_shape[0]}, {rs1_shape[1]} );'
 
-class Case_misaligned_base(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_misaligned_base(BaseCase_vexxx_mm):
     def template(self, num, name, rd, width, height, doff, soff1, soff2):
         return f'TEST_VEXXX_MM_MISALIGNED_BASE( {num}, {name}, {width}, {height}, {doff}, {soff1}, {soff2} )'
 
-class Case_invalid_param(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_invalid_param(BaseCase_vexxx_mm):
     def template(self, num, name, rd, width, height ):
         return f'TEST_VEXXX_MM_INVALID_PARAM( {num}, {name}, {width}, {height} )'
 
-class Case_misaligned_stride(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_misaligned_stride(BaseCase_vexxx_mm):
     def template(self, num, name, rd, width, height, dstride, sstride1, sstride2):
         return f'TEST_VEXXX_MM_MISALIGNED_STRIDE( {num}, {name}, {width}, {height}, {dstride}, {sstride1}, {sstride2} )'
 
-class Case_access_fault(BaseCase):
-    head = '#include "vexxx_mm.h"'
+class Case_access_fault(BaseCase_vexxx_mm):
     def template(self, num, name, rd, width, height, dst, src1, src2):
         return f'TEST_VEXXX_MM_ACCESS_FAULT( {num}, {name}, {width}, {height}, {dst}, {src1}, {src2} )'
 
@@ -225,4 +221,44 @@ class Test_veadd_mm(BaseTest_vexxx_mm):
 
 class Test_vesub_mm(BaseTest_vexxx_mm):
     inst = Vesub_mm
-  
+
+class Test_veemul_mm(BaseTest_vexxx_mm):
+    inst = Veemul_mm
+
+class Test_vemax_mm(BaseTest_vexxx_mm):
+    inst = Vemax_mm
+
+    @pytest.mark.parametrize('rs1, rs2', [
+        # Functional tests with basic data
+        linspace_mm(np.half, 64, 32 ),
+        linspace_mm(np.half, 64, 64 ),
+        linspace_mm(np.half, 128, 128 ),
+        linspace_mm(np.half, 256, 256 ),
+        linspace_mm(np.half, 256, 512 ),
+
+        # Functional tests with shapes
+
+        # near 64 mac
+        linspace_mm(np.half, 63, 31 ),
+        linspace_mm(np.half, 65, 33 ),
+        linspace_mm(np.half, 65, 33 ),
+        
+        # small shapes
+        linspace_mm(np.half, 1, 1 ),
+        linspace_mm(np.half, 10, 1 ),
+        linspace_mm(np.half, 1, 10 ),
+        linspace_mm(np.half, 10, 10 ),
+
+        # middle shapes
+        linspace_mm(np.half, 127, 127 ),
+        linspace_mm(np.half, 255, 127 ),
+        linspace_mm(np.half, 127, 255 ),
+        linspace_mm(np.half, 255, 255 ),
+
+        # full of l1buffer
+        linspace_mm(np.half, 54613, 4 ),
+        linspace_mm(np.half, 853, 256 ),
+        linspace_mm(np.half, 256, 853 ),
+    ])
+    def test_basic_shapes(self, rs1, rs2 ):
+        simulate(self, Case_basic_shapes, rs1=rs1, rs2=rs2)  

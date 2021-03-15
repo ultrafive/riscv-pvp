@@ -23,6 +23,7 @@
 #define RD_ADDR   0xc0000000
 #define RS1_ADDR  0xc00a0000
 
+
 #ifndef VV_CHECK_EQ
 #define VV_CHECK_EQ(vec1, vec2, vlen, acc) VV_CHECK_EQ_INT16(vec1, vec2, vlen)
 #endif

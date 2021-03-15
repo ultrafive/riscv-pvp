@@ -5,9 +5,9 @@
 #include "test_macros_stc.h"
 #include "exception.h"
 
-#ifndef INST
-#error INST must be defined
-#endif
+// #ifndef INST
+// #error INST must be defined
+// #endif
 
 #undef RD_ADDR
 #undef RS1_ADDR
@@ -52,7 +52,7 @@
 #define EQM(vec1, vec2, vlen) VV_CHECK_EQ_HF(vec1, vec2, vlen, 0.001, 5)
 
 #define RD_ADDR   0xc0000000
-#define RS1_ADDR  0xc0000020
+#define RS1_ADDR  0xc00a0000
 
 #endif
 
@@ -261,6 +261,7 @@ test_ ## testnum ## _end: \
  */
 #define VEXXX_MF_ACCESS_FAULT(testnum, inst, result, val1, val2, height, width) \
 test_ ## testnum: \
+  TEST_EXCEPTION(CAUSE_NCP_CUST_ACCESS, test_ ## testnum ## _end); \
   li TESTNUM, testnum; \
   \
   SET_SHAPES(height, width) \
