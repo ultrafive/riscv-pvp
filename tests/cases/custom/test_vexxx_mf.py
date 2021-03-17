@@ -7,10 +7,12 @@ from isa.custom.vesub_mf import *
 from isa.custom.veemul_mf import *
 from isa.custom.veemul_x32_mf import *
 from isa.custom.veemul_x8_hf_mf import *
+from isa.custom.vemax_mf import *
 from isa.custom.vemin_mf import *
 
 class BaseCase_vexxx_mf(BaseCase):
     head = '#include "vexxx_mf.h"'
+    env = 'RVTEST_RV32STC'
 
 class Case_shape(BaseCase_vexxx_mf):
     def template( self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
@@ -440,4 +442,21 @@ class Test_vemin_mf(BaseTest_vexxx_mf):
         pass
     class Case_stride_inst(Case_stride):
         pass
-    
+
+class Test_vemax_mf(BaseTest_vexxx_mf):
+    inst = Vemax_mf
+
+    class Case_access_fault_inst(Case_access_fault):
+        pass
+    class Case_addr_overlapping_inst(Case_addr_overlapping):
+        pass
+    class Case_invalid_param_inst(Case_invalid_param):
+        pass
+    class Case_misaligned_base_addr_inst(Case_misaligned_base_addr):
+        pass
+    class Case_misaligned_stride_inst(Case_misaligned_stride):
+        pass
+    class Case_shape_inst(Case_shape):
+        pass
+    class Case_stride_inst(Case_stride):
+        pass

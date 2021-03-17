@@ -10,7 +10,7 @@ template = '''
 #include "test_macros.h"
 $head
 
-RVTEST_RV32STC
+$env
 RVTEST_CODE_BEGIN
     $code
     TEST_PASSFAIL
@@ -70,7 +70,7 @@ def generate_source(source, case, inst, **kw):
         out = "test_rd"
     code = case.template(2, inst.name, out, *args)
 
-    content = Template(template).substitute(head=case.head, code = code, data = data)
+    content = Template(template).substitute(head=case.head, env=case.env, code = code, data = data)
     print(content,  file=open(source, 'w'))
 
 CC = 'clang'

@@ -4,6 +4,11 @@
 #include "test_macros_stc.h"
 #include "exception.h"
 
+#define OUT_H(h, w, kh, kw, pad_t, pad_b, pad_l, pad_r, sk, dl) \
+  ((h + pad_t + pad_b - dl * (kh - 1) - 1) / sk + 1)
+#define OUT_W(h, w, kh, kw, pad_t, pad_b, pad_l, pad_r, sk, dl) \
+  ((w + pad_l + pad_r - dl * (kw - 1) - 1) / sk + 1)
+
 #define MECONV_RD_ADDR   IMB_ADDR
 #define MECONV_RS1_ADDR  0xc0000000
 #define MECONV_RS2_ADDR  0xc0080000
@@ -44,7 +49,7 @@
   #define LDOUTS lh
   #define STOUTS sh
   #define SET_DEQUANT_CSR(testnum) \
-      la t0, t##testnum##_dequant; \
+      la t0, test_dequant; \
       lw t0, 0(t0); \
       csrw conv_dequant_coeff, t0;
   #define VV_CHECK_EQ(a1, a2, len, acc) \

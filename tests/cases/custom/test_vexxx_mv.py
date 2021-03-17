@@ -6,9 +6,12 @@ from isa.custom.veadd_mv import *
 from isa.custom.vesub_mv import *
 from isa.custom.veemul_mv import *
 from isa.custom.veemul_x32_mv import *
+from isa.custom.vemax_mv import *
+from isa.custom.vemin_mv import *
 
 class BaseCase_vexxx_mv(BaseCase):
     head = '#include "vexxx_mv.h"'
+    env = 'RVTEST_RV32STC'
 
 class Case_basic_shape(BaseCase_vexxx_mv):
     def template( self, num, name, rd, rs1, vs2, dim_h, rs1_data, rs1_shape, vs2_data, vs2_shape ):
@@ -81,8 +84,6 @@ class BaseTest_vexxx_mv(BaseTest):
         linespace_mv( np.half, 426, 256, True ),
         linespace_mv( np.half, 256, 426, True ),
 
-        # functional tests with special float
-        special_float_mv( np.half, 32, 1, True )
     ] )
     def test_basic_shapes_dimh( self, rs1, vs2, dim_h ):
         simulate( self, self.Case_basic_shape_inst, rs1=rs1, vs2=vs2, dim_h=dim_h )
@@ -119,13 +120,24 @@ class BaseTest_vexxx_mv(BaseTest):
         linespace_mv( np.half, 853, 256, False ),
         linespace_mv( np.half, 256, 853, False ),
 
-        # functional tests with special float
-        special_float_mv( np.half, 1, 32, False )
-
     ])
     def test_basic_shapes_dimw( self, rs1, vs2, dim_w ):
         simulate( self, self.Case_basic_shape_inst, rs1=rs1, vs2=vs2, dim_w=dim_w )
 
+    @pytest.mark.parametrize('rs1, vs2, dim_h', [
+        # functional tests with special float
+        special_float_mv( np.half, 32, 1, True )
+    ] )
+    def test_special_float_dimh( self, rs1, vs2, dim_h ):
+        simulate( self, self.Case_basic_shape_inst, rs1=rs1, vs2=vs2, dim_h=dim_h )
+
+    @pytest.mark.parametrize('rs1, vs2, dim_w',[
+        # functional tests with special float
+        special_float_mv( np.half, 1, 32, False )
+
+    ])
+    def test_special_float_dimw( self, rs1, vs2, dim_w ):
+        simulate( self, self.Case_basic_shape_inst, rs1=rs1, vs2=vs2, dim_w=dim_w )
     @pytest.mark.parametrize('rs1, vs2, dim_h, dstride, sstride1', [
         # Functional tests for stride
 
@@ -564,3 +576,55 @@ class Test_veemul_x32_mv(BaseTest_vexxx_mv):
     ])
     def test_access_fault( self, width, height, dim, result, val1, val2 ):
         simulate( self, self.Case_access_fault_inst, width=width, height=height, dim=dim, result=result, val1=val1, val2=val2 )
+
+    def test_special_float_dimh( self ):
+        pass
+
+    def test_special_float_dimw( self ):
+        pass
+
+class Test_vemax_mv(BaseTest_vexxx_mv):
+    inst = Vemax_mv
+
+    class Case_access_fault_inst(Case_access_fault):
+        pass
+    class Case_basic_shape_inst(Case_basic_shape):
+        pass
+    class Case_inplace_rs1_inst(Case_inplace_rs1):
+        pass
+    class Case_invalid_param_inst(Case_invalid_param):
+        pass
+    class Case_misaligned_base_inst(Case_misaligned_base):
+        pass
+    class Case_misaligned_stride_inst(Case_misaligned_stride):
+        pass
+    class Case_stride_inst(Case_stride):
+        pass
+    def test_special_float_dimh( self ):
+        pass
+
+    def test_special_float_dimw( self ):
+        pass
+
+class Test_vemin_mv(BaseTest_vexxx_mv):
+    inst = Vemin_mv
+
+    class Case_access_fault_inst(Case_access_fault):
+        pass
+    class Case_basic_shape_inst(Case_basic_shape):
+        pass
+    class Case_inplace_rs1_inst(Case_inplace_rs1):
+        pass
+    class Case_invalid_param_inst(Case_invalid_param):
+        pass
+    class Case_misaligned_base_inst(Case_misaligned_base):
+        pass
+    class Case_misaligned_stride_inst(Case_misaligned_stride):
+        pass
+    class Case_stride_inst(Case_stride):
+        pass
+    def test_special_float_dimh( self ):
+        pass
+
+    def test_special_float_dimw( self ):
+        pass

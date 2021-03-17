@@ -6,6 +6,7 @@ from isa.custom.veemacc_mv import *
 
 class BaseCase_veemacc_mv(BaseCase):
     head = '#include "veemacc.h"'
+    env = 'RVTEST_RV32STC'
 
 class Case_shape(BaseCase_veemacc_mv):
     def template( self, num, name, rd, rs1, rs2, dim, rs1_data, rs1_shape, rs2_data, rs2_shape ):

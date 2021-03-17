@@ -6,9 +6,11 @@ from isa.custom.veadd_mm import *
 from isa.custom.vesub_mm import *
 from isa.custom.veemul_mm import *
 from isa.custom.vemax_mm import *
+from isa.custom.vemin_mm import *
 
 class BaseCase_vexxx_mm(BaseCase):
     head = '#include "vexxx_mm.h"'
+    env = 'RVTEST_RV32STC'
 
 class Case_basic_shapes(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
@@ -60,7 +62,7 @@ class BaseTest_vexxx_mm(BaseTest):
         # near 64 mac
         linspace_mm(np.half, 63, 31 ),
         linspace_mm(np.half, 65, 33 ),
-        linspace_mm(np.half, 65, 33 ),
+        linspace_mm(np.half, 63, 33 ),
         
         # small shapes
         linspace_mm(np.half, 1, 1 ),
@@ -241,7 +243,7 @@ class Test_vemax_mm(BaseTest_vexxx_mm):
         # near 64 mac
         linspace_mm(np.half, 63, 31 ),
         linspace_mm(np.half, 65, 33 ),
-        linspace_mm(np.half, 65, 33 ),
+        linspace_mm(np.half, 63, 33 ),
         
         # small shapes
         linspace_mm(np.half, 1, 1 ),
@@ -262,3 +264,68 @@ class Test_vemax_mm(BaseTest_vexxx_mm):
     ])
     def test_basic_shapes(self, rs1, rs2 ):
         simulate(self, Case_basic_shapes, rs1=rs1, rs2=rs2)  
+
+class Test_vemin_mm(BaseTest_vexxx_mm):
+    inst = Vemin_mm
+
+    @pytest.mark.parametrize('rs1, rs2', [
+        # Functional tests with basic data
+        linspace_mm(np.half, 64, 32 ),
+        linspace_mm(np.half, 64, 64 ),
+        linspace_mm(np.half, 128, 128 ),
+        linspace_mm(np.half, 256, 256 ),
+        linspace_mm(np.half, 256, 512 ),
+
+        # Functional tests with shapes
+
+        # near 64 mac
+        linspace_mm(np.half, 63, 31 ),
+        linspace_mm(np.half, 65, 33 ),
+        linspace_mm(np.half, 63, 33 ),
+        
+        # small shapes
+        linspace_mm(np.half, 1, 1 ),
+        linspace_mm(np.half, 10, 1 ),
+        linspace_mm(np.half, 1, 10 ),
+        linspace_mm(np.half, 10, 10 ),
+
+        # middle shapes
+        linspace_mm(np.half, 127, 127 ),
+        linspace_mm(np.half, 255, 127 ),
+        linspace_mm(np.half, 127, 255 ),
+        linspace_mm(np.half, 255, 255 ),
+
+        # full of l1buffer
+        linspace_mm(np.half, 54613, 4 ),
+        linspace_mm(np.half, 853, 256 ),
+        linspace_mm(np.half, 256, 853 ),
+    ])
+    def test_basic_shapes(self, rs1, rs2 ):
+        simulate(self, Case_basic_shapes, rs1=rs1, rs2=rs2)
+
+    @pytest.mark.parametrize('rs1, rs2, dstride, sstride1, sstride2', [
+        #functional tests for stride
+
+        linspace_mm_stride( np.half, 64, 32, 128, 0, 0 ),
+        linspace_mm_stride( np.half, 64, 32, 0, 128, 0 ),
+        linspace_mm_stride( np.half, 64, 32, 0, 0, 128 ),
+        linspace_mm_stride( np.half, 64, 32, 0, 128, 128 ),
+        linspace_mm_stride( np.half, 64, 32, 128, 128, 0 ),
+        linspace_mm_stride( np.half, 64, 32, 128, 128, 128 ),
+        linspace_mm_stride( np.half, 63, 31, 130, 130, 130 ),
+        linspace_mm_stride( np.half, 65, 33, 254, 254, 254 ),
+        linspace_mm_stride( np.half, 63, 33, 126, 126, 126 ),
+        # row=1, rs and rd all stride < width test
+        linspace_mm_stride( np.half, 63, 1, 11, 13, 21 )
+    ] )
+    def test_stride(self, rs1, rs2, dstride, sstride1, sstride2 ):
+        simulate(self, Case_stride, rs1=rs1, rs2=rs2, dstride=dstride, sstride1=sstride1, sstride2=sstride2 )
+
+    def test_inplace_rs1( self ):
+        pass
+
+    def test_inplace_rs2( self ):
+        pass
+ 
+    def test_rs1_eq_rs2( self ):
+        pass

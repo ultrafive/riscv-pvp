@@ -18,3 +18,4 @@ pytest-reporter-html1==0.8.1
 toml==0.10.2
 typing-extensions==3.7.4.3
 zipp==3.4.0
+tensorflow==2.4.1

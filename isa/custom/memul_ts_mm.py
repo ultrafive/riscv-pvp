@@ -1,8 +1,8 @@
 from isa.inst import *
 import numpy as np
 
-class Memul_mm(Inst):
-    name = 'memul.mm'
+class Memul_ts_mm(Inst):
+    name = 'memul.mm.ts'
 
     def golden( self ):
         if 'vs1' in self.keys():
@@ -14,4 +14,4 @@ class Memul_mm(Inst):
                     [np.half('nan'), np.half('nan'), np.half('nan'), np.half('nan')]], dtype=np.float16)
                 return vd
             else:
-                return np.matmul( self['vs1'], self['vs2'], dtype=np.float16 )
+                return np.matmul( self['vs1'].transpose(), self['vs2'], dtype=np.float16 )

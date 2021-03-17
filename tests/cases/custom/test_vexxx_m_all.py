@@ -4,9 +4,11 @@ from tests.cases.params import *
 from isa.simulate import *
 from isa.custom.veacc_m import *
 from isa.custom.vemax_m_all import *
+from isa.custom.vemin_m_all import *
 
 class BaseCase_VEXXX_M(BaseCase):
     head = '#include "vexxx_m_all.h"'
+    env = 'RVTEST_RV32STC'
 
 class Case_shape(BaseCase_VEXXX_M):
     def template( self, num, name, rd, rs1, rs1_data, rs1_shape ):
@@ -195,7 +197,76 @@ class Test_veacc_m_all(BaseTest_vexxx_m_all):
         head = '#include "veacc_m_all.h"'
 
 class Test_vemax_m_all(BaseTest_vexxx_m_all):
-    inst = Vemax_all
+    inst = Vemax_m_all
+
+    class Case_access_fault_inst(Case_access_fault):
+        pass
+    class Case_invalid_param_inst(Case_invalid_param):
+        pass
+    class Case_misaligned_base_inst(Case_misaligned_base):
+        pass
+    class Case_misaligned_stride_inst(Case_misaligned_stride):
+        pass
+    class Case_shape_inst(Case_shape):
+        pass
+    class Case_stride_inst(Case_stride):
+        pass
+
+    @pytest.mark.parametrize( 'rs1',[
+        # Functional tests with basic data
+        random_m( np.half, 64, 32 ),
+        random_m( np.half, 64, 64 ),
+        random_m( np.half, 128, 128 ),
+        random_m( np.half, 256, 256 ),
+        random_m( np.half, 256, 512 ),
+
+        # Functional tests with shapes
+
+        # near 64 mac
+        random_m( np.half, 63, 31 ),
+        random_m( np.half, 65, 33 ),
+        random_m( np.half, 63, 33 ),
+        
+        # small shapes
+        random_m( np.half, 1, 1 ),
+        random_m( np.half, 10, 1 ),
+        random_m( np.half, 1, 10 ),
+        random_m( np.half, 10, 10 ),
+
+        # middle shape
+        random_m( np.half, 127, 127 ),
+        random_m( np.half, 255, 127 ),
+        random_m( np.half, 127, 255 ),
+        random_m( np.half, 255, 255 ),
+
+        # full of l1buffer
+        random_m( np.half, 40960, 8 ),
+        random_m( np.half, 853, 256 ),
+        random_m( np.half, 256, 853 ),
+
+        # functional tests with special float
+        
+        # 0
+        special_float_m( np.half, 40, 0x0000 ),
+        #-0#include "vexxx_m_all.h"
+        special_float_m( np.half, 41, 0x8000 ),
+        # inf
+        special_float_m( np.half, 42, 0x7c00 ),
+        # -inf
+        special_float_m( np.half, 43, 0xfc00 ),
+        # 65500
+        special_float_m( np.half, 45, 0x7bff ),
+        # 6.104e-05
+        special_float_m( np.half, 46, 0x0400 ),
+        # 6.e-08
+        special_float_m( np.half, 47, 0x0001 )
+
+    ] )
+    def test_shape( self, rs1 ):
+        simulate( self, self.Case_shape_inst, rs1=rs1 )
+
+class Test_vemin_m_all(BaseTest_vexxx_m_all):
+    inst = Vemin_m_all
 
     class Case_access_fault_inst(Case_access_fault):
         pass
