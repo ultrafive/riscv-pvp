@@ -74,8 +74,8 @@ def generate_source(source, case, inst, **kw):
     print(content,  file=open(source, 'w'))
 
 CC = 'clang'
-ARCH_FLAGS = '-march=rv32g -mabi=ilp32'
-TARGET_FLAGS = '--target=riscv32npu -static -nostdlib -nostartfiles'
+ARCH_FLAGS = ''
+TARGET_FLAGS = '--target=riscv32 -mcpu=npu-v1 -static -nostdlib -nostartfiles'
 INCS = '-Ienv/b -Imacros/scalar -Imacros/vector -Imacros/stc'
 LINKFLAGS = '-Tenv/b/link.ld'
 
