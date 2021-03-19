@@ -4,4 +4,5 @@ class Veadd_mm(Inst):
     name = 'veadd.mm'
 
     def golden(self):
-        return self['rs1'] + self['rs2']
+        if 'rs1' in self.keys():
+            return self['rs1'] + self['rs2']

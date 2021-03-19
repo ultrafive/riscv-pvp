@@ -44,7 +44,7 @@
   #define LDOUTS lh
   #define STOUTS sh
   #define SET_DEQUANT_CSR(testnum) \
-      la t0, t##testnum##_dequant; \
+      la t0, test_dequant;/*t##testnum##_dequant;*/ \
       lw t0, 0(t0); \
       csrw m_dequant_coeff, t0;
   #define VV_CHECK_EQ(a1, a2, len, acc) \

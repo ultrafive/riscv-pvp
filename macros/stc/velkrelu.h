@@ -87,6 +87,13 @@
 #define EQM(result, golden_data, size) \
   VV_CHECK_EQ_HF_DEFAULT(result, golden_data, size); \
 
+#define L1B_BASE 0xC0000000
+#define L1B_SIZE 0x140000
+#define IMB_SIZE 0x4000
+#define NOT_L1B_ADDR (L1B_BASE - 0x100)
+#define NOT_IMB_ADDR (IMB_ADDR - 0x100)
+#define ALMOST_UPPER_L1B (L1B_BASE + L1B_SIZE - 0x10)
+#define ALMOST_UPPER_IMB (IMB_ADDR + IMB_SIZE - 0x10)
 
 /* Set shapes and strides */
 #define SETCSR(height_s1, width_s1, stride_s1, stride_res) \

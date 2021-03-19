@@ -7,9 +7,9 @@
 #include "test_macros_stc.h"
 #include "exception.h"
 
-#ifndef INST
-#error INST must be defined
-#endif
+// #ifndef INST
+// #error INST must be defined
+// #endif
 
 #undef RD_ADDR
 #undef RS1_ADDR

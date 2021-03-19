@@ -67,9 +67,10 @@ class BaseTest_rvi_imm(BaseTest):
     def test_zerosrc1(self, imm):
         simulate(self, Case_imm_zerosrc1, rs1=0, imm=imm)
         
-class Test_addi(BaseTest_rvi_imm):
-    inst = Addi
+# class Test_addi(BaseTest_rvi_imm):
+#     inst = Addi
 
-class Test_ori(BaseTest_rvi_imm):
-    inst = Ori
+
+# class Test_ori(BaseTest_rvi_imm):
+#     inst = Ori
   
