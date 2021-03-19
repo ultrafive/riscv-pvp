@@ -1,0 +1,55 @@
+image: 'code.streamcomputing.com/ubuntu:18.04-stc'
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  RISCV: /usr/local
+
+stages:
+  - test
+  - report
+  - deploy
+
+cache:
+  paths:
+    - .cache
+    - .env
+
+before_script:
+  - export PIP_CACHE_DIR=`pwd`/.cache/pip
+  - pip3 install -r requirements.txt
+
+
+test:
+  stage : test
+  script:
+    - curl http://releases.streamcomputing.com/toolchain/llvm-toolchain/latest | bash
+    - curl http://releases.streamcomputing.com/simulator/spike/latest | bash
+    - rm -rf output && pytest --alluredir=output --basetemp=$PWD/build
+  artifacts:
+    paths:
+      - build
+      - output
+    name: output
+
+report:
+  stage : report
+  script:
+    - export PATH=$PATH:`pwd`/.cache/local/bin
+    - mkdir -p `pwd`/.cache/local
+    - if [ ! -x `pwd`/.cache/local/bin/allure ]; then curl https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.13.8/allure-commandline-2.13.8.tgz | tar zxv -C `pwd`/.cache/local --strip-components 1 ; fi
+    - allure generate --clean -o report output
+  artifacts:
+    paths:
+      - report
+    name: report
+
+pages:
+  stage: deploy
+  script:
+    - mv report public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+
