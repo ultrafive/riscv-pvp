@@ -2,6 +2,7 @@
 from string import Template
 import os
 import numpy as np
+import allure
 
 case_num = 0
 
@@ -51,7 +52,8 @@ def array_data(prefix, k, vv):
             lines.append(f"    .dword  0x{hex_val} // {x}")
     return '\n'.join(lines) + '\n'
 
-def generate_source(source, case, inst, **kw):
+@allure.step
+def generate(source, case, inst, **kw):
 
     data = ''
     kw_extra = {}
@@ -60,7 +62,6 @@ def generate_source(source, case, inst, **kw):
             kw_extra[k + '_data'] = "test_" + k
             kw_extra[k + '_shape'] = kw[k].shape
             data += array_data(f'test', k, kw[k])
-    print(data)
 
     args = list({**kw, **kw_extra}.values())
 
@@ -72,6 +73,7 @@ def generate_source(source, case, inst, **kw):
 
     content = Template(template).substitute(head=case.head, env=case.env, code = code, data = data)
     print(content,  file=open(source, 'w'))
+    allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 
 CC = 'clang'
 ARCH_FLAGS = ''
@@ -81,18 +83,27 @@ LINKFLAGS = '-Tenv/b/link.ld'
 
 SIM = 'spike'
 
-def compile(binary, mapfile, source, **kw):
-    cmd = f'{CC} {ARCH_FLAGS} {TARGET_FLAGS} {INCS} {LINKFLAGS} -Wl,-Map,{mapfile} {source} -o {binary}'
-    assert os.system(cmd) == 0
+@allure.step
+def compile(binary, mapfile, source, logfile, **kw):
+    cmd = f'{CC} {ARCH_FLAGS} {TARGET_FLAGS} {INCS} {LINKFLAGS} -Wl,-Map,{mapfile} {source} -o {binary} > {logfile} 2>&1'
+    ret = os.system(cmd)
+    allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
+    allure.attach.file(logfile, 'compile log', attachment_type=allure.attachment_type.TEXT)
+    assert ret == 0
 
-def run(memfile, logfile, binary, **kw):
+@allure.step
+def run(memfile, binary, logfile, **kw):
     cmd = f'{SIM} {binary} > {logfile} 2>&1'
-    print(cmd)
-    assert os.system(cmd) == 0
+    ret = os.system(cmd)
+    allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
+    allure.attach.file(logfile, 'run log', attachment_type=allure.attachment_type.TEXT)
+    assert ret == 0
 
+@allure.step
 def readmem(memfile, symbol):
     pass
 
+@allure.step
 def diff(resmap, golden, memfile):
     for symbol in resmap:
         assert golden[symbol] == readmem(memfile, symbol)
@@ -104,8 +115,9 @@ def simulate(testcase, caseclass, **kw):
     source = f'{workdir}/test.S'
     binary = f'{workdir}/test.elf'
     mapfile = f'{workdir}/test.map'
-    logfile = f'{workdir}/test.log'
-    memfile = f'{workdir}/test.mem'
+    compile_log = f'{workdir}/compile.log'
+    run_log = f'{workdir}/run.log'
+    run_mem = f'{workdir}/run.mem'
 
     inst = instclass(**kw)
     golden = inst.golden()
@@ -113,8 +125,8 @@ def simulate(testcase, caseclass, **kw):
     case = caseclass()
     resmap = case.results()
 
-    generate_source(source, case, inst, **kw)
-    compile(binary, mapfile, source, **kw)
-    run(memfile, logfile, binary, **kw)
+    generate(source, case, inst, **kw)
+    compile(binary, mapfile, source, compile_log, **kw)
+    run(run_mem, binary, run_log, **kw)
 
-    diff(resmap, golden, memfile)
+    diff(resmap, golden, run_mem)
