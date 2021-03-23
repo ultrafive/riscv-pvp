@@ -8,8 +8,10 @@ from isa.custom.memul_x8_mm import *
 from isa.custom.memul_hf_x8_mm import *
 
 class BaseCase_METMUL_MM(BaseCase):
-    head = '#include "memul.h"'
+    header = '#include "memul.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 
 class Case_base(BaseCase_METMUL_MM):
@@ -172,11 +174,11 @@ class Test_memul_mm(BaseTest_memul_mm):
     argnames = { 'test_base':[ 'vs1', 'vs2' ], 'test_stride':[ 'vs1', 'vs2', 'stride_s1', 'stride_s2', 'stride_d' ], 'test_misaligned_block':[ 'vs1', 'vs2', 'off_s1', 'off_s2', 'off_d' ], 'test_softfloat_base':[ 'vs1', 'vs2' ] }
 
     class Case_base_inst(Case_base):
-        head = '#define HF\n#include "memul.h"'
+        header = '#define HF\n#include "memul.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define HF\n#include "memul.h"'
+        header = '#define HF\n#include "memul.h"'
     class Case_misaligned_block_inst(Case_misaligned_block):
-        head = '#define HF\n#include "memul.h"'
+        header = '#define HF\n#include "memul.h"'
 
 class Test_memul_ts_mm(BaseTest_memul_mm):
     inst = Memul_ts_mm
@@ -217,15 +219,15 @@ class Test_memul_ts_mm(BaseTest_memul_mm):
     argnames = { 'test_base':[ 'vs1', 'vs2' ], 'test_stride':[ 'vs1', 'vs2', 'stride_s1', 'stride_s2', 'stride_d' ], 'test_misaligned_block':[ 'vs1', 'vs2', 'off_s1', 'off_s2', 'off_d' ], 'test_softfloat_base':[ 'vs1', 'vs2' ] }
 
     class Case_base_inst(Case_base):
-        head = '#define TS\n#define HF\n#include "memul.h"'
+        header = '#define TS\n#define HF\n#include "memul.h"'
         def template( self, num, name, vd, vs1, vs2, vs1_data, vs1_shape, vs2_data, vs2_shape ):
             return f'TEST_MEMUL( {num}, {vd}, {vs1_data}, {vs2_data}, {vs1_shape[1]}, {vs1_shape[0]}, {vs2_shape[1]} )'
     class Case_stride_inst(Case_stride):
-        head = '#define TS\n#define HF\n#include "memul.h"'
+        header = '#define TS\n#define HF\n#include "memul.h"'
         def template( self, num, name, vd, vs1, vs2, stride_s1, stride_s2, stride_d, vs1_data, vs1_shape, vs2_data, vs2_shape ):
             return f'TEST_MEMUL_STRIDE( {num}, {vd}, {vs1_data}, {vs2_data}, {vs1_shape[1]}, {vs1_shape[0]}, {vs2_shape[1]}, {stride_s1}, {stride_s2}, {stride_d} )'
     class Case_misaligned_block_inst(Case_misaligned_block):
-        head = '#define TS\n#define HF\n#include "memul.h"'
+        header = '#define TS\n#define HF\n#include "memul.h"'
         def template( self, num, name, vd, vs1, vs2, off_s1, off_s2, off_d, vs1_data, vs1_shape, vs2_data, vs2_shape ):
             return f'TEST_MEMUL_MISALIGNED_BLOCK( {num}, {vd}, {vs1_data}, {vs2_data}, {vs1_shape[1]}, {vs1_shape[0]}, {vs2_shape[1]}, {off_s1}, {off_s2}, {off_d} )'
 
@@ -345,11 +347,11 @@ class Test_memul_x8_mm(BaseTest_memul_mm):
     argnames = { 'test_base':[ 'vs1', 'vs2' ], 'test_stride':[ 'vs1', 'vs2', 'stride_s1', 'stride_s2', 'stride_d' ], 'test_misaligned_block':[ 'vs1', 'vs2', 'off_s1', 'off_s2', 'off_d' ], 'test_softfloat_base':[ 'vs1', 'vs2' ] }
 
     class Case_base_inst(Case_base):
-        head = '#define X8\n#include "memul.h"'
+        header = '#define X8\n#include "memul.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define X8\n#include "memul.h"'
+        header = '#define X8\n#include "memul.h"'
     class Case_misaligned_block_inst(Case_misaligned_block):
-        head = '#define X8\n#include "memul.h"'
+        header = '#define X8\n#include "memul.h"'
 
     def test_softfloat_base( self, vs1, vs2 ):
         pass
@@ -490,17 +492,17 @@ class Test_memul_hf_x8_mm(BaseTest_memul_mm):
     'test_misaligned_block':[ 'dequant', 'vs1', 'vs2', 'off_s1', 'off_s2', 'off_d'], 'test_softfloat_base':[ 'dequant', 'vs1', 'vs2' ] }
 
     class Case_base_inst(Case_base):
-        head = '#define HF_X8\n#include "memul.h"'
+        header = '#define HF_X8\n#include "memul.h"'
         def template( self, num, name, vd, dequant, vs1, vs2, dequant_data, dequant_shape, vs1_data, vs1_shape, vs2_data, vs2_shape ):
             return f'TEST_MEMUL( {num}, {vd}, {vs1_data}, {vs2_data}, {vs1_shape[0]}, {vs1_shape[1]}, {vs2_shape[1]} )'
 
     class Case_stride_inst(Case_stride):
-        head = '#define HF_X8\n#include "memul.h"'
+        header = '#define HF_X8\n#include "memul.h"'
         def template( self, num, name, vd, dequant, vs1, vs2, stride_s1, stride_s2, stride_d, dequant_data, dequant_shape, vs1_data, vs1_shape, vs2_data, vs2_shape ):
             return f'TEST_MEMUL_STRIDE( {num}, {vd}, {vs1_data}, {vs2_data}, {vs1_shape[0]}, {vs1_shape[1]}, {vs2_shape[1]}, {stride_s1}, {stride_s2}, {stride_d} )'
 
     class Case_misaligned_block_inst(Case_misaligned_block):
-        head = '#define HF_X8\n#include "memul.h"'
+        header = '#define HF_X8\n#include "memul.h"'
         def template( self, num, name, vd, dequant, vs1, vs2, off_s1, off_s2, off_d, dequant_data, dequant_shape, vs1_data, vs1_shape, vs2_data, vs2_shape ):
             return f'TEST_MEMUL_MISALIGNED_BLOCK( {num}, {vd}, {vs1_data}, {vs2_data}, {vs1_shape[0]}, {vs1_shape[1]}, {vs2_shape[1]}, {off_s1}, {off_s2}, {off_d} )'
 

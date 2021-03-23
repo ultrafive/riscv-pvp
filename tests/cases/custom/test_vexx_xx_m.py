@@ -10,8 +10,10 @@ from isa.custom.vesqrt_m import *
 from isa.custom.verecip_m import *
 
 class BaseCase_VEXX_XX_M(BaseCase):
-    head = '#include "vexx_xx_m.h"'
+    header = '#include "vexx_xx_m.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_shape(BaseCase_VEXX_XX_M):
     def template( self, num, name, rd, rs1, rs1_data, rs1_shape ):
@@ -185,19 +187,19 @@ class Test_vecvt_hf_x8_m(BaseTest_vexx_xx_m):
     
 
     class Case_shape_inst(Case_shape):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_rs1_internal_inst(Case_rs1_internal):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
 
     def test_rs1_internal(self):
         pass
@@ -233,19 +235,19 @@ class Test_vecvt_hf_xu8_m(BaseTest_vexx_xx_m):
     
 
     class Case_shape_inst(Case_shape):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_rs1_internal_inst(Case_rs1_internal):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_HF_X8_M\n#include "vexx_xx_m.h"'
 
     def test_rs1_internal(self):
         pass
@@ -280,19 +282,19 @@ class Test_vecvt_x8_hf_m(BaseTest_vexx_xx_m):
     
 
     class Case_shape_inst(Case_shape):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
     class Case_rs1_internal_inst(Case_rs1_internal):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_X8_HF_M\n#include "vexx_xx_m.h"'
 
     @pytest.mark.parametrize( 'height, width, doff, soff1', [
         #*****************************************************
@@ -322,19 +324,19 @@ class Test_veexp_m(BaseTest_vexx_xx_m):
     
 
     class Case_shape_inst(Case_shape):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_rs1_internal_inst(Case_rs1_internal):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
 
 class Test_vesqrt_m(BaseTest_vexx_xx_m):
     inst = Vesqrt_m
@@ -344,19 +346,19 @@ class Test_vesqrt_m(BaseTest_vexx_xx_m):
     
 
     class Case_shape_inst(Case_shape):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_rs1_internal_inst(Case_rs1_internal):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
 
 class Test_verecip_m(BaseTest_vexx_xx_m):
     inst = Verecip_m
@@ -366,16 +368,16 @@ class Test_verecip_m(BaseTest_vexx_xx_m):
     
 
     class Case_shape_inst(Case_shape):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_rs1_internal_inst(Case_rs1_internal):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'
+        header = '#define VEXX_M_DEFAULT\n#include "vexx_xx_m.h"'

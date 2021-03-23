@@ -7,8 +7,10 @@ from isa.custom.vemax_m_dim import *
 from isa.custom.vemin_m_dim import *
 
 class BaseCase_VEXXX_M(BaseCase):
-    head = '#include "vexxx_m_dim.h"'
+    header = '#include "vexxx_m_dim.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 
 class Case_shape(BaseCase_VEXXX_M):
@@ -328,17 +330,17 @@ class Test_veacc_m_dim(BaseTest_vexxx_m_dim):
     inst = Veacc_m_dim
 
     class Case_access_fault_inst(Case_access_fault):
-        head = '#include "veacc_m_dim.h"'
+        header = '#include "veacc_m_dim.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#include "veacc_m_dim.h"'
+        header = '#include "veacc_m_dim.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#include "veacc_m_dim.h"'
+        header = '#include "veacc_m_dim.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#include "veacc_m_dim.h"'
+        header = '#include "veacc_m_dim.h"'
     class Case_shape_inst(Case_shape):
-        head = '#include "veacc_m_dim.h"'
+        header = '#include "veacc_m_dim.h"'
     class Case_stride_inst(Case_stride):
-        head = '#include "veacc_m_dim.h"'
+        header = '#include "veacc_m_dim.h"'
 
 class Test_vemax_m_dim(BaseTest_vexxx_m_dim):
     inst = Vemax_m_dim

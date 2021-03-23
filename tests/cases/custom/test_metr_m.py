@@ -5,8 +5,10 @@ from isa.simulate import *
 from isa.custom.metr_m import *
 
 class BaseCase_METR_M(BaseCase):
-    head = '#include "metr.h"'
+    header = '#include "metr.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_shape(BaseCase_METR_M):
     def template( self, num, name, rd, rs1, rs1_data, rs1_shape ):

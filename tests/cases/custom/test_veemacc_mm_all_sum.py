@@ -5,8 +5,10 @@ from isa.simulate import *
 from isa.custom.veemacc_mm_all_sum import *
 
 class BaseCase_veemacc_mm_all_sum(BaseCase):
-    head = '#include "veemacc.h"'
+    header = '#include "veemacc.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_shape(BaseCase_veemacc_mm_all_sum):
     def template( self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):

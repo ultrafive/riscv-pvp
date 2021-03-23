@@ -10,8 +10,10 @@ from isa.custom.vemax_mv import *
 from isa.custom.vemin_mv import *
 
 class BaseCase_vexxx_mv(BaseCase):
-    head = '#include "vexxx_mv.h"'
+    header = '#include "vexxx_mv.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_basic_shape(BaseCase_vexxx_mv):
     def template( self, num, name, rd, rs1, vs2, dim_h, rs1_data, rs1_shape, vs2_data, vs2_shape ):
@@ -406,19 +408,19 @@ class Test_veemul_x32_mv(BaseTest_vexxx_mv):
     inst = Veemul_x32_mv
 
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
     class Case_basic_shape_inst(Case_basic_shape):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
     class Case_inplace_rs1_inst(Case_inplace_rs1):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define X32_MV\n#include "vexxx_mv.h"'
+        header = '#define X32_MV\n#include "vexxx_mv.h"'
 
     @pytest.mark.parametrize('rs1, vs2, dim_h', [
         # Functional tests with basic data, dim_h

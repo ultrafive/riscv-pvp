@@ -5,8 +5,10 @@ from isa.simulate import *
 from isa.custom.meconv_mm import *
 
 class BaseCase_MECONV_MM(BaseCase):
-    head = '#define HF\n#include "meconv.h"'
+    header = '#define HF\n#include "meconv.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_base(BaseCase_MECONV_MM):
     def template( self, num, name, vd, vs1, vs2, h, w, cin, cout, kh, kw, padding, sk, dl, vs1_data, vs1_shape, vs2_data, vs2_shape  ):

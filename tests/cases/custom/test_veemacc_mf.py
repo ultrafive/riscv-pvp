@@ -5,8 +5,10 @@ from isa.simulate import *
 from isa.custom.veemacc_mf import *
 
 class BaseCase_veemacc_mf(BaseCase):
-    head = '#include "veemacc.h"'
+    header = '#include "veemacc.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_shape(BaseCase_veemacc_mf):
     def template( self, num, name, rd, rs1, rs2, dim, rs1_data, rs1_shape, rs2_data, rs2_shape ):

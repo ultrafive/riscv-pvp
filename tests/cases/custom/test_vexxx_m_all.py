@@ -7,8 +7,10 @@ from isa.custom.vemax_m_all import *
 from isa.custom.vemin_m_all import *
 
 class BaseCase_VEXXX_M(BaseCase):
-    head = '#include "vexxx_m_all.h"'
+    header = '#include "vexxx_m_all.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_shape(BaseCase_VEXXX_M):
     def template( self, num, name, rd, rs1, rs1_data, rs1_shape ):
@@ -184,17 +186,17 @@ class Test_veacc_m_all(BaseTest_vexxx_m_all):
     inst = Veacc_m
 
     class Case_access_fault_inst(Case_access_fault):
-        head = '#include "veacc_m_all.h"'
+        header = '#include "veacc_m_all.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#include "veacc_m_all.h"'
+        header = '#include "veacc_m_all.h"'
     class Case_misaligned_base_inst(Case_misaligned_base):
-        head = '#include "veacc_m_all.h"'
+        header = '#include "veacc_m_all.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#include "veacc_m_all.h"'
+        header = '#include "veacc_m_all.h"'
     class Case_shape_inst(Case_shape):
-        head = '#include "veacc_m_all.h"'
+        header = '#include "veacc_m_all.h"'
     class Case_stride_inst(Case_stride):
-        head = '#include "veacc_m_all.h"'
+        header = '#include "veacc_m_all.h"'
 
 class Test_vemax_m_all(BaseTest_vexxx_m_all):
     inst = Vemax_m_all

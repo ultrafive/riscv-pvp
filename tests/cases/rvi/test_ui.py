@@ -6,8 +6,10 @@ from isa.rvi.lui import *
 from isa.rvi.auipc import *
 
 class BaseCase_rvi_uimm(BaseCase):
-    head = '#include "exception.h"'
+    header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
+    tdata = ''
+    foot = ''
 
 class Case(BaseCase_rvi_uimm):
     def template(self, num, name, res, testreg, correctval, code ):

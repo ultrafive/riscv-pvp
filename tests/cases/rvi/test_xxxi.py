@@ -12,8 +12,10 @@ from isa.rvi.slli import *
 from isa.rvi.srli import *
 from isa.rvi.srai import *
 class BaseCase_rvi_imm(BaseCase):
-    head = '#include "exception.h"'
+    header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
+    tdata = ''
+    foot = ''
 
 class Case_imm_op(BaseCase_rvi_imm):
     def template(self, num, name, res, val1, imm ):

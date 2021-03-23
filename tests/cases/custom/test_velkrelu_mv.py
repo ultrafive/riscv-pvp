@@ -5,8 +5,10 @@ from isa.simulate import *
 from isa.custom.velkrelu_mv import *
 
 class BaseCase_velkrelu_mv(BaseCase):
-    head = '#include "velkrelu.h"'
+    header = '#include "velkrelu.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_base(BaseCase_velkrelu_mv):
     def template( self, num, name, rd, rs1, rs2, dim, rs1_data, rs1_shape, rs2_data, rs2_shape ):

@@ -9,8 +9,10 @@ from isa.custom.vemax_mm import *
 from isa.custom.vemin_mm import *
 
 class BaseCase_vexxx_mm(BaseCase):
-    head = '#include "vexxx_mm.h"'
+    header = '#include "vexxx_mm.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_basic_shapes(BaseCase_vexxx_mm):
     def template(self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):

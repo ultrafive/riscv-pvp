@@ -14,8 +14,10 @@ from isa.rvi.sra import *
 from isa.rvi.sub import *
 
 class BaseCase_rvi_rr(BaseCase):
-    head = '#include "exception.h"'
+    header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
+    tdata = ''
+    foot = ''
 
 class Case_rr_op(BaseCase_rvi_rr):
     def template(self, num, name, res, rs1, rs2 ):

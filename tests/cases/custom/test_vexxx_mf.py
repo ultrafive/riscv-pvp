@@ -11,8 +11,10 @@ from isa.custom.vemax_mf import *
 from isa.custom.vemin_mf import *
 
 class BaseCase_vexxx_mf(BaseCase):
-    head = '#include "vexxx_mf.h"'
+    header = '#include "vexxx_mf.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_shape(BaseCase_vexxx_mf):
     def template( self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):
@@ -243,19 +245,19 @@ class Test_veemul_x32_mf(BaseTest_vexxx_mf):
     inst = Veemul_x32_mf
 
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
     class Case_addr_overlapping_inst(Case_addr_overlapping):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
     class Case_misaligned_base_addr_inst(Case_misaligned_base_addr):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
     class Case_shape_inst(Case_shape):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define X32_MF\n#include "vexxx_mf.h"'
+        header = '#define X32_MF\n#include "vexxx_mf.h"'
 
     @pytest.mark.parametrize( 'rs1, rs2', [
         # test shapes
@@ -325,19 +327,19 @@ class Test_veemul_x8_hf_mf(BaseTest_vexxx_mf):
     inst = Veemul_x8_hf_mf
 
     class Case_access_fault_inst(Case_access_fault):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
     class Case_addr_overlapping_inst(Case_addr_overlapping):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
     class Case_invalid_param_inst(Case_invalid_param):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
     class Case_misaligned_base_addr_inst(Case_misaligned_base_addr):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
     class Case_misaligned_stride_inst(Case_misaligned_stride):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
     class Case_shape_inst(Case_shape):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
     class Case_stride_inst(Case_stride):
-        head = '#define X8_HF_MF\n#include "vexxx_mf.h"'
+        header = '#define X8_HF_MF\n#include "vexxx_mf.h"'
 
     @pytest.mark.parametrize( 'rs1, rs2', [
         # test shapes

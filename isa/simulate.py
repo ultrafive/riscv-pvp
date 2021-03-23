@@ -9,7 +9,7 @@ case_num = 0
 template = '''
 #include "riscv_test.h"
 #include "test_macros.h"
-$head
+$header
 
 $env
 RVTEST_CODE_BEGIN
@@ -25,7 +25,9 @@ RVTEST_DATA_BEGIN
 
     TEST_DATA
     $data
+    $tdata
 RVTEST_DATA_END
+$foot
 '''
 
 def array_data(prefix, k, vv):
@@ -71,7 +73,7 @@ def generate(source, case, inst, **kw):
         out = "test_rd"
     code = case.template(2, inst.name, out, *args)
 
-    content = Template(template).substitute(head=case.head, env=case.env, code = code, data = data)
+    content = Template(template).substitute(header=case.header, env=case.env, code = code, data = data, tdata=case.tdata, foot=case.foot)
     print(content,  file=open(source, 'w'))
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 

@@ -5,8 +5,10 @@ from isa.simulate import *
 from isa.custom.velut_m import *
 
 class BaseCase_velut_m(BaseCase):
-    head = '#include "velut_m.h"'
+    header = '#include "velut_m.h"'
     env = 'RVTEST_RV32STC'
+    tdata = ''
+    foot = ''
 
 class Case_base(BaseCase_velut_m):
     def template( self, num, name, rd, rs1, rs2, tsize, rs1_data, rs1_shape, rs2_data, rs2_shape ):

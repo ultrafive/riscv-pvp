@@ -609,6 +609,15 @@ test_ ## testnum: \
   .double result; \
   .popsection
 
+#define TEST_FSGNJS(n, insn, new_sign, rs1_sign, rs2_sign) \
+  TEST_CASE(n, a0, 0x12345678 | (-(new_sign) << 31), \
+    li a1, ((rs1_sign) << 31) | 0x12345678; \
+    li a2, -(rs2_sign); \
+    fmv.s.x f1, a1; \
+    fmv.s.x f2, a2; \
+    insn f0, f1, f2; \
+    fmv.x.s a0, f0)
+
 // We need some special handling here to allow 64-bit comparison in 32-bit arch
 // TODO: find a better name and clean up when intended for general usage?
 #define TEST_CASE_D32( testnum, testreg1, testreg2, correctval, code... ) \
