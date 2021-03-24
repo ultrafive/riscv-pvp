@@ -11,7 +11,7 @@ class BaseCase_recording(BaseCase):
 minf: .float -Inf
 three: .float 3.0
     '''
-    foot = ''
+    footer = ''
 
 class Case_macro(BaseCase_recording):
     def template( self, num, name, rd, macro ):

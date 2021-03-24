@@ -10,7 +10,7 @@ class BaseCase_VEXXX_M(BaseCase):
     header = '#include "vexxx_m_dim.h"'
     env = 'RVTEST_RV32STC'
     tdata = ''
-    foot = ''
+    footer = ''
 
 
 class Case_shape(BaseCase_VEXXX_M):

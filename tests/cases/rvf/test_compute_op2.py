@@ -13,7 +13,7 @@ class BaseCase_rvf_compute_op2(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32UF'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_fp_op2_s(BaseCase_rvf_compute_op2):
     def template( self, num, name, res, rs1, rs2, flag ):

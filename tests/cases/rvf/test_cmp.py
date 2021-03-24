@@ -11,7 +11,7 @@ class BaseCase_rvf_cmp(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32UF'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_cmp(BaseCase_rvf_cmp):
     def template( self, num, name, res, rs1, rs2, flags ):

@@ -13,7 +13,7 @@ class BaseCase_b(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
 
 class Case_br2_op_taken(BaseCase_b):

@@ -17,7 +17,7 @@ class BaseCase_rvi_rr(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_rr_op(BaseCase_rvi_rr):
     def template(self, num, name, res, rs1, rs2 ):

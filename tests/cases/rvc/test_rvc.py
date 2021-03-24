@@ -8,7 +8,7 @@ class BaseCase_rvc(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_rvc(BaseCase_rvc):
     def template(self, num, name, result, precondition, test):

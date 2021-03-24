@@ -9,7 +9,7 @@ class BaseCase_jal(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_macro(BaseCase_jal):
     def template( self, num, name, rd, macro ):

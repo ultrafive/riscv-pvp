@@ -8,7 +8,7 @@ class BaseCase_veemacc_mm_all_sum(BaseCase):
     header = '#include "veemacc.h"'
     env = 'RVTEST_RV32STC'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_shape(BaseCase_veemacc_mm_all_sum):
     def template( self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):

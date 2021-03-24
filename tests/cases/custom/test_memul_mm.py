@@ -11,7 +11,7 @@ class BaseCase_METMUL_MM(BaseCase):
     header = '#include "memul.h"'
     env = 'RVTEST_RV32STC'
     tdata = ''
-    foot = ''
+    footer = ''
 
 
 class Case_base(BaseCase_METMUL_MM):

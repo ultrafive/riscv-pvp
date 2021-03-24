@@ -13,7 +13,7 @@ class Case_simple(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
     def template( self, num, name, rd ):
         return f'RVTEST_PASS'

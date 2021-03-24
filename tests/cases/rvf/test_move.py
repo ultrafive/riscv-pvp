@@ -10,7 +10,7 @@ class BaseCase_move(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32UF'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_macro(BaseCase_move):
     def template( self, num, name, rd, macro ):

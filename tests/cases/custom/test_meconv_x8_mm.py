@@ -8,7 +8,7 @@ class BaseCase_MECONV_X8_MM(BaseCase):
     header = '#define X8\n#include "meconv.h"'
     env = 'RVTEST_RV32STC'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_base(BaseCase_MECONV_X8_MM):
     def template( self, num, name, vd, vs1, vs2, h, w, cin, cout, kh, kw, padding, sk, dl, vs1_data, vs1_shape, vs2_data, vs2_shape  ):

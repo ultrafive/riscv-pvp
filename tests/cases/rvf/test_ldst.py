@@ -19,7 +19,7 @@ tdat:
 .word 0xabad1dea
 .word 0x1337d00d
 '''
-    foot = ''
+    footer = ''
 
 class Case_case(BaseCase_ldst):
     def template( self, num, name, rd, testreg, correctval, code ):

@@ -10,7 +10,7 @@ class BaseCase_store(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_st_op(BaseCase_store):
     def template( self, num, name, rd, result, offset, base, load_inst ):

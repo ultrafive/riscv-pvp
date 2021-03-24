@@ -12,7 +12,7 @@ class BaseCase_load(BaseCase):
     header = '#include "exception.h"'
     env = 'RVTEST_RV32U'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_ld_op(BaseCase_load):
     def template( self, num, name, rd, result, offset, base ):

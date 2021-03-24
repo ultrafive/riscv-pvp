@@ -14,7 +14,7 @@ class BaseCase_vexxx_mf(BaseCase):
     header = '#include "vexxx_mf.h"'
     env = 'RVTEST_RV32STC'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_shape(BaseCase_vexxx_mf):
     def template( self, num, name, rd, rs1, rs2, rs1_data, rs1_shape, rs2_data, rs2_shape ):

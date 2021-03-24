@@ -27,7 +27,7 @@ RVTEST_DATA_BEGIN
     $data
     $tdata
 RVTEST_DATA_END
-$foot
+$footer
 '''
 
 def array_data(prefix, k, vv):
@@ -73,7 +73,7 @@ def generate(source, case, inst, **kw):
         out = "test_rd"
     code = case.template(2, inst.name, out, *args)
 
-    content = Template(template).substitute(header=case.header, env=case.env, code = code, data = data, tdata=case.tdata, foot=case.foot)
+    content = Template(template).substitute(header=case.header, env=case.env, code = code, data = data, tdata=case.tdata, footer=case.footer)
     print(content,  file=open(source, 'w'))
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 

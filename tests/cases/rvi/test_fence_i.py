@@ -17,7 +17,7 @@ jalr a5, a6, 0
 3: addi a3, a3, 555
 jalr a5, a6, 0
 '''
-    foot = ''
+    footer = ''
     def template(self, num, name, rd, macro):
         return f'{macro}'
 

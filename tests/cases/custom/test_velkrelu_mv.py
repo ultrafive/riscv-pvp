@@ -8,7 +8,7 @@ class BaseCase_velkrelu_mv(BaseCase):
     header = '#include "velkrelu.h"'
     env = 'RVTEST_RV32STC'
     tdata = ''
-    foot = ''
+    footer = ''
 
 class Case_base(BaseCase_velkrelu_mv):
     def template( self, num, name, rd, rs1, rs2, dim, rs1_data, rs1_shape, rs2_data, rs2_shape ):

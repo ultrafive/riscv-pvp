@@ -25,7 +25,7 @@ tdat_d:
 .dword 0xfff0000000000000
 .dword 0x7ff0000000000000
 '''
-    foot = ''
+    footer = ''
 
 class Case_fp_int_op_s(BaseCase_rvf_cvt_wl_s):
     def template( self, num, name, res, val1, rm, flags ):
