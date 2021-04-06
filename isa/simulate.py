@@ -132,3 +132,50 @@ def simulate(testcase, caseclass, **kw):
     run(run_mem, binary, run_log, **kw)
 
     diff(resmap, golden, run_mem)
+
+@allure.step
+def generate2(source, tpl, case, inst, **kw):
+
+    data = ''
+    kw_extra = {}
+    for k in kw:
+        if isinstance(kw[k], np.ndarray):
+            kw_extra[k + '_data'] = "test_" + k
+            kw_extra[k + '_shape'] = kw[k].shape
+            data += array_data(f'test', k, kw[k])
+
+    args = list({**kw, **kw_extra}.values())
+
+    out = inst.golden()
+    if isinstance(out, np.ndarray):
+        data += array_data(f'test', 'rd', out)
+        out = "test_rd"
+
+    code = tpl.format_map(dict(num= 2, name = inst.name, res = out, **kw))
+
+    if not hasattr(case, 'tdata'):
+        case.tdata = ''
+    if not hasattr(case, 'footer'):
+        case.footer = ''
+    content = Template(template).substitute(header=case.header, env=case.env, code = code, data = data, tdata=case.tdata, footer=case.footer)
+    print(content,  file=open(source, 'w'))
+    allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
+
+
+def simulate2(testcase, template, **kw):
+    workdir = testcase.workdir
+    instclass = testcase.inst
+
+    source = f'{workdir}/test.S'
+    binary = f'{workdir}/test.elf'
+    mapfile = f'{workdir}/test.map'
+    compile_log = f'{workdir}/compile.log'
+    run_log = f'{workdir}/run.log'
+    run_mem = f'{workdir}/run.mem'
+
+    inst = instclass(**kw)
+    golden = inst.golden()
+
+    generate2(source, template, testcase, inst, **kw)
+    compile(binary, mapfile, source, compile_log, **kw)
+    run(run_mem, binary, run_log, **kw)
