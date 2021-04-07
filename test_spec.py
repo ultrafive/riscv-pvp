@@ -10,11 +10,12 @@ import pytest
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
-    argnames = metafunc.cls.argnames[ metafunc.function.__name__ ]
-    params = metafunc.cls.params[ metafunc.function.__name__ ]
-    metafunc.parametrize(
-        argnames, [ param for param in params ]
-    )
+    if metafunc.function.__name__ in metafunc.cls.argnames.keys():
+        argnames = metafunc.cls.argnames[ metafunc.function.__name__ ]
+        params = metafunc.cls.params[ metafunc.function.__name__ ]
+        metafunc.parametrize(
+            argnames, [ param for param in params ]
+        )
 
 def rename(newname):
     def decorator(f):
@@ -52,14 +53,20 @@ for filename in glob.iglob('tests/specs/**/*.spec.yml', recursive=True):
                 _defaults = ''
             if not name in cfg['cases']:
                 continue
-            argnames = re.split(r'\s*,\s*', _args)
-            attrs['argnames'][name] = argnames
-            params = cfg['cases'][name]
-            attrs['params'][name] = params
 
-            _kw = ', '.join([f'{an}={an}' for an in argnames])
+            if _args.strip()  != '':
 
-            exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", {_kw}, {_defaults})')
+                argnames = re.split(r'\s*,\s*', _args)
+
+                attrs['argnames'][name] = argnames
+                params = cfg['cases'][name]
+                attrs['params'][name] = params
+
+                _kw = ', '.join([f'{an}={an}' for an in argnames])
+                exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", {_kw}, {_defaults})')
+            else:
+                exec(f'def {name}(self): simulate2(self, """{template}""")')
+
             exec(f'attrs[name] = {name}')
             del globals()[name]
 
