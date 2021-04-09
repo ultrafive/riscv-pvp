@@ -26,6 +26,7 @@ test:
     - curl http://releases.streamcomputing.com/simulator/spike/latest | bash
     - ./run-test.sh
   artifacts:
+    when: always
     paths:
       - build
       - output
