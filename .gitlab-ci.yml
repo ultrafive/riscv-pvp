@@ -23,6 +23,7 @@ test:
   stage : test
   script:
     - curl http://releases.streamcomputing.com/toolchain/llvm-toolchain/latest | bash
+    - curl http://releases.streamcomputing.com/host-sdk/hpe/libnpurt-latest | bash
     - curl http://releases.streamcomputing.com/simulator/spike/latest | bash
     - ./run-test.sh
   artifacts:
