@@ -76,14 +76,22 @@ def generate(source, case, inst, **kw):
     content = Template(template).substitute(header=case.header, env=case.env, code = code, data = data, tdata=case.tdata, footer=case.footer)
     print(content,  file=open(source, 'w'))
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
-
+'''
 CC = 'clang'
 ARCH_FLAGS = ''
 TARGET_FLAGS = '--target=riscv32 -mcpu=npu-v1 -static -nostdlib -nostartfiles'
 INCS = '-Ienv/b -Imacros/scalar -Imacros/vector -Imacros/stc'
 LINKFLAGS = '-Tenv/b/link.ld'
+'''
+
+CC = 'riscv64-unknown-elf-gcc'
+ARCH_FLAGS = '-DXLEN=64 -DVLEN=1024'
+TARGET_FLAGS = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
+INCS = '-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc'
+LINKFLAGS = '-Tenv/p/link.ld'
 
 SIM = 'spike'
+VARCH = '--varch=vlen:1024,elen:64,slen:1024'
 
 @allure.step
 def compile(binary, mapfile, source, logfile, **kw):
@@ -95,7 +103,7 @@ def compile(binary, mapfile, source, logfile, **kw):
 
 @allure.step
 def run(memfile, binary, logfile, **kw):
-    cmd = f'{SIM} {binary} > {logfile} 2>&1'
+    cmd = f'{SIM} {VARCH} {binary} > {logfile} 2>&1'
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'run log', attachment_type=allure.attachment_type.TEXT)
@@ -151,7 +159,7 @@ def generate2(source, tpl, case, inst, **kw):
         data += array_data(f'test', 'rd', out)
         out = "test_rd"
 
-    code = tpl.format_map(dict(num= 2, name = inst.name, res = out, **kw))
+    code = tpl.format_map(dict(num= 2, name = inst.name, res = out, **kw, **kw_extra))
 
     if not hasattr(case, 'tdata'):
         case.tdata = ''

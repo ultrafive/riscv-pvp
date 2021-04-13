@@ -43,12 +43,24 @@
 
     $ git clone https://github.com/riscv/riscv-gnu-toolchain
     $ cd riscv-gnu-toolchain
-    $ mkdir -p build && cd build && ../configure --prefix=$RISCV
+	$ git submodule update --init --recursive
+	$ git checkout rvv-0.9.x
+	$ git submodule foreach --recursive "git checkout master"
+    $ mkdir -p build && cd build && ../configure --with-arch=rv64imafcv --with-abi=lp64f  --prefix=$RISCV
     $ make -j`nproc`
 
     $ git clone https://github.com/riscv/riscv-tools
     $ cd riscv-tools
     $ git submodule update --init --recursive
+	$ git submodule foreach --recursive "git checkout master"
+	$
+	$ #modify build.sh, just compile riscv-isa-sim with --with-isa=rv64imafcv:
+	$ vi build.sh
+	$ build_project riscv-isa-sim --prefix=$RISCV  --with-isa=rv64imafcv
+	$ #build_project riscv-openocd --prefix=$RISCV --enable-remote-bitbang --enable-jtag_vpi --disable-werror
+	$ #CC= CXX= build_project riscv-pk --prefix=$RISCV --host=riscv64-unknown-elf
+	$ #build_project riscv-tests --prefix=$RISCV/riscv64-unknown-elf
+	$
     $ ./build.sh
 
 ### 安装python依赖

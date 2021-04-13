@@ -26,8 +26,8 @@
 /*************************************************************************/
 vv_check_eq_hf:
 1:
-	flhw ft0, 0(a0)
-	flhw ft1, 0(a1)
+	flw ft0, 0(a0)
+	flw ft1, 0(a1)
 
         /* Compare pass if two FP values match exactly, including +-inf */
 	feq.s t0, ft0, ft1

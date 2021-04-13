@@ -1,0 +1,64 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  _templates: &_templates
+    test_vlx_v_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vlen}; 
+        la a1, {rs1_data}; 
+        la a3, test_{num}_data; 
+        vsetvli t0, a0, e{ebits};
+        {name} v1, (a1); 
+        {stins} v1, (a3);
+        {eqm}({res}, test_{num}_data, {vlen});
+        .pushsection .data;
+      test_{num}_data:
+        .fill {vlen}, ({ebits} / 8), 0;
+        .popsection
+
+    test_vlx_v_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vlen};
+        la a1, {rs1_data};
+        la a4, {v0_data};
+        la a3, test_{num}_data;
+
+      vsetvli t0, a0, e{ebits};
+      {name} v0, (a4);
+      {name} v1, (a1), v0.t;
+
+      vse16.v v1, (a3);
+        {eqm}({res}, test_{num}_data, {vlen});
+        .pushsection .data;
+      test_{num}_data:
+        .fill {vlen}, ({ebits}  /8), 0;
+        .popsection
+
+vle16_v:
+  templates:
+    <<: *_templates
+    test_vlx_v_without_mask @ rs1, vlen @ ebits=16, stins='vse16.v', eqm='VV_CHECK_EQ_INT16': |
+      {inherit}
+
+    test_vlx_v_with_mask @ rs1, vlen, v0 @ ebits=16, eqm='VV_CHECK_EQ_INT16': |
+      {inherit}
+
+  <<: *default
+
+  cases:
+    test_vlx_v_without_mask:
+      - '[np.array([1], dtype=np.int16), 1]'
+      - '[np.array([1, 1, -1, 64], dtype=np.int16), 4]'
+      - '[rvv_v_generator(63, dtype=np.int16), 63]'
+      - '[rvv_v_generator(64, dtype=np.int16), 64]'
+
+    test_vlx_v_with_mask :
+      - '[np.array([1], dtype=np.int16), 1, rvv_mask_generator(1)]'
+      - '[np.array([1, 1, -1, 64], dtype=np.int16), 4, rvv_mask_generator(4)]'
+      - '[rvv_v_generator(63, dtype=np.int16), 63, rvv_mask_generator(63)]'
+      - '[rvv_v_generator(64, dtype=np.int16), 64, rvv_mask_generator(64)]'

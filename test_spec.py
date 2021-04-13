@@ -1,5 +1,5 @@
 from isa.simulate import simulate2
-from tests.cases.params import workdir
+from tests.cases.params import *
 from isa import *
 
 import re
@@ -10,12 +10,11 @@ import pytest
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
-    if metafunc.function.__name__ in metafunc.cls.argnames.keys():
-        argnames = metafunc.cls.argnames[ metafunc.function.__name__ ]
-        params = metafunc.cls.params[ metafunc.function.__name__ ]
-        metafunc.parametrize(
-            argnames, [ param for param in params ]
-        )
+    argnames = metafunc.cls.argnames[ metafunc.function.__name__ ]
+    params = metafunc.cls.params[ metafunc.function.__name__ ]
+    metafunc.parametrize(
+        argnames, [ eval(param) if isinstance(param, str) else param for param in params ]
+    )
 
 def rename(newname):
     def decorator(f):
@@ -46,27 +45,33 @@ for filename in glob.iglob('tests/specs/**/*.spec.yml', recursive=True):
         attrs['argnames'] = {}
         attrs['params'] = {}
         for key, template in cfg['templates'].items():
-            [name, _args, *others] = re.split(r'\s*@\s*', key)
-            if others:
-                _defaults = others[0]
+            [name, *others] = re.split(r'\s*@\s*', key)
+            if len(others) == 2:
+                _args = others[0]
+                _defaults = others[1]
+            elif len(others) == 1:
+                _args = others[0]
+                _defaults = ''
             else:
                 _defaults = ''
+
             if not name in cfg['cases']:
                 continue
-
-            if _args.strip()  != '':
-
+            if _args:
                 argnames = re.split(r'\s*,\s*', _args)
-
-                attrs['argnames'][name] = argnames
-                params = cfg['cases'][name]
-                attrs['params'][name] = params
-
-                _kw = ', '.join([f'{an}={an}' for an in argnames])
-                exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", {_kw}, {_defaults})')
             else:
-                exec(f'def {name}(self): simulate2(self, """{template}""")')
+                argnames = []
+            attrs['argnames'][name] = argnames
+            params = cfg['cases'][name]
+            attrs['params'][name] = params
 
+            if template.strip() == '{inherit}':
+                print(cfg['templates'])
+                template = cfg['templates'][name]
+
+            _kw = ', '.join([f'{an}={an}' for an in argnames])
+
+            exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", {_kw}, {_defaults})')
             exec(f'attrs[name] = {name}')
             del globals()[name]
 
