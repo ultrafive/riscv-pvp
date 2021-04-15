@@ -1,8 +1,8 @@
 from isa.inst import *
 import numpy as np
 
-class Vle16_v(Inst):
-    name = 'vle16.v'
+class Vle8_v(Inst):
+    name = 'vle8.v'
 
     def golden(self):
         if 'mask' not in self:

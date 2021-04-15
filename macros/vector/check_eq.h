@@ -150,6 +150,7 @@ vv_check_eq_hf:
     addi t2, t2, -1; \
     bnez t2, 1b;
 
+#define VV_CHECK_EQ_INT64(vec1, vec2, vlen) VV_CHECK_EQ_INT(vec1, vec2, vlen, ld, 8)
 #define VV_CHECK_EQ_INT32(vec1, vec2, vlen) VV_CHECK_EQ_INT(vec1, vec2, vlen, lw, 4)
 #define VV_CHECK_EQ_INT16(vec1, vec2, vlen) VV_CHECK_EQ_INT(vec1, vec2, vlen, lh, 2)
 #define VV_CHECK_EQ_INT8(vec1, vec2, vlen) VV_CHECK_EQ_INT(vec1, vec2, vlen, lb, 1)

@@ -5,53 +5,53 @@ _: &default
     #include "test_macros_v.h"
 
   _templates: &_templates
-    test_vlx_v_without_mask: |
+    test_vsx_v_without_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen}; 
-        la a1, {rs1_data}; 
-        la a3, test_{num}_data; 
+        li a0, {vlen};
+        la a1, {rs1_data};
+        la a3, test_{num}_data;
         vsetvli t0, a0, e{ebits};
-        {name} v1, (a1); 
-        {stins} v1, (a3);
+        {ldins} v1, (a1);
+        {name} v1, (a3);
+
         {eqm}({res}, test_{num}_data, {vlen});
         .pushsection .data;
       test_{num}_data:
-        .fill {vlen}, ({ebits} / 8), 0;
+        .fill {vlen}, ({ebits}/8), 0;
         .popsection
 
-    test_vlx_v_with_mask: |
+    test_vsx_v_with_mask: |
       test_{num}:
         li TESTNUM, {num};
         li a0, {vlen};
         la a1, {rs1_data};
         la a4, {mask_data};
         la a3, test_{num}_data;
+        vsetvli t0, a0, e{ebits};
+        {ldins} v1, (a1);
+        {ldins} v0, (a4);
 
-        vsetvli t1, a0, e{ebits};
-        {name} v0, (a4);
-        {name} v1, (a1), v0.t;
-
-        {stins} v1, (a3);
+        {name} v1, (a3), v0.t;
         {eqm}({res}, test_{num}_data, {vlen});
         .pushsection .data;
       test_{num}_data:
-        .fill {vlen}, ({ebits}  /8), 0;
+        .fill {vlen}, ({ebits}/8), 0;
         .popsection
 
-vle8_v:
+vse8_v:
   templates:
     <<: *_templates
-    test_vlx_v_without_mask @ rs1, vlen @ ebits=8, stins='vse8.v', eqm='VV_CHECK_EQ_INT8': |
+    test_vsx_v_without_mask @ rs1, vlen @ ebits=8, ldins='vle8.v', eqm='VV_CHECK_EQ_INT8': |
       {inherit}
 
-    test_vlx_v_with_mask @ rs1, vlen, mask @ ebits=8, stins='vse8.v', eqm='VV_CHECK_EQ_INT8': |
+    test_vsx_v_with_mask @ rs1, vlen, mask @ ebits=8, ldins='vle8.v', eqm='VV_CHECK_EQ_INT8': |
       {inherit}
 
   <<: *default
 
   cases:
-    test_vlx_v_without_mask:
+    test_vsx_v_without_mask:
       - '[np.array([1], dtype=np.int8), 1]'
       - '[np.array([1, 1, -1, 64], dtype=np.int8), 4]'
       - '[rvv_v_generator(63, dtype=np.int8), 63]'
@@ -59,79 +59,79 @@ vle8_v:
       - '[rvv_v_generator(127, dtype=np.int8), 127]'
       - '[rvv_v_generator(128, dtype=np.int8), 128]'
 
-    test_vlx_v_with_mask :
+    test_vsx_v_with_mask:
       - '[np.array([1], dtype=np.int8), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int8), 4, np.array([0x5], dtype=np.uint8)]'
       - '[rvv_v_generator(63, dtype=np.int8), 63, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
       - '[rvv_v_generator(64, dtype=np.int8), 64, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
 
-vle16_v:
+vse16_v:
   templates:
     <<: *_templates
-    test_vlx_v_without_mask @ rs1, vlen @ ebits=16, stins='vse16.v', eqm='VV_CHECK_EQ_INT16': |
+    test_vsx_v_without_mask @ rs1, vlen @ ebits=16, ldins='vle16.v', eqm='VV_CHECK_EQ_INT16': |
       {inherit}
 
-    test_vlx_v_with_mask @ rs1, vlen, mask @ ebits=16, stins='vse16.v', eqm='VV_CHECK_EQ_INT16': |
+    test_vsx_v_with_mask @ rs1, vlen, mask @ ebits=16, ldins='vle16.v', eqm='VV_CHECK_EQ_INT16': |
       {inherit}
 
   <<: *default
 
   cases:
-    test_vlx_v_without_mask:
+    test_vsx_v_without_mask:
       - '[np.array([1], dtype=np.int16), 1]'
       - '[np.array([1, 1, -1, 64], dtype=np.int16), 4]'
       - '[rvv_v_generator(63, dtype=np.int16), 63]'
       - '[rvv_v_generator(64, dtype=np.int16), 64]'
 
-    test_vlx_v_with_mask :
+    test_vsx_v_with_mask :
       - '[np.array([1], dtype=np.int16), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int16), 4, np.array([0x5], dtype=np.uint8)]'
       - '[rvv_v_generator(63, dtype=np.int16), 63, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
       - '[rvv_v_generator(64, dtype=np.int16), 64, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
 
-vle32_v:
+vse32_v:
   templates:
     <<: *_templates
-    test_vlx_v_without_mask @ rs1, vlen @ ebits=32, stins='vse32.v', eqm='VV_CHECK_EQ_INT32': |
+    test_vsx_v_without_mask @ rs1, vlen @ ebits=32, ldins='vle32.v', eqm='VV_CHECK_EQ_INT32': |
       {inherit}
 
-    test_vlx_v_with_mask @ rs1, vlen, mask @ ebits=32, stins='vse32.v', eqm='VV_CHECK_EQ_INT32': |
+    test_vsx_v_with_mask @ rs1, vlen, mask @ ebits=32, ldins='vle32.v', eqm='VV_CHECK_EQ_INT32': |
       {inherit}
 
   <<: *default
 
   cases:
-    test_vlx_v_without_mask:
+    test_vsx_v_without_mask:
       - '[np.array([1], dtype=np.int32), 1]'
       - '[np.array([1, 1, -1, 64], dtype=np.int32), 4]'
       - '[rvv_v_generator(31, dtype=np.int32), 31]'
       - '[rvv_v_generator(32, dtype=np.int32), 32]'
 
-    test_vlx_v_with_mask :
+    test_vsx_v_with_mask :
       - '[np.array([1], dtype=np.int32), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int32), 4, np.array([0x5], dtype=np.uint8)]'
       - '[rvv_v_generator(31, dtype=np.int32), 31, np.array([0x5a55aa5a], dtype=np.uint32)]'
       - '[rvv_v_generator(32, dtype=np.int32), 32, np.array([0x5a55aa5a], dtype=np.uint32)]'
 
-vle64_v:
+vse64_v:
   templates:
     <<: *_templates
-    test_vlx_v_without_mask @ rs1, vlen @ ebits=64, stins='vse64.v', eqm='VV_CHECK_EQ_INT64': |
+    test_vsx_v_without_mask @ rs1, vlen @ ebits=64, ldins='vle64.v', eqm='VV_CHECK_EQ_INT64': |
       {inherit}
 
-    test_vlx_v_with_mask @ rs1, vlen, mask @ ebits=64, stins='vse64.v', eqm='VV_CHECK_EQ_INT64': |
+    test_vsx_v_with_mask @ rs1, vlen, mask @ ebits=64, ldins='vle64.v', eqm='VV_CHECK_EQ_INT64': |
       {inherit}
 
   <<: *default
 
   cases:
-    test_vlx_v_without_mask:
+    test_vsx_v_without_mask:
       - '[np.array([1], dtype=np.int64), 1]'
       - '[np.array([1, 1, -1, 64], dtype=np.int64), 4]'
       - '[rvv_v_generator(15, dtype=np.int64), 15]'
       - '[rvv_v_generator(16, dtype=np.int64), 16]'
 
-    test_vlx_v_with_mask :
+    test_vsx_v_with_mask :
       - '[np.array([1], dtype=np.int64), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int64), 4, np.array([0x5], dtype=np.uint8)]'
       - '[rvv_v_generator(15, dtype=np.int64), 15, np.array([0x5a55aa5a], dtype=np.uint32)]'

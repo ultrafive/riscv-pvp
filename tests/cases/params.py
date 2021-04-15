@@ -847,16 +847,6 @@ def random_meconv_hf_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, of
         id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{off_s1}x{off_s2}x{off_d}x{padding}x{sk}x{dl}'
     )
 
-def rvv_mask_generator(vlen):
-    if vlen <= 8:
-        return np.array([0xa], dtype=np.uint8)
-    elif vlen > 8 and vlen <= 16:
-        return np.array([0x5a5a], dtype=np.uint16)
-    elif vlen > 16 and vlen <= 32:
-        return np.array([0x5a55aa5a], dtype=np.uint32)
-    else:
-        return np.array([0x5a55aa5aff005faf], dtype=np.uint64)
-
 def rvv_v_generator(vlen, dtype=np.int16):
     return np.linspace(1, 0xffff, vlen, dtype=dtype)
 
