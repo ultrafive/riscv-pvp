@@ -74,8 +74,8 @@ vse8_v:
     test_vsx_v_with_mask:
       - '[np.array([1], dtype=np.int8), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int8), 4, np.array([0x5], dtype=np.uint8)]'
-      - '[rvv_v_generator(63, dtype=np.int8), 63, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
-      - '[rvv_v_generator(64, dtype=np.int8), 64, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
+      - '[rvv_v_generator(63, dtype=np.int8), 63, np.array([0x5a, 0x55, 0xaa, 0x5a, 0xa5, 0xff, 0x5f, 0xaf], dtype=np.uint8)]'
+      - '[rvv_v_generator(64, dtype=np.int8), 64, np.array([0x5a, 0x55, 0xaa, 0x5a, 0xa5, 0xff, 0x5f, 0xaf], dtype=np.uint8)]'
 
 vse16_v:
   templates:
@@ -98,8 +98,8 @@ vse16_v:
     test_vsx_v_with_mask :
       - '[np.array([1], dtype=np.int16), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int16), 4, np.array([0x5], dtype=np.uint8)]'
-      - '[rvv_v_generator(63, dtype=np.int16), 63, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
-      - '[rvv_v_generator(64, dtype=np.int16), 64, np.array([0x5a55aa5aff005faf], dtype=np.uint64)]'
+      - '[rvv_v_generator(63, dtype=np.int16), 63, np.array([0x5a, 0x55, 0xaa, 0x5a, 0xa5, 0xff, 0x5f, 0xaf], dtype=np.uint8)]'
+      - '[rvv_v_generator(64, dtype=np.int16), 64, np.array([0x5a, 0x55, 0xaa, 0x5a, 0xa5, 0xff, 0x5f, 0xaf], dtype=np.uint8)]'
 
 vse32_v:
   templates:
@@ -122,8 +122,8 @@ vse32_v:
     test_vsx_v_with_mask :
       - '[np.array([1], dtype=np.int32), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int32), 4, np.array([0x5], dtype=np.uint8)]'
-      - '[rvv_v_generator(31, dtype=np.int32), 31, np.array([0x5a55aa5a], dtype=np.uint32)]'
-      - '[rvv_v_generator(32, dtype=np.int32), 32, np.array([0x5a55aa5a], dtype=np.uint32)]'
+      - '[rvv_v_generator(31, dtype=np.int32), 31, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
+      - '[rvv_v_generator(32, dtype=np.int32), 32, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
 
 vse64_v:
   templates:
@@ -146,5 +146,5 @@ vse64_v:
     test_vsx_v_with_mask :
       - '[np.array([1], dtype=np.int64), 1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64], dtype=np.int64), 4, np.array([0x5], dtype=np.uint8)]'
-      - '[rvv_v_generator(15, dtype=np.int64), 15, np.array([0x5a55aa5a], dtype=np.uint32)]'
-      - '[rvv_v_generator(16, dtype=np.int64), 16, np.array([0x5a55aa5a], dtype=np.uint32)]'
+      - '[rvv_v_generator(15, dtype=np.int64), 15, np.array([0x55, 0xaa], dtype=np.uint8)]'
+      - '[rvv_v_generator(16, dtype=np.int64), 16, np.array([0xaa, 0x55], dtype=np.uint8)]'
