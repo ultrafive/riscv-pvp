@@ -24,6 +24,7 @@ RVTEST_CODE_END
 RVTEST_DATA_BEGIN
 
     TEST_DATA
+    .subsection 1
     $data
     $tdata
 RVTEST_DATA_END
@@ -102,8 +103,8 @@ def compile(binary, mapfile, source, logfile, **kw):
     assert ret == 0
 
 @allure.step
-def run(memfile, binary, logfile, **kw):
-    cmd = f'{SIM} {VARCH} {binary} > {logfile} 2>&1'
+def run(memfile, binary, logfile, res_file, **kw):
+    cmd = f'{SIM} {VARCH} +signature={res_file} {binary} > {logfile} 2>&1'
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'run log', attachment_type=allure.attachment_type.TEXT)
@@ -152,14 +153,13 @@ def generate2(source, tpl, case, inst, **kw):
             kw_extra[k + '_shape'] = kw[k].shape
             data += array_data(f'test', k, kw[k])
 
-    args = list({**kw, **kw_extra}.values())
 
-    out = inst.golden()
-    if isinstance(out, np.ndarray):
-        data += array_data(f'test', 'rd', out)
-        out = "test_rd"
+    # out = inst.golden()
+    # if isinstance(out, np.ndarray):
+    #     data += array_data(f'test', 'rd', out)
+    #     out = "test_rd"
 
-    code = tpl.format_map(dict(num= 2, name = inst.name, res = out, **kw, **kw_extra))
+    code = tpl.format_map(dict(num= 2, name = inst.name, res = 0, **kw, **kw_extra))
 
     if not hasattr(case, 'tdata'):
         case.tdata = ''
@@ -169,8 +169,32 @@ def generate2(source, tpl, case, inst, **kw):
     print(content,  file=open(source, 'w'))
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 
+@allure.step
+def diff2(res_file, golden, diff_str):
+    itemsize = golden.itemsize
+    size = golden.size
+    result = []
+    with open(res_file) as file:
+        for line in file:
+            line = line.rstrip()
+            for no in range(int(16/itemsize)):
+                if no == 0:
+                    str = line[-2*itemsize:]
+                else:
+                    str = line[-(no+1)*2*itemsize:-no*2*itemsize]
+                num = int( str, 16 )
+                result.append( num )
+            if len(result) >= size:
+                break
+    result = result[:size]
+    result = np.array(result, dtype='uint%d' % (itemsize*8))
+    result.dtype = golden.dtype
+    result = result.reshape( golden.shape )
+    print(golden)  
+    print(result)
+    assert eval(diff_str)
 
-def simulate2(testcase, template, **kw):
+def simulate2(testcase, template, diff_str, **kw):
     workdir = testcase.workdir
     instclass = testcase.inst
 
@@ -180,10 +204,13 @@ def simulate2(testcase, template, **kw):
     compile_log = f'{workdir}/compile.log'
     run_log = f'{workdir}/run.log'
     run_mem = f'{workdir}/run.mem'
+    res_file = f'{workdir}/res.txt'
 
     inst = instclass(**kw)
     golden = inst.golden()
 
     generate2(source, template, testcase, inst, **kw)
     compile(binary, mapfile, source, compile_log, **kw)
-    run(run_mem, binary, run_log, **kw)
+    run(run_mem, binary, run_log, res_file, **kw)
+    if diff_str != '0':
+        diff2(res_file, golden, diff_str)
