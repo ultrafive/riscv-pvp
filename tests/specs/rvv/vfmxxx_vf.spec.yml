@@ -1,0 +1,141 @@
+_: &default
+  head: |
+    #include "exception.h"
+  env: RVTEST_RV64UV
+  _templates: &_templates
+    test_basic_without_mask: |
+      test_{num}: \
+          li TESTNUM, {num}; \
+          li a0, {rs2_shape[0]} ; \
+          vsetvli t0, a0, e{ebits}; \
+          la a1, {rs1_data} ; \
+          la a2, {rs2_data} ; \
+          la a3, {rds_data} ; \
+          {fldins} fa1, (a1) ; \
+          {ldins} v2, (a2) ; \
+          {ldins} v3, (a3) ; \
+          {name} v3, fa1, v2 ; \
+          la a3, test_{num}_data ; 
+          {stins} v3, (a3); \
+          .pushsection .data, 1; \
+      test_{num}_data: \
+          .fill {rs2_shape[0]}, ({ebits}/8), 0; \
+          .popsection
+    test_special_without_mask: |
+      test_{num}: \
+          li TESTNUM, {num}; \
+          li a0, {rs2_shape[0]} ; \
+          vsetvli t0, a0, e{ebits}; \
+          la a1, {rs1_data} ; \
+          la a2, {rs2_data} ; \
+          la a3, {rds_data} ; \
+          {fldins} fa1, (a1) ; \
+          {ldins} v2, (a2) ; \
+          {ldins} v3, (a3) ; \
+          {name} v3, fa1, v2 ; \
+          la a3, test_{num}_data ; 
+          {stins} v3, (a3); \
+          .pushsection .data, 1; \
+      test_{num}_data: \
+          .fill {rs2_shape[0]}, ({ebits}/8), 0; \
+          .popsection
+    test_dest_eq_rs2_without_mask: |
+      test_{num}: \
+          li TESTNUM, {num}; \
+          li a0, {rs2_shape[0]} ; \
+          vsetvli t0, a0, e{ebits}; \
+          la a1, {rs1_data} ; \
+          la a2, {rs2_data} ; \
+          {fldins} fa1, (a1) ; \
+          {ldins} v2, (a2) ; \
+          {name} v2, fa1, v2 ; \
+          la a3, test_{num}_data ; \
+          {stins} v2, (a3); \
+          .pushsection .data, 1; \
+      test_{num}_data: \
+          .fill {rs2_shape[0]}, ({ebits}/8), 0; \
+          .popsection
+    test_basic_with_mask: |
+      test_{num}: \
+          li TESTNUM, {num}; \
+          li a0, {rs2_shape[0]} ; \
+          vsetvli t0, a0, e{ebits}; \
+          la a1, {rs1_data} ; \
+          la a2, {rs2_data} ; \
+          la a3, {rds_data} ; \
+          la a4, {v0_data} ; \
+          {fldins} fa1, (a1) ; \
+          {ldins} v2, (a2) ; \
+          {ldins} v3, (a3) ; \
+          {ldins} v0, (a4) ; \
+          {name} v3, fa1, v2, v0.t ; \
+          la a3, test_{num}_data ; \
+          {stins} v3, (a3); \
+          .pushsection .data, 1; \
+      test_{num}_data: \
+          .fill {rs2_shape[0]}, ({ebits}/8), 0; \
+          .popsection
+
+  templates: 
+    <<: *_templates
+    test_basic_without_mask @rds, rs1, rs2 @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v': |
+      {inherit}
+    test_special_without_mask @ rds, rs1, rs2 @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v': |
+      {inherit}
+    test_dest_eq_rs2_without_mask @ rs1, rs2 @ rds=rs2, ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v': |
+      {inherit}
+    test_basic_with_mask @ rds, rs1, rs2, v0 @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v': |
+      {inherit}
+
+  cases:
+    test_basic_without_mask: 
+      - linspace_rvv_vfv(np.float32, 1)
+      - linspace_rvv_vfv(np.float32, 4)
+      - linspace_rvv_vfv(np.float32, 10)      
+      - linspace_rvv_vfv(np.float32, 32)
+    test_special_without_mask:
+      - "[ linspace_rvv_v_special(np.float32, 0, 32), np.array(random.random(), dtype=np.float32), linspace_rvv_v_special(np.float32, 2, 32) ]" 
+    test_dest_eq_rs2_without_mask:
+      - linspace_rvv_vf(np.float32, 1)
+      - linspace_rvv_vf(np.float32, 4)
+      - linspace_rvv_vf(np.float32, 10)
+      - linspace_rvv_vf(np.float32, 32)
+    test_basic_with_mask:
+      - linspace_rvv_vfv_with_mask(np.float32, 1)
+      - linspace_rvv_vfv_with_mask(np.float32, 4)
+      - linspace_rvv_vfv_with_mask(np.float32, 10)
+      - linspace_rvv_vfv_with_mask(np.float32, 32)
+  diff:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
+    test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
+    test_dest_eq_rs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
+
+
+vfmacc_vf:
+  <<: *default
+
+vfnmacc_vf:
+  <<: *default
+  
+vfmsac_vf:
+  <<: *default
+  
+vfnmsac_vf:
+  <<: *default
+  
+vfmadd_vf:
+  <<: *default
+
+vfnmadd_vf:
+  <<: *default
+
+vfmsub_vf:
+  <<: *default
+  
+vfnmsub_vf:
+  <<: *default
+  
+
+
+  

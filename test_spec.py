@@ -53,9 +53,9 @@ for filename in glob.iglob('tests/specs/**/*.spec.yml', recursive=True):
                 _args = others[0]
                 _defaults = ''
             else:
-                _defaults = ''
+                continue
 
-            if not name in cfg['cases']:
+            if not name in cfg['cases'] or cfg['cases'][name] is None:
                 continue
             if _args:
                 argnames = re.split(r'\s*,\s*', _args)
@@ -71,7 +71,12 @@ for filename in glob.iglob('tests/specs/**/*.spec.yml', recursive=True):
 
             _kw = ', '.join([f'{an}={an}' for an in argnames])
 
-            exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", {_kw}, {_defaults})')
+            if not 'diff' in cfg or not name in cfg['diff']:
+                diff_str = 0
+            else:
+                diff_str = cfg['diff'][name]
+
+            exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
             exec(f'attrs[name] = {name}')
             del globals()[name]
 

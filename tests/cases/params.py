@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import pytest
 
 def linspace_mm(type, w, h):
@@ -859,6 +860,163 @@ def rvv_mask_generator(vlen):
 
 def rvv_v_generator(vlen, dtype=np.int16):
     return np.linspace(1, 0xffff, vlen, dtype=dtype)
+
+def linspace_rvv_vv(type, vlen):
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type)
+    )
+
+def linspace_rvv_wv(type, vlen):
+    if type == np.float16:
+        type_vs2 = np.float32
+    elif type == np.float32:
+        type_vs2 = np.float64
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type_vs2)
+    )
+
+def linspace_rvv_vf(type, vlen):
+    return pytest.param(
+        np.array(random.random(), dtype=np.float32),
+        np.linspace(-127, 128, vlen, dtype=type)
+    )
+
+def linspace_rvv_wf(type, vlen):
+    if type == np.float16:
+        type_vs2 = np.float32
+    elif type == np.float32:
+        type_vs2 = np.float64
+    return pytest.param(
+        np.array(random.random(), dtype=np.float32),
+        np.linspace(-127, 128, vlen, dtype=type_vs2)
+    )
+
+def linspace_rvv_vvv(type, vlen):
+    return pytest.param(
+        np.linspace(-5, 5, vlen, dtype=type),
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type)
+    )
+
+def linspace_rvv_vfv(type, vlen):
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.array(random.random(), dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type)
+    )
+
+def linspace_rvv_v(type, vlen):
+    v=np.linspace(-127, 128, vlen, dtype=type)
+    return v
+
+def linspace_rvv_f(type):
+    f=np.array(random.random(), dtype=type)
+    return f
+
+def linspace_rvv_v0(type, vlen):
+    v=np.linspace(0, 255, vlen, dtype=type)
+    return v
+
+def linspace_rvv_vv_with_mask(type, vlen):
+
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vlen, dtype=type)
+    )
+
+def linspace_rvv_vf_with_mask(type, vlen):
+    return pytest.param(
+        np.array(random.random(), dtype=np.float32),
+        np.linspace(-120, 135, vlen, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vlen, dtype=type)
+    )
+
+def linspace_rvv_wf_with_mask(type, vlen):
+    if type == np.float16:
+        type_vs2 = np.float32
+    elif type == np.float32:
+        type_vs2 = np.float64
+    return pytest.param(
+        np.array(random.random(), dtype=np.float32),
+        np.linspace(-120, 135, vlen, dtype=type_vs2),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vlen, dtype=type_vs2)
+    )
+
+def linspace_rvv_vvv_with_mask(type, vlen):
+    return pytest.param(
+        np.linspace(-1, 1, vlen, dtype=type),
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
+    )
+def linspace_rvv_vfv_with_mask(type, vlen):
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.array(random.random(), dtype=np.float32),
+        np.linspace(-120, 135, vlen, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
+    )
+def linspace_rvv_wvv_with_mask(type, vlen):
+    if type == np.float16:
+        type_vd = np.float32
+    elif type == np.float32:
+        type_vd = np.float64
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vlen, dtype=type_vd)
+    )
+def linspace_rvv_wvf_with_mask(type, vlen):
+    if type == np.float16:
+        type_vd = np.float32
+    elif type == np.float32:
+        type_vd = np.float64
+    return pytest.param(
+        np.array(random.random(), dtype=np.float32),
+        np.linspace(-120, 135, vlen, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vlen, dtype=type_vd)
+    )
+
+def linspace_rvv_wwv_with_mask(type, vlen):
+    if type == np.float16:
+        type_vd = np.float32
+    elif type == np.float32:
+        type_vd = np.float64
+    return pytest.param(
+        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-120, 135, vlen, dtype=type_vd),
+        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vlen, dtype=type_vd)
+    )
+#special vector data
+def linspace_rvv_v_special(type, offset, vlen):
+    # boundary number table        -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
+    bd0 = np.array([[0x0000]*6, [0x0000, 0x7c00,         0x7e00,                 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    bd1 = np.array([[0x7c00]*8, [        0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    bd2 = np.array([[0x7e00]*6, [                        0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    bd3 = np.array([[0x2e66]*3, [                                                0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    bd4 = np.array([[0x4900]*3, [                                                0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    bd5 = np.array([[0x7bff]*3, [                                                0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    bd6 = np.array([[0x0400]*2, [                                                        0x0400, 0x0001]], dtype=np.int16)
+    bd7 = np.array([[0x0001]*1, [                                                                0x0001]], dtype=np.int16)
+    bound_data = np.concatenate((bd0, bd1, bd2, bd3, bd4, bd5, bd6, bd7),axis=1)
+    bound_data.dtype = type
+
+    # vs data include boundary data, vlen is 64
+    vs = np.linspace(-1, 5, vlen, dtype=type)
+    if offset > 1:
+        offset = 1;
+    vs[:len(bound_data[offset])] = bound_data[offset]
+
+    return vs
 
 @pytest.fixture(scope='function', autouse=True)
 def workdir(request, tmpdir_factory):
