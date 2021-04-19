@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
         li a0, {vlen};
-        vsetvli t0, a0, e{ebits};
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
         la a1, {rs1_data};
         la a2, {rs2_data};
 
@@ -42,10 +42,10 @@ _: &default
       1:
         li t3,  {vlen} / 8 + 1;
       2:
-        vsetvli t0, t3, e8;
+        vsetvli t0, t3, e8,m1,tu,mu;
         vle8.v v0, (a4);
 
-        vsetvli t0, a0, e{ebits};
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
         lw a1, 0(a1);
         {ldins} v2, (a2);
 

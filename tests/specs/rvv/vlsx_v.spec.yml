@@ -13,7 +13,7 @@ _: &default
         la a2, {rs2_data};
         la a3, test_{num}_data;
 
-        vsetvli t0, a0, e{ebits};
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
         lw a2, (a2);
 
         {name} v1, (a1), a2;
@@ -43,12 +43,12 @@ _: &default
       1:
         li t3,  {vlen} / 8 + 1;
       2:
-        vsetvli t0, t3, e8;
+        vsetvli t0, t3, e8,m1,tu,mu;
         vle8.v v0, (a4);
 
         la a3, test_{num}_data;
         lw a2, (a2);
-        vsetvli t0, a0, e{ebits};
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
         {name} v1, (a1), a2, v0.t;
         {stins} v1, (a3); 
 
