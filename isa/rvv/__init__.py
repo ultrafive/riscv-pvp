@@ -21,3 +21,14 @@ from .vsse8_v import *
 from .vsse16_v import *
 from .vsse32_v import *
 from .vsse64_v import *
+
+from .vluxei8_v import *
+
+from .vadd_vv import *
+from .vadd_vx import *
+from .vadd_vi import *
+
+from .vsub_vv import *
+from .vsub_vx import *
+from .vrsub_vx import *
+from .vrsub_vi import *
