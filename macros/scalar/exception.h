@@ -14,7 +14,6 @@
 
 #define TEST_EXCEPTION_HANDLER \
     .align 2; \
-    .global mtvec_handler; \
 mtvec_handler: \
     la t1, _expected_cause; \
     lw t2, 0(t1); \

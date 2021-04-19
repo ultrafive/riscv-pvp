@@ -10,7 +10,7 @@ _: &default
         li  TESTNUM, {num};
         li  x1, {input_vl};
 
-        vsetvli x14, x1, {imm_vtype}, {imm_vlmul};
+        vsetvli x14, x1, {imm_vtype},{imm_vlmul},tu,mu;
 
         li  x7, {res_vl};
         bne x14, x7, tofail_{num};
@@ -27,7 +27,7 @@ _: &default
     test_vsetvli_dest_src1_zero @ res_vl, res_vtype, imm_vtype: |
       test_{num}:
         li  TESTNUM, {num};
-        vsetvli x0, x0, {imm_vtype};
+        vsetvli x0, x0, {imm_vtype},m1,tu,mu;
 
         li  x7, {res_vl};
         csrr t1, vl;
@@ -43,7 +43,7 @@ _: &default
     test_vsetvli_src1_zero @ res_vl, res_vtype, imm_vtype: |
       test_{num}:
         li  TESTNUM, {num};
-        vsetvli x14, x0, {imm_vtype};
+        vsetvli x14, x0, {imm_vtype},m1,tu,mu;
 
         li  x7, {res_vl};
         bne x14, x7, tofail_{num};
@@ -61,7 +61,7 @@ _: &default
       test_{num}:
         li  TESTNUM, {num};
         li  x1, {input_vl};
-        vsetvli x0, x1, {imm_vtype};
+        vsetvli x0, x1, {imm_vtype},m1,tu,mu;
 
         li  x7, {res_vl};
         csrr t1, vl;
