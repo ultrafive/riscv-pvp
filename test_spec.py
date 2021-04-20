@@ -28,11 +28,13 @@ def rename(newname):
         return f
     return decorator
 
-for specs in args.specs.split():
-    if os.path.isdir(specs):
-        spec = f'{specs}/**/*.spec.yml'
-    else:
-        spec = specs
+specs = args.specs.split()
+if not specs and len(specs) == 0:
+    specs = ['tests/specs']
+
+for spec in specs:
+    if os.path.isdir(spec):
+        spec = f'{spec}/**/*.spec.yml'
 
     for filename in glob.iglob(spec, recursive=True):
         stream = open(filename, 'r')
