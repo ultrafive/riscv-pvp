@@ -6,7 +6,13 @@ import re
 import yaml
 import glob
 import pytest
+import os
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--specs', help='test specs')
+args, pytest_args = parser.parse_known_args()
+sys.argv[1:] = pytest_args
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
@@ -22,62 +28,68 @@ def rename(newname):
         return f
     return decorator
 
-for filename in glob.iglob('tests/specs/**/*.spec.yml', recursive=True):
-    stream = open(filename, 'r')
-    config = yaml.load(stream, Loader=yaml.SafeLoader)
+for specs in args.specs.split():
+    if os.path.isdir(specs):
+        spec = f'{specs}/**/*.spec.yml'
+    else:
+        spec = specs
 
-    for inst, cfg in config.items() :
-        if inst.startswith('_'):
-            continue
-        print(f'{inst}:')
+    for filename in glob.iglob(spec, recursive=True):
+        stream = open(filename, 'r')
+        config = yaml.load(stream, Loader=yaml.SafeLoader)
 
-        print(cfg['templates'])
-        attrs = dict()
-        attrs['inst'] = globals()[inst.capitalize()]
-        attrs['env'] = cfg['env']
-        if 'head' in cfg:
-            attrs['header'] = cfg['head']
-        if 'footer' in cfg:
-            attrs['footer'] = cfg['footer']
-        if 'tdata' in cfg:
-            attrs['tdata'] = cfg['tdata']
-
-        attrs['argnames'] = {}
-        attrs['params'] = {}
-        for key, template in cfg['templates'].items():
-            [name, *others] = re.split(r'\s*@\s*', key)
-            if len(others) == 2:
-                _args = others[0]
-                _defaults = others[1]
-            elif len(others) == 1:
-                _args = others[0]
-                _defaults = ''
-            else:
+        for inst, cfg in config.items() :
+            if inst.startswith('_'):
                 continue
+            print(f'{inst}:')
 
-            if not name in cfg['cases'] or cfg['cases'][name] is None:
-                continue
-            if _args:
-                argnames = re.split(r'\s*,\s*', _args)
-            else:
-                argnames = []
-            attrs['argnames'][name] = argnames
-            params = cfg['cases'][name]
-            attrs['params'][name] = params
+            print(cfg['templates'])
+            attrs = dict()
+            attrs['inst'] = globals()[inst.capitalize()]
+            attrs['env'] = cfg['env']
+            if 'head' in cfg:
+                attrs['header'] = cfg['head']
+            if 'footer' in cfg:
+                attrs['footer'] = cfg['footer']
+            if 'tdata' in cfg:
+                attrs['tdata'] = cfg['tdata']
 
-            if template.strip() == '{inherit}':
-                print(cfg['templates'])
-                template = cfg['templates'][name]
+            attrs['argnames'] = {}
+            attrs['params'] = {}
+            for key, template in cfg['templates'].items():
+                [name, *others] = re.split(r'\s*@\s*', key)
+                if len(others) == 2:
+                    _args = others[0]
+                    _defaults = others[1]
+                elif len(others) == 1:
+                    _args = others[0]
+                    _defaults = ''
+                else:
+                    continue
 
-            _kw = ', '.join([f'{an}={an}' for an in argnames])
+                if not name in cfg['cases'] or cfg['cases'][name] is None:
+                    continue
+                if _args:
+                    argnames = re.split(r'\s*,\s*', _args)
+                else:
+                    argnames = []
+                attrs['argnames'][name] = argnames
+                params = cfg['cases'][name]
+                attrs['params'][name] = params
 
-            if not 'diff' in cfg or not name in cfg['diff']:
-                diff_str = 0
-            else:
-                diff_str = cfg['diff'][name]
+                if template.strip() == '{inherit}':
+                    print(cfg['templates'])
+                    template = cfg['templates'][name]
 
-            exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
-            exec(f'attrs[name] = {name}')
-            del globals()[name]
+                _kw = ', '.join([f'{an}={an}' for an in argnames])
 
-        globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
+                if not 'diff' in cfg or not name in cfg['diff']:
+                    diff_str = 0
+                else:
+                    diff_str = cfg['diff'][name]
+
+                exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
+                exec(f'attrs[name] = {name}')
+                del globals()[name]
+
+            globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
