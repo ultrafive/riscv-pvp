@@ -154,12 +154,13 @@ def generate2(source, tpl, case, inst, **kw):
             data += array_data(f'test', k, kw[k])
 
 
-    # out = inst.golden()
-    # if isinstance(out, np.ndarray):
-    #     data += array_data(f'test', 'rd', out)
-    #     out = "test_rd"
+    out = inst.golden()
+    # this should be removed after all tests compare ndarray on the host
+    if isinstance(out, np.ndarray):
+        data += array_data(f'test', 'rd', out)
+        out = "test_rd"
 
-    code = tpl.format_map(dict(num= 2, name = inst.name, res = 0, **kw, **kw_extra))
+    code = tpl.format_map(dict(num= 2, name = inst.name, res = out, **kw, **kw_extra))
 
     if not hasattr(case, 'tdata'):
         case.tdata = ''
