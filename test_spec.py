@@ -28,9 +28,10 @@ def rename(newname):
         return f
     return decorator
 
-specs = args.specs.split()
-if not specs and len(specs) == 0:
+if not args.specs or len(args.specs.split()) == 0:
     specs = ['tests/specs']
+else:
+    specs = args.specs.split()
 
 for spec in specs:
     if os.path.isdir(spec):
