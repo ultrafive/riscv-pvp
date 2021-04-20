@@ -2,12 +2,20 @@ from isa.inst import *
 import numpy as np
 import math
 
-class Vle16_v(Inst):
-    name = 'vle16.v'
+class Vlse16_v(Inst):
+    name = 'vlse16.v'
 
     def golden(self):
+        sew = 2
+
+        if self['rs2'] == 0:
+            vd= np.full([self['vlen']], self['rs1'][0])
+        else:
+            vd = self['rs1'][::int(self['rs2']/sew)]
+            vd = vd[:self['vlen']]
+
         if 'mask' not in self:
-            return self['rs1']
+            return vd
         else:
             mask_list = []
             for index in range(0, math.ceil(self['vlen'] / 8 )):
@@ -19,4 +27,5 @@ class Vle16_v(Inst):
                         mask_list.append(False)
                     v0_mask = v0_mask >> 1
 
-            return np.ma.array(self['rs1'], mask = mask_list[0: self['vlen']], fill_value = 0).filled()
+
+            return np.ma.array(vd, mask = mask_list[0: self['vlen']], fill_value = 0).filled()

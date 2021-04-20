@@ -85,13 +85,13 @@ INCS = '-Ienv/b -Imacros/scalar -Imacros/vector -Imacros/stc'
 LINKFLAGS = '-Tenv/b/link.ld'
 '''
 
-CC = 'riscv64-unknown-elf-gcc'
-ARCH_FLAGS = '-DXLEN=64 -DVLEN=1024'
+CC = 'clang --target=riscv64-unknown-elf -mno-relax -fuse-ld=lld'
+ARCH_FLAGS = '-march=rv64gv0p10 -menable-experimental-extensions -DXLEN=64 -DVLEN=1024'
 TARGET_FLAGS = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
 INCS = '-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc'
 LINKFLAGS = '-Tenv/p/link.ld'
 
-SIM = 'spike'
+SIM = 'spike --isa=rv64gcv'
 VARCH = '--varch=vlen:1024,elen:64,slen:1024'
 
 @allure.step
@@ -154,10 +154,11 @@ def generate2(source, tpl, case, inst, **kw):
             data += array_data(f'test', k, kw[k])
 
 
-    # out = inst.golden()
-    # if isinstance(out, np.ndarray):
-    #     data += array_data(f'test', 'rd', out)
-    #     out = "test_rd"
+    out = inst.golden()
+    # this should be removed after all tests compare ndarray on the host
+    if isinstance(out, np.ndarray):
+        data += array_data(f'test', 'rd', out)
+        out = "test_rd"
 
     code = tpl.format_map(dict(num= 2, name = inst.name, res = 0, **kw, **kw_extra))
 

@@ -2,12 +2,13 @@ from isa.inst import *
 import numpy as np
 import math
 
-class Vle16_v(Inst):
-    name = 'vle16.v'
+class Vrsub_vi(Inst):
+    name = 'vrsub.vi'
 
     def golden(self):
         if 'mask' not in self:
-            return self['rs1']
+            vd = np.array(self['imm']) - self['rs2']
+            return vd
         else:
             mask_list = []
             for index in range(0, math.ceil(self['vlen'] / 8 )):
@@ -19,4 +20,4 @@ class Vle16_v(Inst):
                         mask_list.append(False)
                     v0_mask = v0_mask >> 1
 
-            return np.ma.array(self['rs1'], mask = mask_list[0: self['vlen']], fill_value = 0).filled()
+            return np.ma.array(np.array(self['imm']) - self['rs2'], mask = mask_list[0: self['vlen']], fill_value = 0).filled()

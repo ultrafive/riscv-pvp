@@ -7,7 +7,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           la a2, {rs2_data} ; 
           {ldins} v1, (a1) ; 
@@ -24,7 +24,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           la a2, {rs2_data} ; 
           {ldins} v1, (a1) ; 
@@ -40,7 +40,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           {ldins} v1, (a1) ; 
           {name} v3, v1, v1 ; 
@@ -54,7 +54,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           {ldins} v1, (a1) ; 
           {name} v1, v1, v1 ; 
@@ -68,7 +68,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           la a2, {rs2_data} ; 
           {ldins} v1, (a1) ; 
@@ -84,7 +84,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           la a2, {rs2_data} ; 
           {ldins} v1, (a1) ; 
@@ -100,7 +100,7 @@ _: &default
       test_{num}: 
           li TESTNUM, {num}; 
           li a0, {rs1_shape[0]} ; 
-          vsetvli t0, a0, e{ebits}; 
+          vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {rs1_data} ; 
           la a2, {rs2_data} ; 
           la a0, {v0_data} ; 
