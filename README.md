@@ -59,7 +59,8 @@
     $ git clone https://github.com/riscv/riscv-tools
     $ cd riscv-tools
     $ git submodule update --init --recursive
-    $ ./build.sh
+    $ cd riscv-isa-sim && git checkout master && git pull && cd ..
+    $ ./build-spike-only.sh
 
 ### 安装python依赖
 
