@@ -6,10 +6,10 @@ _: &default
     test_basic_without_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
-          la a2, {rs2_data} ; 
+          la a1, {vs1_data} ; 
+          la a2, {vs2_data} ; 
           {ldins} v1, (a1) ; 
           {ldins} v2, (a2) ; 
           {name} v3, v2, v1 ; 
@@ -17,16 +17,16 @@ _: &default
           {stins} v3, (a3); 
           .pushsection .data, 1; 
       test_{num}_data: 
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
       
     test_special_without_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
-          la a2, {rs2_data} ; 
+          la a1, {vs1_data} ; 
+          la a2, {vs2_data} ; 
           {ldins} v1, (a1) ; 
           {ldins} v2, (a2) ; 
           {name} v3, v2, v1 ; 
@@ -34,43 +34,43 @@ _: &default
           {stins} v3, (a3); 
           .pushsection .data, 1; 
       test_{num}_data: 
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
-    test_rs1_eq_rs2_without_mask: |
+    test_vs1_eq_vs2_without_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
+          la a1, {vs1_data} ; 
           {ldins} v1, (a1) ; 
           {name} v3, v1, v1 ; 
           la a3, test_{num}_data; 
           {stins} v3, (a3); 
           .pushsection .data, 1; 
       test_{num}_data:
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
-    test_dest_eq_rs1rs2_without_mask: |
+    test_dest_eq_vs1vs2_without_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
+          la a1, {vs1_data} ; 
           {ldins} v1, (a1) ; 
           {name} v1, v1, v1 ; 
           la a3, test_{num}_data; 
           {stins} v1, (a3); 
           .pushsection .data, 1; 
       test_{num}_data: 
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
-    test_dest_eq_rs1_without_mask: |
+    test_dest_eq_vs1_without_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
-          la a2, {rs2_data} ; 
+          la a1, {vs1_data} ; 
+          la a2, {vs2_data} ; 
           {ldins} v1, (a1) ; 
           {ldins} v2, (a2) ; 
           {name} v1, v2, v1 ; 
@@ -78,15 +78,15 @@ _: &default
           {stins} v1, (a3); 
           .pushsection .data, 1; 
       test_{num}_data: 
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
-    test_dest_eq_rs2_without_mask: |
+    test_dest_eq_vs2_without_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
-          la a2, {rs2_data} ; 
+          la a1, {vs1_data} ; 
+          la a2, {vs2_data} ; 
           {ldins} v1, (a1) ; 
           {ldins} v2, (a2) ; 
           {name} v2, v2, v1 ; 
@@ -94,15 +94,15 @@ _: &default
           {stins} v2, (a3); 
           .pushsection .data, 1; 
       test_{num}_data: 
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
     test_basic_with_mask: |
       test_{num}: 
           li TESTNUM, {num}; 
-          li a0, {rs1_shape[0]} ; 
+          li a0, {vs1_shape[0]} ; 
           vsetvli t0, a0, e{ebits},m1,tu,mu;
-          la a1, {rs1_data} ; 
-          la a2, {rs2_data} ; 
+          la a1, {vs1_data} ; 
+          la a2, {vs2_data} ; 
           la a0, {v0_data} ; 
           la a3, {orig_data} ; 
           {ldins} v1, (a1) ; 
@@ -114,24 +114,24 @@ _: &default
           {stins} v3, (a3); 
           .pushsection .data, 1; 
       test_{num}_data: 
-          .fill {rs1_shape[0]}, ({ebits}/8), 0; 
+          .fill {vs1_shape[0]}, ({ebits}/8), 0; 
           .popsection
 
   templates: 
     <<: *_templates
-    test_basic_without_mask @ rs1, rs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_basic_without_mask @ vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_special_without_mask @ rs1, rs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_special_without_mask @ vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_rs1_eq_rs2_without_mask @ rs1 @ rs2=rs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_vs1_eq_vs2_without_mask @ vs1 @ vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_dest_eq_rs1rs2_without_mask @ rs1 @ rs2=rs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_dest_eq_vs1vs2_without_mask @ vs1 @ vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_dest_eq_rs1_without_mask @ rs1, rs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_dest_eq_vs1_without_mask @ vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_dest_eq_rs2_without_mask @ rs1, rs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_dest_eq_vs2_without_mask @ vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_basic_with_mask @ rs1, rs2, v0, orig @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_basic_with_mask @ vs1, vs2, v0, orig @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
   cases:
     test_basic_without_mask:
@@ -141,22 +141,22 @@ _: &default
       - linspace_rvv_vv(np.float32, 32)
     test_special_without_mask:
       - "[ linspace_rvv_v_special(np.float32, 0, 32), linspace_rvv_v_special(np.float32, 1, 32) ]"
-    test_rs1_eq_rs2_without_mask:
+    test_vs1_eq_vs2_without_mask:
       - "[np.linspace(-127, 0xffff, 1, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 4, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 10, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 32, dtype=np.float32)]"
-    test_dest_eq_rs1rs2_without_mask:
+    test_dest_eq_vs1vs2_without_mask:
       - "[np.linspace(-127, 0xffff, 1, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 4, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 10, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 32, dtype=np.float32)]"
-    test_dest_eq_rs1_without_mask:
+    test_dest_eq_vs1_without_mask:
       - linspace_rvv_vv(np.float32, 1)
       - linspace_rvv_vv(np.float32, 4)
       - linspace_rvv_vv(np.float32, 10)
       - linspace_rvv_vv(np.float32, 32)
-    test_dest_eq_rs2_without_mask:
+    test_dest_eq_vs2_without_mask:
       - linspace_rvv_vv(np.float32, 1)
       - linspace_rvv_vv(np.float32, 4)
       - linspace_rvv_vv(np.float32, 10)
@@ -167,13 +167,13 @@ _: &default
       - linspace_rvv_vv_with_mask(np.float32, 10)
       - linspace_rvv_vv_with_mask(np.float32, 32)
   diff:
-    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
-    test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
-    test_rs1_eq_rs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_dest_eq_rs1rs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_dest_eq_rs1_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_dest_eq_rs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
+    test_basic_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True) 
+    test_special_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True) 
+    test_vs1_eq_vs2_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True)
+    test_dest_eq_vs1vs2_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True)
+    test_dest_eq_vs1_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True)
+    test_dest_eq_vs2_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True)
 
 vfadd_vv:
   <<: *default
@@ -192,3 +192,113 @@ vfmax_vv:
 
 vfmin_vv:
   <<: *default
+
+vfsgnj_vv:
+  <<: *default
+  cases: &cases_fsgnj
+    test_basic_without_mask:
+      - "[ np.array([-1.23], dtype=np.float32), np.array([4.56], dtype=np.float32)  ]"
+      - "[ np.array([4.56], dtype=np.float32), np.array([-1.23], dtype=np.float32)  ]"
+      - "[ np.array([4.56], dtype=np.float32), np.array([4.56], dtype=np.float32)  ]"
+      - "[ np.linspace(-2, -1, 10, dtype=np.float32), np.linspace(3, 4, 10, dtype=np.float32) ]"
+      - "[ np.linspace(1, 2, 10, dtype=np.float32), np.linspace(-4, -3, 10, dtype=np.float32) ]"
+      - "[ np.linspace(-10, 10, 10, dtype=np.float32), np.linspace(-10, 10, 10, dtype=np.float32) ]"
+      - "[ np.linspace(-20, -1, 32, dtype=np.float32), np.linspace(3, 40, 32, dtype=np.float32) ]"
+      - "[ np.linspace(1, 20, 32, dtype=np.float32), np.linspace(-40, -3, 32, dtype=np.float32) ]"
+      - "[ np.linspace(-10, 10, 32, dtype=np.float32), np.linspace(-10, 10, 32, dtype=np.float32) ]"      
+    test_special_without_mask:
+      - "[ linspace_rvv_v_special(np.float32, 0, 32), linspace_rvv_v_special(np.float32, 1, 32) ]"
+    test_vs1_eq_vs2_without_mask:
+      - "[np.linspace(-127, 0xffff, 1, dtype=np.float32)]"
+      - "[np.linspace(-127, 0xffff, 4, dtype=np.float32)]"
+      - "[np.linspace(-127, 0xffff, 10, dtype=np.float32)]"
+      - "[np.linspace(-127, 0xffff, 32, dtype=np.float32)]"
+    test_dest_eq_vs1vs2_without_mask:
+      - "[np.linspace(-127, 0xffff, 1, dtype=np.float32)]"
+      - "[np.linspace(-127, 0xffff, 4, dtype=np.float32)]"
+      - "[np.linspace(-127, 0xffff, 10, dtype=np.float32)]"
+      - "[np.linspace(-127, 0xffff, 32, dtype=np.float32)]"
+    test_dest_eq_vs1_without_mask:
+      - "[ np.array([-1.23], dtype=np.float32), np.array([4.56], dtype=np.float32)  ]"
+      - "[ np.array([4.56], dtype=np.float32), np.array([-1.23], dtype=np.float32)  ]"
+      - "[ np.array([4.56], dtype=np.float32), np.array([4.56], dtype=np.float32)  ]"
+      - "[ np.linspace(-2, -1, 10, dtype=np.float32), np.linspace(3, 4, 10, dtype=np.float32) ]"
+      - "[ np.linspace(1, 2, 10, dtype=np.float32), np.linspace(-4, -3, 10, dtype=np.float32) ]"
+      - "[ np.linspace(-10, 10, 10, dtype=np.float32), np.linspace(-10, 10, 10, dtype=np.float32) ]"
+      - "[ np.linspace(-20, -1, 32, dtype=np.float32), np.linspace(3, 40, 32, dtype=np.float32) ]"
+      - "[ np.linspace(1, 20, 32, dtype=np.float32), np.linspace(-40, -3, 32, dtype=np.float32) ]"
+      - "[ np.linspace(-10, 10, 32, dtype=np.float32), np.linspace(-10, 10, 32, dtype=np.float32) ]"
+    test_dest_eq_vs2_without_mask:
+      - "[ np.array([-1.23], dtype=np.float32), np.array([4.56], dtype=np.float32)  ]"
+      - "[ np.array([4.56], dtype=np.float32), np.array([-1.23], dtype=np.float32)  ]"
+      - "[ np.array([4.56], dtype=np.float32), np.array([4.56], dtype=np.float32)  ]"
+      - "[ np.linspace(-2, -1, 10, dtype=np.float32), np.linspace(3, 4, 10, dtype=np.float32) ]"
+      - "[ np.linspace(1, 2, 10, dtype=np.float32), np.linspace(-4, -3, 10, dtype=np.float32) ]"
+      - "[ np.linspace(-10, 10, 10, dtype=np.float32), np.linspace(-10, 10, 10, dtype=np.float32) ]"
+      - "[ np.linspace(-20, -1, 32, dtype=np.float32), np.linspace(3, 40, 32, dtype=np.float32) ]"
+      - "[ np.linspace(1, 20, 32, dtype=np.float32), np.linspace(-40, -3, 32, dtype=np.float32) ]"
+      - "[ np.linspace(-10, 10, 32, dtype=np.float32), np.linspace(-10, 10, 32, dtype=np.float32) ]"   
+    test_basic_with_mask:
+      - linspace_rvv_vv_with_mask(np.float32, 1)
+      - linspace_rvv_vv_with_mask(np.float32, 4)
+      - linspace_rvv_vv_with_mask(np.float32, 10)
+      - linspace_rvv_vv_with_mask(np.float32, 32)
+
+
+vfsgnjn_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+
+vfsgnjx_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+
+vmfeq_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+  diff: &diff_eq
+    test_basic_without_mask: np.equal(result, golden).all()
+    test_special_without_mask: np.equal(result, golden).all()
+    test_vs1_eq_vs2_without_mask: np.equal(result, golden).all()
+    test_dest_eq_vs1vs2_without_mask: np.equal(result, golden).all()
+    test_dest_eq_vs1_without_mask: np.equal(result, golden).all()
+    test_dest_eq_vs2_without_mask: np.equal(result, golden).all()
+    test_basic_with_mask: np.equal(result, golden).all()
+
+vmfne_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+  diff:
+    <<: *diff_eq
+
+vmflt_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+  diff:
+    <<: *diff_eq
+
+vmfle_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+  diff:
+    <<: *diff_eq
+
+vmfgt_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj
+  diff:
+    <<: *diff_eq    
+
+vmfge_vv:
+  <<: *default
+  cases:
+    <<: *cases_fsgnj  
+  diff:
+    <<: *diff_eq      

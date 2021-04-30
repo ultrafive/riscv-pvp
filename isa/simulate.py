@@ -160,7 +160,7 @@ def generate2(source, tpl, case, inst, **kw):
         data += array_data(f'test', 'rd', out)
         out = "test_rd"
 
-    code = tpl.format_map(dict(num= 2, name = inst.name, res = 0, **kw, **kw_extra))
+    code = tpl.format_map(dict(num= 2, name = inst.name, res = out, **kw, **kw_extra))
 
     if not hasattr(case, 'tdata'):
         case.tdata = ''
@@ -178,15 +178,26 @@ def diff2(res_file, golden, diff_str):
     with open(res_file) as file:
         for line in file:
             line = line.rstrip()
-            for no in range(int(16/itemsize)):
-                if no == 0:
-                    str = line[-2*itemsize:]
-                else:
-                    str = line[-(no+1)*2*itemsize:-no*2*itemsize]
-                num = int( str, 16 )
-                result.append( num )
+            if golden.dtype != np.bool_:
+                for no in range(int(16/itemsize)):
+                    if no == 0:
+                        str = line[-2*itemsize:]
+                    else:
+                        str = line[-(no+1)*2*itemsize:-no*2*itemsize]
+                    num = int( str, 16 )
+                    result.append( num )
+            else:
+                for no in range(32):
+                    str = line[ 31 - no ]
+                    num = int( str, 16 )
+                    result.append( num >> 0 & 1 )
+                    result.append( num >> 1 & 1 )
+                    result.append( num >> 2 & 1 )
+                    result.append( num >> 3 & 1 )
+
             if len(result) >= size:
                 break
+
     result = result[:size]
     result = np.array(result, dtype='uint%d' % (itemsize*8))
     result.dtype = golden.dtype

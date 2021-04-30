@@ -21,7 +21,7 @@ mtvec_handler: \
     bne t0, t2, fail; \
     \
     la t0, _restore_addr; \
-    lw t1, 0(t0); \
+    ld t1, 0(t0); \
     jr t1; \
     .pushsection .data; \
     .align 4; .global _expected_cause; _expected_cause: .dword 0; \

@@ -1,0 +1,57 @@
+_: &default
+  head: |
+    #include "exception.h"
+  env: RVTEST_RV64UV
+  _templates: &_templates
+    test_basic_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        la x1, {rs1_data};
+        li a0, ({rs1_shape[0]}/{nfields});
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        {name} {vreg}, (x1);
+        la a1, test_{num}_data;
+        {stins} {vreg}, (a1);
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {rs1_shape[0]}, ({ebits}/8), 0;
+        .popsection
+    test_basic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        la x1, {rs1_data};
+        li a0, ({rs1_shape[0]}/{nfields});
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        la a2, {orig_data};
+        {name} {vreg}, (a2);
+        la a1, {v0_data};
+        {ldins} v0, (a1);        
+        {name} {vreg}, (x1), v0.t;
+        la a1, test_{num}_data;
+        {stins} {vreg}, (a1);
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {rs1_shape[0]}, ({ebits}/8), 0;
+        .popsection
+
+  diff:
+    test_basic_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True )
+    test_basic_with_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True )    
+
+vlseg2e32_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1 @ nfields=2, ebits=32, vreg='v1', stins='vsseg2e32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, v0, orig @ nfields=2, ebits=32, vreg='v1', ldins='vle32.v', stins='vsseg2e32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.linspace( -1000, 1000, 1*2, dtype=np.int32 ) ]"
+      - "[ np.linspace( -1000, 1000, 10*2, dtype=np.int32 )]"
+      - "[ np.linspace( -1000, 1000, 32*2, dtype=np.int32 ) ]" 
+    test_basic_with_mask:
+      - "[ np.linspace( -1000, 1000, 1*2, dtype=np.int32 ), random_mask(1), np.zeros( 1*2, dtype=np.int32 ) ]"
+      - "[ np.linspace( -1000, 1000, 10*2, dtype=np.int32 ), random_mask(10), np.zeros( 10*2, dtype=np.int32 ) ]"
+      - "[ np.linspace( -1000, 1000, 32*2, dtype=np.int32 ), random_mask(32), np.zeros( 32*2, dtype=np.int32 ) ]"        

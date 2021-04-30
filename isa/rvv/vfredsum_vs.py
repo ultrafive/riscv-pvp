@@ -5,18 +5,17 @@ class Vfredsum_vs(Inst):
     name = 'vfredsum.vs'
 
     def golden(self):
-        if 'rs2' not in self and 'orig' in self and 'rs1' in self:
-            self['orig'][0] = self['rs1'][0] + self['rs1'].sum()
-            return  self['orig']
-        elif 'orig' not in self and 'rs2' not in self:
-            self['rs1'][0] = self['rs1'][0] + self['rs1'].sum()
-            return self['rs1']
-        elif 'orig' not in self and 'rs1' in self and 'rs2' in self:
-            self['rs1'][0] = self['rs1'][0] + self['rs2'].sum()
-            return self['rs1']
-        elif 'v0' in self:
-            self['orig'][0] = self['rs1'][0] + np.ma.array(self['rs2'], mask=((self['v0'] + 1) & 0x1).astype(bool)).sum()
-            return self['orig']
+        vd = self['orig'].copy()
+        if 'v0' in self:
+            mask = []
+            for no in range(0, self['vs2'].size):
+                mask.append( 1 - (( self['v0'][np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 ) )
+            mask = np.array(mask).astype( bool )
+            if mask.all() == True:
+                vd[0] = self['vs1'][0]
+            else:
+                vd[0] = self['vs1'][0] + np.ma.array( self['vs2'], mask=mask ).sum()
         else:
-            self['orig'][0] = self['rs1'][0] + self['rs2'].sum()
-            return self['orig']
+            vd[0] = self['vs1'][0] + self['vs2'].sum()
+
+        return vd
