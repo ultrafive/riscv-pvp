@@ -1,4 +1,4 @@
-from isa.simulate import simulate2
+from isa.simulate import simulate
 from tests.cases.params import *
 from isa import *
 
@@ -91,7 +91,7 @@ for spec in specs:
                 else:
                     diff_str = cfg['diff'][name]
 
-                exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
+                exec(f'def {name}(self, {_args}): simulate.simulate(self, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
                 exec(f'attrs[name] = {name}')
                 del globals()[name]
 

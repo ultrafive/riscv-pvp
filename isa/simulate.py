@@ -55,35 +55,6 @@ def array_data(prefix, k, vv):
             lines.append(f"    .dword  0x{hex_val} // {x}")
     return '\n'.join(lines) + '\n'
 
-@allure.step
-def generate(source, case, inst, **kw):
-
-    data = ''
-    kw_extra = {}
-    for k in kw:
-        if isinstance(kw[k], np.ndarray):
-            kw_extra[k + '_data'] = "test_" + k
-            kw_extra[k + '_shape'] = kw[k].shape
-            data += array_data(f'test', k, kw[k])
-
-    args = list({**kw, **kw_extra}.values())
-
-    out = inst.golden()
-    if isinstance(out, np.ndarray):
-        data += array_data(f'test', 'rd', out)
-        out = "test_rd"
-    code = case.template(2, inst.name, out, *args)
-
-    content = Template(template).substitute(header=case.header, env=case.env, code = code, data = data, tdata=case.tdata, footer=case.footer)
-    print(content,  file=open(source, 'w'))
-    allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
-'''
-CC = 'clang'
-ARCH_FLAGS = ''
-TARGET_FLAGS = '--target=riscv32 -mcpu=npu-v1 -static -nostdlib -nostartfiles'
-INCS = '-Ienv/b -Imacros/scalar -Imacros/vector -Imacros/stc'
-LINKFLAGS = '-Tenv/b/link.ld'
-'''
 
 CC = 'clang --target=riscv64-unknown-elf -mno-relax -fuse-ld=lld'
 ARCH_FLAGS = '-march=rv64gv0p10 -menable-experimental-extensions -DXLEN=64 -DVLEN=1024'
@@ -114,36 +85,9 @@ def run(memfile, binary, logfile, res_file, **kw):
 def readmem(memfile, symbol):
     pass
 
-@allure.step
-def diff(resmap, golden, memfile):
-    for symbol in resmap:
-        assert golden[symbol] == readmem(memfile, symbol)
-
-def simulate(testcase, caseclass, **kw):
-    workdir = testcase.workdir
-    instclass = testcase.inst
-
-    source = f'{workdir}/test.S'
-    binary = f'{workdir}/test.elf'
-    mapfile = f'{workdir}/test.map'
-    compile_log = f'{workdir}/compile.log'
-    run_log = f'{workdir}/run.log'
-    run_mem = f'{workdir}/run.mem'
-
-    inst = instclass(**kw)
-    golden = inst.golden()
-
-    case = caseclass()
-    resmap = case.results()
-
-    generate(source, case, inst, **kw)
-    compile(binary, mapfile, source, compile_log, **kw)
-    run(run_mem, binary, run_log, **kw)
-
-    diff(resmap, golden, run_mem)
 
 @allure.step
-def generate2(source, tpl, case, inst, **kw):
+def generate(source, tpl, case, inst, **kw):
 
     data = ''
     kw_extra = {}
@@ -171,7 +115,7 @@ def generate2(source, tpl, case, inst, **kw):
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 
 @allure.step
-def diff2(res_file, golden, diff_str):
+def diff(res_file, golden, diff_str):
     itemsize = golden.itemsize
     size = golden.size
     result = []
@@ -195,7 +139,7 @@ def diff2(res_file, golden, diff_str):
     print(result)
     assert eval(diff_str)
 
-def simulate2(testcase, template, diff_str, **kw):
+def simulate(testcase, template, diff_str, **kw):
     workdir = testcase.workdir
     instclass = testcase.inst
 
@@ -210,8 +154,8 @@ def simulate2(testcase, template, diff_str, **kw):
     inst = instclass(**kw)
     golden = inst.golden()
 
-    generate2(source, template, testcase, inst, **kw)
+    generate(source, template, testcase, inst, **kw)
     compile(binary, mapfile, source, compile_log, **kw)
     run(run_mem, binary, run_log, res_file, **kw)
     if diff_str != '0':
-        diff2(res_file, golden, diff_str)
+        diff(res_file, golden, diff_str)
