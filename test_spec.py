@@ -98,12 +98,12 @@ for spec in specs:
 
                 _kw = ', '.join([f'{an}={an}' for an in argnames])
 
-                if not 'diff' in cfg or not name in cfg['diff']:
-                    diff_str = 0
+                if not 'check' in cfg or not name in cfg['check']:
+                    check_str = 0
                 else:
-                    diff_str = cfg['diff'][name]
+                    check_str = cfg['check'][name]
 
-                exec(f'def {name}(self, {_args}): simulate(self, args, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
+                exec(f'def {name}(self, {_args}): simulate(self, args, """{template}""", """{check_str}""", {_kw}, {_defaults})')
                 exec(f'attrs[name] = {name}')
                 del globals()[name]
 

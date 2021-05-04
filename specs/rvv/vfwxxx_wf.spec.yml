@@ -112,7 +112,7 @@ _: &default
       - linspace_rvv_wf_with_mask(np.float32, 4)
       - linspace_rvv_wf_with_mask(np.float32, 10)
       - linspace_rvv_wf_with_mask(np.float32, 16)
-  diff:
+  check:
     test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
     test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
     test_dest_eq_rs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)

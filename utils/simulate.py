@@ -73,7 +73,7 @@ def compile(args, binary, mapfile, source, logfile, **kw):
 def run(args, memfile, binary, logfile, res_file, **kw):
     sim = f'{args.spike} --isa=rv{args.xlen}gcv --varch=vlen:{args.vlen},elen:{args.elen},slen:{args.slen}'
 
-    cmd = f'{sim} +signature={res_file} {binary} > {logfile} 2>&1'
+    cmd = f'{sim} +signature={res_file} +signature-granularity={32} {binary} > {logfile} 2>&1'
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'run log', attachment_type=allure.attachment_type.TEXT)
@@ -113,14 +113,14 @@ def generate(source, tpl, case, inst, **kw):
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 
 @allure.step
-def diff(res_file, golden, diff_str):
+def check(res_file, golden, check_str):
     itemsize = golden.itemsize
     size = golden.size
     result = []
     with open(res_file) as file:
         for line in file:
             line = line.rstrip()
-            for no in range(int(16/itemsize)):
+            for no in range(int(32/itemsize)):
                 if no == 0:
                     str = line[-2*itemsize:]
                 else:
@@ -135,9 +135,9 @@ def diff(res_file, golden, diff_str):
     result = result.reshape( golden.shape )
     print(golden)  
     print(result)
-    assert eval(diff_str)
+    assert eval(check_str)
 
-def simulate(testcase, args, template, diff_str, **kw):
+def simulate(testcase, args, template, check_str, **kw):
     workdir = testcase.workdir
     instclass = testcase.inst
 
@@ -155,5 +155,5 @@ def simulate(testcase, args, template, diff_str, **kw):
     generate(source, template, testcase, inst, **kw)
     compile(args, binary, mapfile, source, compile_log, **kw)
     run(args, run_mem, binary, run_log, res_file, **kw)
-    if diff_str != '0':
-        diff(res_file, golden, diff_str)
+    if check_str != '0':
+        check(res_file, golden, check_str)

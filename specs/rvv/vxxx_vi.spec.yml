@@ -66,7 +66,7 @@ _: &default
       - '[np.linspace(0, 0xffffffff, 31, dtype=np.int32), 9, np.linspace(0, 255, 4, dtype=np.uint8), 31]'
       - '[np.linspace(0, 0xffffffff, 32, dtype=np.int32), 15, np.linspace(0, 255, 4, dtype=np.uint8), 32]'
   
-  diff:
+  check:
     test_vxxx_vi_without_mask: np.array_equal(result, golden)
     test_vxxx_vi_with_mask: np.array_equal(result, golden)
 

@@ -55,7 +55,7 @@ _: &default
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
-  diff:
+  check:
     test_vlsx_v_without_mask: np.array_equal(result, golden)
     test_vlsx_v_with_mask: np.array_equal(result, golden)
 

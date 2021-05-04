@@ -49,7 +49,7 @@ _: &default
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
 
-  diff:
+  check:
     test_vsx_v_without_mask: np.array_equal(result, golden)
     test_vsx_v_with_mask: np.array_equal(result, golden)
 
