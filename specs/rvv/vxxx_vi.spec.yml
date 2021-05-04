@@ -5,29 +5,29 @@ _: &default
     #include "test_macros_v.h"
 
   templates:
-    test_vxxx_vi_without_mask @ rs2, imm, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v', eqm='VV_CHECK_EQ_INT32': |
+    test_vxxx_vi_without_mask @ vs2, imm, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       test_{num}:
         li TESTNUM, {num};
         li a0, {vlen};
         vsetvli t0, a0, e{ebits},m1,tu,mu;
 
-        la a2, {rs2_data};
+        la a2, {vs2_data};
         {ldins} v2, (a2);
         {name} v3, v2, {imm};
         la a3, test_{num}_data;
         {stins} v3, (a3);
-        {eqm}({res}, test_{num}_data, {vlen});
-        .pushsection .data;
+
+        .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
 
-    test_vxxx_vi_with_mask @ rs2, imm, mask, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v', eqm='VV_CHECK_EQ_INT32': |
+    test_vxxx_vi_with_mask @ vs2, imm, mask, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       test_{num}:
         li TESTNUM, {num};
 
         li a0, {vlen};
-        la a2, {rs2_data};
+        la a2, {vs2_data};
         la a4, {mask_data};
 
         li t1, 8;
@@ -46,8 +46,8 @@ _: &default
         {name} v3, v2, {imm}, v0.t;
         la a3, test_{num}_data;
         {stins} v3, (a3);
-        {eqm}({res}, test_{num}_data, {vlen});
-        .pushsection .data;
+
+        .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
@@ -65,10 +65,23 @@ _: &default
       - '[np.linspace(0, 0xffff, 16, dtype=np.int32), 3, np.array([0x5a, 0xa5], dtype=np.uint8), 16]'
       - '[np.linspace(0, 0xffffffff, 31, dtype=np.int32), 9, np.linspace(0, 255, 4, dtype=np.uint8), 31]'
       - '[np.linspace(0, 0xffffffff, 32, dtype=np.int32), 15, np.linspace(0, 255, 4, dtype=np.uint8), 32]'
+  
+  diff:
+    test_vxxx_vi_without_mask: np.array_equal(result, golden)
+    test_vxxx_vi_with_mask: np.array_equal(result, golden)
 
 
 vadd_vi:
   <<: *default
 
 vrsub_vi:
+  <<: *default
+
+vand_vi:
+  <<: *default
+
+vor_vi:
+  <<: *default
+
+vxor_vi:
   <<: *default

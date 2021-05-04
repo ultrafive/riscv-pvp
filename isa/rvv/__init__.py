@@ -1,34 +1,18 @@
-from .vle8_v import *
-from .vle16_v import *
-from .vle32_v import *
-from .vle64_v import *
-
 from .vsetvl import *
 from .vsetvli import *
 from .vsetivli import *
 
-from .vsexxx_v import *
+from .vlenn_v import *
+from .vsenn_v import *
 
-from .vlse8_v import *
-from .vlse16_v import *
-from .vlse32_v import *
-from .vlse64_v import *
-
-from .vsse8_v import *
-from .vsse16_v import *
-from .vsse32_v import *
-from .vsse64_v import *
+from .vlsenn_v import *
+from .vssenn_v import *
 
 from .vluxei8_v import *
 
-from .vadd_vv import *
-from .vadd_vx import *
-from .vadd_vi import *
-
-from .vsub_vv import *
-from .vsub_vx import *
-from .vrsub_vx import *
-from .vrsub_vi import *
+from .vxxx_vi import *
+from .vxxx_vv import *
+from .vxxx_vx import *
 
 from .vfadd_vv import *
 from .vfsub_vv import *
