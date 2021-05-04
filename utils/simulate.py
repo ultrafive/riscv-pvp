@@ -55,27 +55,25 @@ def array_data(prefix, k, vv):
             lines.append(f"    .dword  0x{hex_val} // {x}")
     return '\n'.join(lines) + '\n'
 
-
-CC = 'clang --target=riscv64-unknown-elf -mno-relax -fuse-ld=lld'
-ARCH_FLAGS = '-march=rv64gv0p10 -menable-experimental-extensions -DXLEN=64 -DVLEN=1024'
-TARGET_FLAGS = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
-INCS = '-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc'
-LINKFLAGS = '-Tenv/p/link.ld'
-
-SIM = 'spike --isa=rv64gcv'
-VARCH = '--varch=vlen:1024,elen:64,slen:1024'
-
 @allure.step
-def compile(binary, mapfile, source, logfile, **kw):
-    cmd = f'{CC} {ARCH_FLAGS} {TARGET_FLAGS} {INCS} {LINKFLAGS} -Wl,-Map,{mapfile} {source} -o {binary} > {logfile} 2>&1'
+def compile(args, binary, mapfile, source, logfile, **kw):
+    cc = f'{args.clang} --target=riscv{args.xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{args.xlen}gv0p10 -menable-experimental-extensions'
+    defines = f'-DXLEN={args.xlen} -DVLEN={args.vlen}'
+    cflags = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
+    incs = '-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc'
+    linkflags = '-Tenv/p/link.ld'
+
+    cmd = f'{cc} {defines} {cflags} {incs} {linkflags} -Wl,-Map,{mapfile} {source} -o {binary} > {logfile} 2>&1'
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'compile log', attachment_type=allure.attachment_type.TEXT)
     assert ret == 0
 
 @allure.step
-def run(memfile, binary, logfile, res_file, **kw):
-    cmd = f'{SIM} {VARCH} +signature={res_file} {binary} > {logfile} 2>&1'
+def run(args, memfile, binary, logfile, res_file, **kw):
+    sim = f'{args.spike} --isa=rv{args.xlen}gcv --varch=vlen:{args.vlen},elen:{args.elen},slen:{args.slen}'
+
+    cmd = f'{sim} +signature={res_file} {binary} > {logfile} 2>&1'
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'run log', attachment_type=allure.attachment_type.TEXT)
@@ -139,7 +137,7 @@ def diff(res_file, golden, diff_str):
     print(result)
     assert eval(diff_str)
 
-def simulate(testcase, template, diff_str, **kw):
+def simulate(testcase, args, template, diff_str, **kw):
     workdir = testcase.workdir
     instclass = testcase.inst
 
@@ -155,7 +153,7 @@ def simulate(testcase, template, diff_str, **kw):
     golden = inst.golden()
 
     generate(source, template, testcase, inst, **kw)
-    compile(binary, mapfile, source, compile_log, **kw)
-    run(run_mem, binary, run_log, res_file, **kw)
+    compile(args, binary, mapfile, source, compile_log, **kw)
+    run(args, run_mem, binary, run_log, res_file, **kw)
     if diff_str != '0':
         diff(res_file, golden, diff_str)
