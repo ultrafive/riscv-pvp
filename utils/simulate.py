@@ -112,30 +112,58 @@ def generate(source, tpl, case, inst, **kw):
     print(content,  file=open(source, 'w'))
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 
-@allure.step
-def check(res_file, golden, check_str):
-    itemsize = golden.itemsize
-    size = golden.size
+def from_txt(fpath, ebyte, size):
     result = []
-    with open(res_file) as file:
+    with open(fpath) as file:
         for line in file:
             line = line.rstrip()
-            for no in range(int(32/itemsize)):
+            for no in range(int(32/ebyte)):
                 if no == 0:
-                    str = line[-2*itemsize:]
+                    str = line[-2*ebyte:]
                 else:
-                    str = line[-(no+1)*2*itemsize:-no*2*itemsize]
+                    str = line[-(no+1)*2*ebyte:-no*2*ebyte]
                 num = int( str, 16 )
                 result.append( num )
             if len(result) >= size:
                 break
     result = result[:size]
-    result = np.array(result, dtype='uint%d' % (itemsize*8))
+    return np.array(result, dtype='uint%d' % (ebyte*8))
+
+@allure.step
+def check(res_file, golden, check_str):
+    itemsize = golden.itemsize
+    size = golden.size
+
+    result = from_txt(res_file, itemsize, size)
+
     result.dtype = golden.dtype
     result = result.reshape( golden.shape )
     print(golden)  
     print(result)
     assert eval(check_str)
+
+@allure.step
+def diff(args, run_mem, binary, res_file, golden, workdir):
+    if not isinstance(golden, np.ndarray):
+        return
+
+    itemsize = golden.itemsize
+    size = golden.size
+    gold = from_txt(res_file, itemsize, size)
+
+    sims = { 'vcs': args.vcs, 'verilator': args.verilator }
+    for k, sim in sims.items():
+        if sim == None:
+            continue
+        cmd = f'{sim} +signature={workdir}/{k}.sig +signature-granularity={32} {binary} > {workdir}/{k}.log 2>&1'
+        ret = os.system(cmd)
+        allure.attach(cmd, f'{k} command line', attachment_type=allure.attachment_type.TEXT)
+        allure.attach.file(f'{workdir}/{k}.log', f'{k} log', attachment_type=allure.attachment_type.TEXT)
+        assert ret == 0
+
+        data = from_txt(f'{workdir}/{k}.sig', itemsize, size)
+        assert np.array_equal(gold, data)
+
 
 def simulate(testcase, args, template, check_str, **kw):
     workdir = testcase.workdir
@@ -145,9 +173,9 @@ def simulate(testcase, args, template, check_str, **kw):
     binary = f'{workdir}/test.elf'
     mapfile = f'{workdir}/test.map'
     compile_log = f'{workdir}/compile.log'
-    run_log = f'{workdir}/run.log'
+    run_log = f'{workdir}/spike.log'
     run_mem = f'{workdir}/run.mem'
-    res_file = f'{workdir}/res.txt'
+    res_file = f'{workdir}/spike.sig'
 
     inst = instclass(**kw)
     golden = inst.golden()
@@ -157,3 +185,4 @@ def simulate(testcase, args, template, check_str, **kw):
     run(args, run_mem, binary, run_log, res_file, **kw)
     if check_str != '0':
         check(res_file, golden, check_str)
+    diff(args, run_mem, binary, res_file, golden, workdir)
