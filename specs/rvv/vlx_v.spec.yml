@@ -14,8 +14,7 @@ _: &default
         vsetvli t0, a0, e{ebits},m1,tu,mu;
         {name} v1, (a1); 
         {stins} v1, (a3);
-        {eqm}({res}, test_{num}_data, {vlen});
-        .pushsection .data;
+        .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits} / 8), 0;
         .popsection
@@ -43,11 +42,13 @@ _: &default
         {name} v1, (a1), v0.t;
 
         {stins} v1, (a3);
-        {eqm}({res}, test_{num}_data, {vlen});
-        .pushsection .data;
+        .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits}  /8), 0;
         .popsection
+  diff:
+    test_vlx_v_without_mask: np.array_equal(result, golden)
+    test_vlx_v_with_mask: np.array_equal(result, golden)
 
 vle8_v:
   templates:

@@ -1,0 +1,19 @@
+from isa.inst import *
+import numpy as np
+import math
+
+class _VseX_v(Inst):
+    def golden(self):
+        return self.masked(self['rs1'])
+
+class Vse8_v(_VseX_v):
+    name = 'vse8.v'
+
+class Vse16_v(_VseX_v):
+    name = 'vse16.v'
+
+class Vse32_v(_VseX_v):
+    name = 'vse32.v'
+
+class Vse64_v(_VseX_v):
+    name = 'vse64.v'

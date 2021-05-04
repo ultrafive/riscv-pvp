@@ -15,8 +15,7 @@ _: &default
         {ldins} v1, (a1);
         {name} v1, (a3);
 
-        {eqm}({res}, test_{num}_data, {vlen});
-        .pushsection .data;
+        .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
@@ -45,11 +44,14 @@ _: &default
         {ldins} v1, (a1);
 
         {name} v1, (a3), v0.t;
-        {eqm}({res}, test_{num}_data, {vlen});
-        .pushsection .data;
+        .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
+
+  diff:
+    test_vsx_v_without_mask: np.array_equal(result, golden)
+    test_vsx_v_with_mask: np.array_equal(result, golden)
 
 vse8_v:
   templates:

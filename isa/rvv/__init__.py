@@ -7,10 +7,7 @@ from .vsetvl import *
 from .vsetvli import *
 from .vsetivli import *
 
-from .vse8_v import *
-from .vse16_v import *
-from .vse32_v import *
-from .vse64_v import *
+from .vsexxx_v import *
 
 from .vlse8_v import *
 from .vlse16_v import *
