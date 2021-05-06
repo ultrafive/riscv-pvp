@@ -1,5 +1,5 @@
-from isa.simulate import simulate2
-from tests.cases.params import *
+from utils.simulate import simulate
+from utils.params import *
 from isa import *
 
 import re
@@ -11,6 +11,18 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--specs', help='test specs')
+parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
+parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
+parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
+parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
+parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
+
+parser.add_argument('--clang', help='path of clang compiler', default='clang')
+
+parser.add_argument('--spike', help='path of spike simulator', default='spike')
+parser.add_argument('--vcs', help='path of vcs simulator', default=None)
+parser.add_argument('--verilator', help='path of verilator simulator', default=None)
+
 args, pytest_args = parser.parse_known_args()
 sys.argv[1:] = pytest_args
 
@@ -29,7 +41,7 @@ def rename(newname):
     return decorator
 
 if not args.specs or len(args.specs.split()) == 0:
-    specs = ['tests/specs']
+    specs = ['specs']
 else:
     specs = args.specs.split()
 
@@ -86,12 +98,12 @@ for spec in specs:
 
                 _kw = ', '.join([f'{an}={an}' for an in argnames])
 
-                if not 'diff' in cfg or not name in cfg['diff']:
-                    diff_str = 0
+                if not 'check' in cfg or not name in cfg['check']:
+                    check_str = 0
                 else:
-                    diff_str = cfg['diff'][name]
+                    check_str = cfg['check'][name]
 
-                exec(f'def {name}(self, {_args}): simulate2(self, """{template}""", """{diff_str}""", {_kw}, {_defaults})')
+                exec(f'def {name}(self, {_args}): simulate(self, args, """{template}""", """{check_str}""", {_kw}, {_defaults})')
                 exec(f'attrs[name] = {name}')
                 del globals()[name]
 
