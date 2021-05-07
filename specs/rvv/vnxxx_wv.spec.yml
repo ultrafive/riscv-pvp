@@ -1,0 +1,99 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_vnxxx_wv_without_mask @ vs2, vs1, vlen @ ebits=32, stebits=64, ldins='vle32.v', vs2ldins='vle64.v', stins='vse32.v': |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vlen};
+        la a1, {vs1_data};
+        la a2, {vs2_data};
+
+        vsetvli t0, a0, e{stebits}, m1, tu, mu;
+        {vs2ldins} v4, (a2);
+
+        vsetvli t0, a0, e{ebits}, m1, tu, mu;
+        {ldins} v1, (a1);
+        {name} v2, v4, v1;
+        la a3, test_{num}_data;
+
+        {stins} v2, (a3);
+
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8)*2, 0;
+        .popsection
+
+    test_vnxxx_wv_with_mask @ vs2, vs1, mask, vlen @ ebits=32, stebits=64, ldins='vle32.v', vs2ldins='vle64.v', stins='vse32.v': |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vlen};
+        la a1, {vs1_data};
+        la a2, {vs2_data};
+        la a4, {mask_data};
+
+        li t1, 8;
+        remu t2, a0, t1;
+        bnez t2, 1f;
+        li t3,  {vlen} / 8;
+        j 2f;
+      1:
+        li t3,  {vlen} / 8 + 1;
+      2:
+        vsetvli t0, t3, e8, m1, tu, mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{stebits}, m1, tu, mu;
+        {vs2ldins} v4, (a2);
+
+        vsetvli t0, a0, e{ebits}, m1, tu, mu;
+        {ldins} v1, (a1);
+
+        {name} v2, v4, v1, v0.t;
+        la a3, test_{num}_data;
+        {stins} v2, (a3);
+
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8)*2, 0;
+        .popsection
+
+  check:
+    test_vnxxx_wv_without_mask: np.array_equal(result, golden)
+    test_vnxxx_wv_with_mask: np.array_equal(result, golden)
+
+vnsrl_wv:
+  <<: *default
+
+  cases:
+    test_vnxxx_wv_without_mask:
+      - '[np.array([4], dtype=np.uint64), np.array([4], dtype=np.uint32), 1]'
+      - '[np.array([0x1fffffff], dtype=np.uint64), np.array([0xf], dtype=np.uint32), 1]'
+      - '[np.linspace(0, 0xffff, 16, dtype=np.uint64), np.linspace(0x1, 0x1f, 16, dtype=np.uint32), 16]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.uint64), np.linspace(0x20, 0x3f, 15, dtype=np.uint32), 15]'
+      - '[np.linspace(0x1000000000000, 0xffffffffffffff, 16, dtype=np.uint64), np.linspace(0x20, 0x3f, 16, dtype=np.uint32), 16]'
+    test_vnxxx_wv_with_mask:
+      - '[np.array([4], dtype=np.uint64), np.array([4], dtype=np.uint32), np.array([0x5a], dtype=np.uint8), 1]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 5, dtype=np.uint64), np.linspace(0x20, 0x3f, 5, dtype=np.uint32), np.array([0x5a], dtype=np.uint8), 5]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.uint64), np.linspace(0x20, 0x3f, 15, dtype=np.uint32), np.linspace(0, 255, 2, dtype=np.uint8), 15]'
+      - '[np.linspace(0x1000000000000000, 0xffffffffffffffff, 16, dtype=np.uint64), np.linspace(0x20, 0x3f, 16, dtype=np.uint32), np.linspace(0, 255, 2, dtype=np.uint8), 16]'
+
+vnsra_wv:
+  <<: *default
+
+  cases:
+    test_vnxxx_wv_without_mask:
+      - '[np.array([4], dtype=np.int64), np.array([4], dtype=np.uint32), 1]'
+      - '[np.array([0x1fffffff], dtype=np.int64), np.array([0xf], dtype=np.uint32), 1]'
+      - '[np.linspace(0, 0xffff, 16, dtype=np.int64), np.linspace(0x1, 0x1f, 16, dtype=np.uint32), 16]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.int64), np.linspace(0x20, 0x3f, 15, dtype=np.uint32), 15]'
+      - '[np.linspace(0x1000000000000, 0xffffffffffffffff, 16, dtype=np.int64), np.linspace(0x20, 0x3f, 16, dtype=np.uint32), 16]'
+    test_vnxxx_wv_with_mask:
+      - '[np.array([4], dtype=np.int64), np.array([4], dtype=np.int32), np.array([0x5a], dtype=np.uint8), 1]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 5, dtype=np.int64), np.linspace(0x20, 0x3f, 5, dtype=np.int32), np.array([0x5a], dtype=np.uint8), 5]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.int64), np.linspace(0x20, 0x3f, 15, dtype=np.int32), np.linspace(0, 255, 2, dtype=np.uint8), 15]'
+      - '[np.linspace(0x1000000000000000, 0xffffffffffffffff, 16, dtype=np.int64), np.linspace(0x20, 0x3f, 16, dtype=np.int32), np.linspace(0, 255, 2, dtype=np.uint8), 16]'

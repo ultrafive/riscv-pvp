@@ -14,6 +14,39 @@ from .vxxx_vi import *
 from .vxxx_vv import *
 from .vxxx_vx import *
 
+from .vmxxx_vv import *
+from .vmxxx_vx import *
+from .vmxxx_vi import *
+
+from .vmxxx_vvm import *
+from .vmxxx_vxm import *
+from .vmxxx_vim import *
+
+from .vnxxx_wv import *
+from .vnxxx_wx import *
+from .vnxxx_wi import *
+
+from .vwmxxxx_vv import *
+from .vwmxxxx_vx import *
+
+from .vwxxx_vv import *
+from .vwxxx_vx import *
+from .vwxxx_wv import *
+from .vwxxx_wx import *
+
+from .vxext_vfx import *
+
+from .vmv_v_v import *
+from .vmv_v_x import *
+from .vmv_v_i import *
+
+from .vxxx_vvm import *
+from .vxxx_vxm import *
+from .vxxx_vim import *
+
+from .vxxxx_vv import *
+from .vxxxx_vx import *
+
 from .vfadd_vv import *
 from .vfsub_vv import *
 from .vfmul_vv import *
