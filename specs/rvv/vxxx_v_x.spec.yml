@@ -1,0 +1,42 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  _templates: &_templates
+    test_vxxx_v_x: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vlen};
+        li a1, {rs1};
+
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        {name} v3, a1;
+        la a3, test_{num}_data;
+        {stins} v3, (a3);
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8), 0;
+        .popsection
+
+  check:
+    test_vxxx_v_x: np.array_equal(result, golden)
+
+vmv_v_x:
+  templates:
+    <<: *_templates
+    test_vxxx_v_x @ rs1, vlen @ ebits=32, stins='vse32.v': |
+      {inherit}
+
+  <<: *default
+
+  cases:
+    test_vxxx_v_x:
+      - '[1, 1]'
+      - '[-1, 4]'
+      - '[-128, 31]'
+      - '[-141, 31]'
+      - '[-255, 32]'
+      - '[-512, 32]'
+

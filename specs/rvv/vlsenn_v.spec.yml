@@ -63,10 +63,10 @@ _: &default
 vlse8_v:
   templates:
     <<: *_templates
-    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=8, stins='vse8.v', eqm='VV_CHECK_EQ_INT8': |
+    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=8, stins='vse8.v': |
       {inherit}
 
-    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=8, stins='vse8.v', eqm='VV_CHECK_EQ_INT8': |
+    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=8, stins='vse8.v': |
       {inherit}
   
   <<: *default
@@ -86,10 +86,10 @@ vlse8_v:
 vlse16_v:
   templates:
     <<: *_templates
-    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=16, stins='vse16.v', eqm='VV_CHECK_EQ_INT16': |
+    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=16, stins='vse16.v': |
       {inherit}
 
-    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=16, stins='vse16.v', eqm='VV_CHECK_EQ_INT16': |
+    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=16, stins='vse16.v': |
       {inherit}
   
   <<: *default
@@ -109,10 +109,10 @@ vlse16_v:
 vlse32_v:
   templates:
     <<: *_templates
-    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=32, stins='vse32.v', eqm='VV_CHECK_EQ_INT32': |
+    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=32, stins='vse32.v': |
       {inherit}
 
-    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=32, stins='vse32.v', eqm='VV_CHECK_EQ_INT32': |
+    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=32, stins='vse32.v': |
       {inherit}
   
   <<: *default
@@ -132,10 +132,10 @@ vlse32_v:
 vlse64_v:
   templates:
     <<: *_templates
-    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=64, stins='vse64.v', eqm='VV_CHECK_EQ_INT64': |
+    test_vlsx_v_without_mask @ rs1, rs2, vlen @ ebits=64, stins='vse64.v': |
       {inherit}
 
-    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=64, stins='vse64.v', eqm='VV_CHECK_EQ_INT64': |
+    test_vlsx_v_with_mask @ rs1, rs2, mask, vlen @ ebits=64, stins='vse64.v': |
       {inherit}
   
   <<: *default
