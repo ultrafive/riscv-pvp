@@ -109,7 +109,7 @@ _: &default
           la a1, {vs1_data} ; 
           la a2, {vs2_data} ; 
           la a3, {vd_data} ; 
-          la a4, {v0_data} ; 
+          la a4, {mask_data} ; 
           {ldins} v1, (a1) ; 
           {ldins} v2, (a2) ; 
           {ldins} v3, (a3) ; 
@@ -136,7 +136,7 @@ _: &default
       {inherit}
     test_dest_eq_vs2_without_mask @ vs1, vs2 @ vd=vs2, ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_basic_with_mask @ vd, vs1, vs2, v0 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_basic_with_mask @ vd, vs1, vs2, mask, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
 
   cases:
@@ -173,13 +173,13 @@ _: &default
       - linspace_rvv_m_vv_with_mask(np.float32, 10)
       - linspace_rvv_m_vv_with_mask(np.float32, 32)
   check:
-    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
-    test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True) 
-    test_vs1_eq_vs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_dest_eq_vs1vs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_dest_eq_vs1_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_dest_eq_vs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
-    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=1e-2, equal_nan=True)
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
+    test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
+    test_vs1_eq_vs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_dest_eq_vs1vs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_dest_eq_vs1_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_dest_eq_vs2_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=0, atol=1e-3, equal_nan=True)
 
 
 vfmacc_vv:

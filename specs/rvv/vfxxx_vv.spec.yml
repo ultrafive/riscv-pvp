@@ -103,7 +103,7 @@ _: &default
           vsetvli t0, a0, e{ebits},m1,tu,mu;
           la a1, {vs1_data} ; 
           la a2, {vs2_data} ; 
-          la a0, {v0_data} ; 
+          la a0, {mask_data} ; 
           la a3, {orig_data} ; 
           {ldins} v1, (a1) ; 
           {ldins} v2, (a2) ; 
@@ -131,7 +131,7 @@ _: &default
       {inherit}
     test_dest_eq_vs2_without_mask @ vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
-    test_basic_with_mask @ vs1, vs2, v0, orig @ ebits=32, ldins='vle32.v', stins='vse32.v': |
+    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
       {inherit}
   cases:
     test_basic_without_mask:
@@ -259,7 +259,7 @@ vmfeq_vv:
   <<: *default
   cases:
     <<: *cases_fsgnj
-  diff: &diff_eq
+  check: &check_eq
     test_basic_without_mask: np.equal(result, golden).all()
     test_special_without_mask: np.equal(result, golden).all()
     test_vs1_eq_vs2_without_mask: np.equal(result, golden).all()
@@ -272,33 +272,33 @@ vmfne_vv:
   <<: *default
   cases:
     <<: *cases_fsgnj
-  diff:
-    <<: *diff_eq
+  check:
+    <<: *check_eq
 
 vmflt_vv:
   <<: *default
   cases:
     <<: *cases_fsgnj
-  diff:
-    <<: *diff_eq
+  check:
+    <<: *check_eq
 
 vmfle_vv:
   <<: *default
   cases:
     <<: *cases_fsgnj
-  diff:
-    <<: *diff_eq
+  check:
+    <<: *check_eq
 
 vmfgt_vv:
   <<: *default
   cases:
     <<: *cases_fsgnj
-  diff:
-    <<: *diff_eq    
+  check:
+    <<: *check_eq    
 
 vmfge_vv:
   <<: *default
   cases:
     <<: *cases_fsgnj  
-  diff:
-    <<: *diff_eq      
+  check:
+    <<: *check_eq      

@@ -1,0 +1,176 @@
+_: &default
+  head: |
+    #include "exception.h"
+  env: RVTEST_RV64UV
+  _templates: &_templates
+    test_basic_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        la x1, {rs1_data};
+        li a0, {vs2_shape[0]};
+        vsetvli t0, a0, e{ebits_vs2},{lmul_vs2},tu,mu;
+        la a1, {vs2_data};
+        {ldins_vs2} v2, (a1);
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        la a2, {vs3_data};
+        {ldins} v4, (a2);
+        {name} v4, (x1), v2;
+    test_basic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        la x1, {rs1_data};
+        li a0, {vs2_shape[0]};
+        vsetvli t0, a0, e{ebits_vs2},{lmul_vs2},tu,mu;
+        la a1, {vs2_data};
+        {ldins_vs2} v2, (a1);
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        la a2, {vs3_data};
+        {ldins} v4, (a2);
+        la a3, {mask_data};
+        {ldins} v0, (a3);
+        {name} v4, (x1), v2, v0.t;    
+
+vsuxei8_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint8)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint8)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint8)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint8)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint8)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint8)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"       
+
+vsuxei16_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint16)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint16)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint16)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint16)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint16)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint16)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"        
+
+vsuxei32_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=32, lmul_vs2='m1', ldins_vs2='vle32.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=32, lmul_vs2='m1', ldins_vs2='vle32.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint32)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint32)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint32)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint32)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint32)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint32)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"        
+
+vsuxei64_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=64, lmul_vs2='m2', ldins_vs2='vle64.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=64, lmul_vs2='m2', ldins_vs2='vle64.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint64)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint64)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint64)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint64)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint64)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint64)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"  
+
+vsoxei8_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint8)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint8)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint8)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint8)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint8)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint8)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"       
+
+vsoxei16_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint16)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint16)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint16)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint16)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint16)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint16)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"        
+
+vsoxei32_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=32, lmul_vs2='m1', ldins_vs2='vle32.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=32, lmul_vs2='m1', ldins_vs2='vle32.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint32)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint32)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint32)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint32)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint32)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint32)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"        
+
+vsoxei64_v:
+  <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=64, lmul_vs2='m2', ldins_vs2='vle64.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=64, lmul_vs2='m2', ldins_vs2='vle64.v', ebits=32, ldins='vle32.v': |
+      {inherit}
+  cases:
+    test_basic_without_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint64)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ) ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint64)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ) ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint64)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ) ]"      
+    test_basic_with_mask:
+      - "[ np.zeros(1, dtype=np.int32), np.linspace( 0, 0, 1, dtype=np.uint64)*4, np.linspace( -1000, 1000, 1, dtype=np.int32 ), random_mask(1), 1 ]"
+      - "[ np.zeros(10, dtype=np.int32), np.linspace( 0, 9, 10, dtype=np.uint64)*4, np.linspace( -1000, 1000, 10, dtype=np.int32 ), random_mask(10), 10 ]"
+      - "[ np.zeros(32, dtype=np.int32), np.linspace( 0, 31, 32, dtype=np.uint64)*4, np.linspace( -1000, 1000, 32, dtype=np.int32 ), random_mask(32), 32 ]"   
+                  

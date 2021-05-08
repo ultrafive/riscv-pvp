@@ -117,23 +117,40 @@ def from_txt(fpath, ebyte, size):
     with open(fpath) as file:
         for line in file:
             line = line.rstrip()
-            for no in range(int(32/ebyte)):
-                if no == 0:
-                    str = line[-2*ebyte:]
-                else:
-                    str = line[-(no+1)*2*ebyte:-no*2*ebyte]
-                num = int( str, 16 )
-                result.append( num )
+            if ebyte != 0.1:
+                for no in range(int(32/ebyte)):
+                    if no == 0:
+                        str = line[-2*ebyte:]
+                    else:
+                        str = line[-(no+1)*2*ebyte:-no*2*ebyte]
+                    num = int( str, 16 )
+                    result.append( num )
+            else:
+                for no in range(64):
+                    str = line[ 63-no ]
+                    num = int(str, 16)
+                    result.append( num >> 0 & 1 )
+                    result.append( num >> 1 & 1 )
+                    result.append( num >> 2 & 1 )
+                    result.append( num >> 3 & 1 )
+
             if len(result) >= size:
                 break
 
     result = result[:size]
+    
+    if ebyte == 0.1:
+        ebyte = 1
+        
     return np.array(result, dtype='uint%d' % (ebyte*8))
 
 @allure.step
 def check(res_file, golden, check_str):
     itemsize = golden.itemsize
     size = golden.size
+
+    if golden.dtype == np.bool_:
+        itemsize = 0.1
 
     result = from_txt(res_file, itemsize, size)
 
