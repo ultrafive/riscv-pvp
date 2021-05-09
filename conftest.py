@@ -2,6 +2,7 @@ option = None
 
 def pytest_addoption(parser):
     parser.addoption('--specs', help='test specs')
+    parser.addoption('--cases', help='test cases, for example:\nTest_addi::test_imm_op[0-0]')
 
     parser.addoption('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
     parser.addoption('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
