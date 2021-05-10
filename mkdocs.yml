@@ -1,0 +1,31 @@
+site_name: RISC-V PVP
+
+repo_name: ultrafive/riscv-pvp
+repo_url: https://github.com/ultrafive/riscv-pvp
+
+copyright: Copyright &copy; 2021 - 2021 UltraFive Team
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  
+nav:
+  - Overview: index.md
+  - Getting Started: get-started.md
+  - Co-Simulation: cosim.md
+  - Customization:
+    - Instructions: custom/instructions.md
+    - Cases: custom/cases.md
+    - Examples:
+       - RVG: custom/rvg-example.md
+       - RVV: custom/rvv-example.md
+  - Reference: 
+    - Command Line: reference/cmdline.md
+
+extra_css:
+  - assets/style.css
