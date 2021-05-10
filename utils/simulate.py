@@ -112,7 +112,7 @@ def generate(source, tpl, case, inst, **kw):
     print(content,  file=open(source, 'w'))
     allure.attach.file(source, 'source file', attachment_type=allure.attachment_type.TEXT)
 
-def from_txt(fpath, ebyte, size):
+def from_txt(fpath, ebyte, size, dtype):
     result = []
     with open(fpath) as file:
         for line in file:
@@ -142,21 +142,27 @@ def from_txt(fpath, ebyte, size):
     if ebyte == 0.1:
         ebyte = 1
         
-    return np.array(result, dtype='uint%d' % (ebyte*8))
+    data = np.array(result, dtype='uint%d' % (ebyte*8))
+    data.dtype = dtype
+    return data
 
 @allure.step
 def check(res_file, golden, check_str):
     itemsize = golden.itemsize
     size = golden.size
+    dtype = golden.dtype
 
     if golden.dtype == np.bool_:
         itemsize = 0.1
 
-    result = from_txt(res_file, itemsize, size)
+    result = from_txt(res_file, itemsize, size, dtype)
 
     result.dtype = golden.dtype
     result = result.reshape( golden.shape )
-    print(golden)  
+    print(">> check")
+    print("-- golden ---")
+    print(golden)
+    print("-- result ---")
     print(result)
     assert eval(check_str)
 
@@ -165,9 +171,13 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
     if not isinstance(golden, np.ndarray):
         return
 
+    print(">> diff")
     itemsize = golden.itemsize
     size = golden.size
-    gold = from_txt(res_file, itemsize, size)
+    dtype = golden.dtype
+    gold = from_txt(res_file, itemsize, size, dtype)
+    print("-- golden ---")
+    print(gold)
 
     sims = { 'vcs': args.vcs, 'verilator': args.verilator }
     for k, sim in sims.items():
@@ -179,7 +189,9 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         allure.attach.file(f'{workdir}/{k}.log', f'{k} log', attachment_type=allure.attachment_type.TEXT)
         assert ret == 0
 
-        data = from_txt(f'{workdir}/{k}.sig', itemsize, size)
+        data = from_txt(f'{workdir}/{k}.sig', itemsize, size, dtype)
+        print(f"-- {k} ---")
+        print(data)
         assert np.array_equal(gold, data)
 
 
