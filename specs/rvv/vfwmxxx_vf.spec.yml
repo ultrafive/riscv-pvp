@@ -57,7 +57,7 @@ _: &default
           la a0, {mask_data} ; 
           {fldins} fa1, (a1) ; 
           {ldins} v2, (a2) ; 
-          {ldins} v0, (a0) ; 
+          vle1.v v0, (a0) ; 
           vsetvli t0, a0, e{ebits_vd},m2,tu,mu; 
           la a3, {vd_data} ;
           {ldins_vd} v4, (a3) ; 

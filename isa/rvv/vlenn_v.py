@@ -5,6 +5,12 @@ class _Vlenn_v(Inst):
     def golden(self):
         return self.masked(self['rs1'])
 
+class Vle1_v(_Vlenn_v):
+    name = 'vle1.v'
+
+    def golden( self ):
+        return self['rs1']
+        
 class Vle8_v(_Vlenn_v):
     name = 'vle8.v'
 

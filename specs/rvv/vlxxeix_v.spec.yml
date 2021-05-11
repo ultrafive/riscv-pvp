@@ -28,7 +28,7 @@ _: &default
         la a1, {vs2_data};
         {ldins_vs2} v2, (a1);
         la a2, {mask_data};
-        {ldins_vs2} v0, (a2);        
+        vle1.v v0, (a2);        
         vsetvli t0, a0, e{ebits},m1,tu,mu;
         la a3, {orig_data};
         {ldins} v4, (a3);

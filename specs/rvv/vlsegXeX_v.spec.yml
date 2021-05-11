@@ -25,7 +25,7 @@ _: &default
         la a2, {orig_data};
         {inst_name} {vreg}, (a2);
         la a1, {mask_data};
-        {ldins} v0, (a1);        
+        vle1.v v0, (a1);        
         {inst_name} {vreg}, (x1), v0.t;
         la a1, test_{num}_data;
         {stins} {vreg}, (a1);

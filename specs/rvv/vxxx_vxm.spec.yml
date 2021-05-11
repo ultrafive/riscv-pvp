@@ -14,18 +14,8 @@ _: &default
         la a2, {vs2_data};
         la a4, {v0_data};
 
-        li t1, 8;
-        remu t2, a0, t1;
-        bnez t2, 1f;
-        li t3,  {vlen} / 8;
-        j 2f;
-      1:
-        li t3,  {vlen} / 8 + 1;
-      2:
-        vsetvli t0, t3, e8,m1,tu,mu;
-        vle8.v v0, (a4);
-
         vsetvli t0, a0, e{ebits},m1,tu,mu;
+        vle1.v v0, (a4);
         {ldins} v2, (a2);
 
         {name} v3, v2, a1, v0;

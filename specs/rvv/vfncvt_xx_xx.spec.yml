@@ -49,7 +49,7 @@ _: &default
           vsetvli t0, a0, e{ebits_vd},m1,tu,mu;          
           la a0, {mask_data} ; 
           la a3, {orig_data} ; 
-          {ldins_vd} v0, (a0) ; 
+          vle1.v v0, (a0) ; 
           {ldins_vd} v4, (a3) ; 
           {name} v4, v2, v0.t ; 
           la a3, test_{num}_data ; 
