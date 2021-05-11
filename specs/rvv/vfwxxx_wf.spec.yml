@@ -71,7 +71,7 @@ _: &default
           {fldins} fa1, (a1) ;
           vsetvli t0, a0, e{ebits_vd},m2,tu,mu; 
           {ldins} v2, (a2) ; 
-          {ldins} v0, (a0) ; 
+          vle1.v v0, (a0) ; 
           {ldins} v4, (a3) ;
           vsetvli t0, a0, e{ebits},m1,tu,mu;
           {name} v4, v2, fa1, v0.t ;

@@ -13,6 +13,15 @@ _: &default
         la a1, {vs1_data};
         la a2, {vs2_data};
   
+
+
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        {ldins} v1, (a1);
+        {ldins} v2, (a2);
+
+        {name} v3, v2, v1;
+        la a3, test_{num}_data;
+        
         li t1, 8;
         remu t2, a0, t1;
         bnez t2, 1f;
@@ -21,14 +30,6 @@ _: &default
       1:
         li t3,  {vlen} / 8 + 1;
       2:
-
-        vsetvli t0, a0, e{ebits},m1,tu,mu;
-        {ldins} v1, (a1);
-        {ldins} v2, (a2);
-
-        {name} v3, v2, v1;
-        la a3, test_{num}_data;
-
         vsetvli t0, t3, e8,m1,tu,mu;
         vse8.v v3, (a3);
         .pushsection .data, 1;
@@ -45,6 +46,12 @@ _: &default
         la a2, {vs2_data};
         la a3, test_{num}_data;
         la a4, {mask_data};
+
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        vle1.v v0, (a4);
+        {ldins} v1, (a1);
+        {ldins} v2, (a2);
+        {name} v3, v2, v1, v0.t;
   
         li t1, 8;
         remu t2, a0, t1;
@@ -54,14 +61,6 @@ _: &default
       1:
         li t3,  {vlen} / 8 + 1;
       2:
-        vsetvli t0, t3, e8,m1,tu,mu;
-        vle8.v v0, (a4);
-
-        vsetvli t0, a0, e{ebits},m1,tu,mu;
-        {ldins} v1, (a1);
-        {ldins} v2, (a2);
-        {name} v3, v2, v1, v0.t;
-
         vsetvli t0, t3, e8,m1,tu,mu;
         vse8.v v3, (a3);
         .pushsection .data, 1;

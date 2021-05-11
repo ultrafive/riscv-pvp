@@ -54,7 +54,7 @@ class Vwsub_vx(Inst):
         return self.masked(vd)
 
 
-class Vmul_vx(Inst):
+class Vwmul_vx(Inst):
     name = 'vmul.vx'
 
     def golden(self):
