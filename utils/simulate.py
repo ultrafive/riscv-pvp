@@ -176,6 +176,7 @@ def check(res_file, golden, check_str, workdir):
     print(golden)
     print("-- result ---")
     diff_to_txt(golden, result, f'{workdir}/check.data')
+    allure.attach.file(f'{workdir}/check.data', f'check result', attachment_type=allure.attachment_type.TEXT)
     print(result)
     assert eval(check_str)
 
@@ -206,6 +207,7 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         print(f"-- {k} ---")
         print(data)
         diff_to_txt(gold, data, f'{workdir}/diff-{k}.data')
+        allure.attach.file(f'{workdir}/diff-{k}.data', f'{k} diff', attachment_type=allure.attachment_type.TEXT)
         assert np.array_equal(gold, data)
 
 
