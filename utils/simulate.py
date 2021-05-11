@@ -146,8 +146,20 @@ def from_txt(fpath, ebyte, size, dtype):
     data.dtype = dtype
     return data
 
+def diff_to_txt(a, b, filename):
+    a = a.reshape(-1)
+    b = b.reshape(-1)
+
+    with open(filename, 'w') as file:
+        for i in range(a.shape[0]):
+            if a[i] == b[i]:
+                file.write(f'{i:2d}: {a[i]:8}({a[i]:08x}), {b[i]:8}({b[i]:08x})\n')
+            else:
+                file.write(f'{i:2d}: {a[i]:8}({a[i]:08x}), {a[i]:8}({b[i]:08x}), mismatch\n')
+
+
 @allure.step
-def check(res_file, golden, check_str):
+def check(res_file, golden, check_str, workdir):
     itemsize = golden.itemsize
     size = golden.size
     dtype = golden.dtype
@@ -163,6 +175,7 @@ def check(res_file, golden, check_str):
     print("-- golden ---")
     print(golden)
     print("-- result ---")
+    diff_to_txt(golden, result, f'{workdir}/check.data')
     print(result)
     assert eval(check_str)
 
@@ -192,6 +205,7 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         data = from_txt(f'{workdir}/{k}.sig', itemsize, size, dtype)
         print(f"-- {k} ---")
         print(data)
+        diff_to_txt(gold, data, f'{workdir}/diff-{k}.data')
         assert np.array_equal(gold, data)
 
 
@@ -214,5 +228,5 @@ def simulate(testcase, args, template, check_str, **kw):
     compile(args, binary, mapfile, source, compile_log, **kw)
     run(args, run_mem, binary, run_log, res_file, **kw)
     if check_str != '0':
-        check(res_file, golden, check_str)
+        check(res_file, golden, check_str, workdir)
     diff(args, run_mem, binary, res_file, golden, workdir)
