@@ -153,13 +153,14 @@ def diff_to_txt(a, b, filename):
     ah.dtype = f'uint{a.itemsize * 8}'
     bh = b.copy()
     bh.dtype = f'uint{b.itemsize * 8}'
+    w = a.itemsize * 2
 
     with open(filename, 'w') as file:
         for i in range(a.shape[0]):
             if a[i] == b[i]:
-                file.write(f'{i:2d}: {a[i]:8}({ah[i]:08x}), {b[i]:8}({bh[i]:08x})\n')
+                print(f'%3d: %{w+4}d(%0{w}x), %{w+4}d(%0{w}x)' % (i, a[i], ah[i], b[i], bh[i]), file=file)
             else:
-                file.write(f'{i:2d}: {a[i]:8}({ah[i]:08x}), {a[i]:8}({bh[i]:08x}), mismatch\n')
+                print(f'%3d: %{w+4}d(%0{w}x), %{w+4}d(%0{w}x), mismatch' % (i, a[i], ah[i], b[i], bh[i]), file=file)
 
 
 @allure.step
