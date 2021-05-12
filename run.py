@@ -11,9 +11,12 @@ import pytest
 import os
 import textwrap
 import argparse
+import io
 import sys, inspect
+from multiprocessing import Pool
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--nproc', help='run tests on n processes', type=int, default=1)
 parser.add_argument('--specs', help='test specs')
 parser.add_argument('--cases', help=textwrap.dedent('test cases,\nfor example: Test_addi::test_imm_op[0-0]'))
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
@@ -116,16 +119,51 @@ for spec in specs:
 
             globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
 
+def run_test(name, cases, argv):
+    output = io.StringIO()
+    sys.stdout = output
+    sys.stderr = output
+    print(name)
+    argv[0] = f'{__file__}::{cases}'
+    pytest.main(['-q', '-p', 'no:warnings', f'--basetemp=build/{name}', '--alluredir=output', *argv])
+    return output
+
+def collect_tests( argv):
+    stdout = sys.stdout
+    stderr = sys.stderr
+    output = io.StringIO()
+    sys.stdout = output
+    sys.stderr = output
+    argv[0] = __file__
+    pytest.main(['-q', '-p', 'no:warnings', f'--co', *argv])
+    sys.stdout = stdout
+    sys.stderr = stderr
+    return output
+
+
 if __name__ == "__main__":
-    for name, obj in list(globals().items()):
-        if not name.startswith('Test_'):
-            continue
-        if args.cases:
-            if args.cases.startswith(name):
-                print(name, end=' ')
-                sys.argv[0] = f'{__file__}::{args.cases}'
-                pytest.main(['-p', 'no:warnings', '--basetemp=build', '--alluredir=output', *sys.argv])
-        else:
-            print(name, end=' ')
-            sys.argv[0] = f'{__file__}::{name}'
-            pytest.main(['-p', 'no:warnings', '--basetemp=build', '--alluredir=output', *sys.argv])
+    os.makedirs('build', exist_ok=True)
+    with Pool(processes=args.nproc) as pool:
+        ps = []
+
+        out = collect_tests(sys.argv)
+        fn = os.path.basename(__file__)
+        specs = list(filter(lambda x: f'{fn}::' in x, out.getvalue().split('\n')))
+        for spec in specs:
+            spec = spec.replace(f'{fn}::', '')
+            inst = re.sub(r'[\[\]]', '_', spec)
+
+            if args.cases:
+                for case in args.cases.split(','):
+                    if not spec.startswith(case):
+                        continue
+                    res = pool.apply_async(run_test, [inst, spec, sys.argv])
+                    ps.append(res)
+            else:
+                res = pool.apply_async(run_test, [inst, spec, sys.argv])
+                ps.append(res)
+
+        for p in ps:
+            for line in p.get().getvalue().split('\n'):
+                if line.startswith('FAILED ') or line.startswith('ERROR '):
+                    print(line)

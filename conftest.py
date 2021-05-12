@@ -1,6 +1,7 @@
 option = None
 
 def pytest_addoption(parser):
+    parser.addoption('--nproc', help='run tests on n processes', type=int, default=1)
     parser.addoption('--specs', help='test specs')
     parser.addoption('--cases', help='test cases, for example:\nTest_addi::test_imm_op[0-0]')
 

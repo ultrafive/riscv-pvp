@@ -1132,4 +1132,4 @@ def linspace_rvv_v_special(type, offset, vlen):
 def workdir(request, tmpdir_factory):
     test_name = request.function.__self__.__class__.__name__ + '.' + request.function.__name__
 
-    request.cls.workdir = tmpdir_factory.mktemp(test_name)
+    request.cls.workdir = tmpdir_factory.getbasetemp()
