@@ -11,7 +11,7 @@ import pytest
 import os
 import textwrap
 import argparse
-
+import sys, inspect
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--specs', help='test specs')
@@ -65,60 +65,67 @@ for spec in specs:
                 continue
             #print(f'{inst}:')
 
-            if __name__ != "__main__":
-                #print(cfg['templates'])
-                attrs = dict()
-                attrs['inst'] = globals()[inst.capitalize()]
-                attrs['env'] = cfg['env']
-                if 'head' in cfg:
-                    attrs['header'] = cfg['head']
-                if 'footer' in cfg:
-                    attrs['footer'] = cfg['footer']
-                if 'tdata' in cfg:
-                    attrs['tdata'] = cfg['tdata']
+            #print(cfg['templates'])
+            attrs = dict()
+            attrs['inst'] = globals()[inst.capitalize()]
+            attrs['env'] = cfg['env']
+            if 'head' in cfg:
+                attrs['header'] = cfg['head']
+            if 'footer' in cfg:
+                attrs['footer'] = cfg['footer']
+            if 'tdata' in cfg:
+                attrs['tdata'] = cfg['tdata']
 
-                attrs['argnames'] = {}
-                attrs['params'] = {}
-                for key, template in cfg['templates'].items():
-                    [name, *others] = re.split(r'\s*@\s*', key)
-                    if len(others) == 2:
-                        _args = others[0]
-                        _defaults = others[1]
-                    elif len(others) == 1:
-                        _args = others[0]
-                        _defaults = ''
-                    else:
-                        continue
+            attrs['argnames'] = {}
+            attrs['params'] = {}
+            for key, template in cfg['templates'].items():
+                [name, *others] = re.split(r'\s*@\s*', key)
+                if len(others) == 2:
+                    _args = others[0]
+                    _defaults = others[1]
+                elif len(others) == 1:
+                    _args = others[0]
+                    _defaults = ''
+                else:
+                    continue
 
-                    if not name in cfg['cases'] or cfg['cases'][name] is None:
-                        continue
-                    if _args:
-                        argnames = re.split(r'\s*,\s*', _args)
-                    else:
-                        argnames = []
-                    attrs['argnames'][name] = argnames
-                    params = cfg['cases'][name]
-                    attrs['params'][name] = params
+                if not name in cfg['cases'] or cfg['cases'][name] is None:
+                    continue
+                if _args:
+                    argnames = re.split(r'\s*,\s*', _args)
+                else:
+                    argnames = []
+                attrs['argnames'][name] = argnames
+                params = cfg['cases'][name]
+                attrs['params'][name] = params
 
-                    if template.strip() == '{inherit}':
-                        #print(cfg['templates'])
-                        template = cfg['templates'][name]
+                if template.strip() == '{inherit}':
+                    #print(cfg['templates'])
+                    template = cfg['templates'][name]
 
-                    _kw = ', '.join([f'{an}={an}' for an in argnames])
+                _kw = ', '.join([f'{an}={an}' for an in argnames])
 
-                    if not 'check' in cfg or not name in cfg['check']:
-                        check_str = 0
-                    else:
-                        check_str = cfg['check'][name]
+                if not 'check' in cfg or not name in cfg['check']:
+                    check_str = 0
+                else:
+                    check_str = cfg['check'][name]
 
-                    exec(f'def {name}(self, {_args}): simulate(self, args, """{template}""", """{check_str}""", {_kw}, {_defaults})')
-                    exec(f'attrs[name] = {name}')
-                    del globals()[name]
+                exec(f'def {name}(self, {_args}): simulate(self, args, """{template}""", """{check_str}""", {_kw}, {_defaults})')
+                exec(f'attrs[name] = {name}')
+                del globals()[name]
 
-                globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
+            globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
 
 if __name__ == "__main__":
-    if args.cases:
-        sys.argv[0] = f'{__file__}::{args.cases}'
-
-    pytest.main([*sys.argv, '-p', 'no:warnings', '--basetemp=build', '--alluredir=output'])
+    for name, obj in list(globals().items()):
+        if not name.startswith('Test_'):
+            continue
+        if args.cases:
+            if args.cases.startswith(name):
+                print(name, end=' ')
+                sys.argv[0] = f'{__file__}::{args.cases}'
+                pytest.main(['-p', 'no:warnings', '--basetemp=build', '--alluredir=output', *sys.argv])
+        else:
+            print(name, end=' ')
+            sys.argv[0] = f'{__file__}::{name}'
+            pytest.main(['-p', 'no:warnings', '--basetemp=build', '--alluredir=output', *sys.argv])
