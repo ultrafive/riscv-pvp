@@ -163,7 +163,16 @@ if __name__ == "__main__":
                 res = pool.apply_async(run_test, [inst, spec, sys.argv])
                 ps.append(res)
 
+        failed = 0
         for p in ps:
+            ok = True
             for line in p.get().getvalue().split('\n'):
                 if line.startswith('FAILED ') or line.startswith('ERROR '):
                     print(line)
+                    ok = False
+            if not ok:
+                failed += 1
+        if failed == 0:
+            print(f'{len(ps)} tests finish, all pass.')
+        else:
+            print(f'{len(ps)} tests finish, {failed} failed.')
