@@ -3,3 +3,9 @@ __pycache__
 output/
 build/
 report/
+*.fsdb
+novas*
+*.rc
+verdi*
+ucli.key
+batch.sh
