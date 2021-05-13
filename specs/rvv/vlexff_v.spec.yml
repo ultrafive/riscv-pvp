@@ -23,7 +23,7 @@ _: &default
         li a0, {rs1_shape[0]};
         vsetvli t0, a0, e{ebits},m1,tu,mu;
         la a2, {mask_data};
-        vle1.v v0, (a2);        
+        {ldins} v0, (a2);        
         la a3, {orig_data};
         {ldins} v2, (a3);
         {name} v2, (x1), v0.t;

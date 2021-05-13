@@ -28,8 +28,19 @@ _: &default
         la a4, {mask_data};
         la a3, test_{num}_data;
 
+        li t0, {vlen};
+        li t1, 8;
+        remu t2, t0, t1;
+        bnez t2, 1f;
+        li t3,  {vlen} / 8;
+        j 2f;
+      1:
+        li t3,  {vlen} / 8 + 1;
+      2:
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
         vsetvli t0, a0, e{ebits},m1,tu,mu;
-        vle1.v v0, (a4);
         {ldins} v1, (a1);
 
         {name} v1, (a3), v0.t;
@@ -41,37 +52,6 @@ _: &default
   check:
     test_vsx_v_without_mask: np.array_equal(result, golden)
     test_vsx_v_with_mask: np.array_equal(result, golden)
-
-vse1_v:
-  <<: *default
-  templates:
-    <<: *_templates
-    test_vsx_v_without_mask @ rs1, vlen, res_len : |
-      test_{num}:
-        li TESTNUM, {num};
-        li a0, {vlen};
-        la a1, {rs1_data};
-        la a3, test_{num}_data;
-        vsetvli t0, a0, e8,m8,tu,mu;
-        vle1.v v1, (a1);
-        {name} v1, (a3);
-        .pushsection .data, 1;
-      test_{num}_data:
-        .fill {res_len}, 1, 0;
-        .popsection
-  cases:
-    test_vsx_v_without_mask:
-      - '[ random_e1(1), 1, res_len_e1(1) ]'
-      - '[ random_e1(63), 63, res_len_e1(63) ]'      
-      - '[ random_e1(64), 64, res_len_e1(64) ]'
-      - '[ random_e1(127), 127, res_len_e1(127) ]'      
-      - '[ random_e1(128), 128, res_len_e1(128) ]'
-      - '[ random_e1(255), 255, res_len_e1(255) ]'      
-      - '[ random_e1(256), 256, res_len_e1(256) ]' 
-      - '[ random_e1(510), 510, res_len_e1(510) ]'      
-      - '[ random_e1(512), 512, res_len_e1(512) ]'       
-      - '[ random_e1(1023), 1023, res_len_e1(1023) ]'            
-      - '[ random_e1(1024), 1024, res_len_e1(1024) ]'   
 
 vse8_v:
   templates:

@@ -65,7 +65,7 @@ _: &default
           la a3, {orig_data} ; 
           {fldins} fa1, (a1) ; 
           {ldins} v2, (a2) ; 
-          vle1.v v0, (a0) ; 
+          {ldins} v0, (a0) ; 
           {ldins} v3, (a3) ; 
           {name} v3, v2, fa1, v0.t ;
           la a3, test_{num}_data ; 

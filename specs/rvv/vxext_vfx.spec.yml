@@ -34,8 +34,18 @@ _: &default
         vsetvli t0, a0, e{eewbits},{emul},tu,mu;
         {ldins} v4, (a1)
 
+        li t1, 8;
+        remu t2, a0, t1;
+        bnez t2, 1f;
+        li t3,  {vlen} / 8;
+        j 2f;
+      1:
+        li t3,  {vlen} / 8 + 1;
+      2:
+        vsetvli t0, t3, e8, m1, tu, mu;
+        vle8.v v0, (a4);
+
         vsetvli t0, a0, e{sewbits},m1,tu,mu;
-        vle1.v v0, (a4);
         {name} v1, v4, v0.t; 
         {stins} v1, (a3);
         .pushsection .data, 1;

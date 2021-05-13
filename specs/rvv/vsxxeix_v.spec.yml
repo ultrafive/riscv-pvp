@@ -27,7 +27,7 @@ _: &default
         la a2, {vs3_data};
         {ldins} v4, (a2);
         la a3, {mask_data};
-        vle1.v v0, (a3);
+        {ldins} v0, (a3);
         {name} v4, (x1), v2, v0.t;    
 
 vsuxei8_v:

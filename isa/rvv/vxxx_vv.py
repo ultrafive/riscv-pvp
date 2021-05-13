@@ -139,5 +139,5 @@ class Vrem_vv(Inst):
     name = 'vrem.vv'
 
     def golden(self):
-        vd = np.fmod( self['vs2'] , self['vs1'] )
+        vd = self['vs2'] - self['vs1'] * (self['vs2'] // self['vs1'])
         return self.masked(vd)

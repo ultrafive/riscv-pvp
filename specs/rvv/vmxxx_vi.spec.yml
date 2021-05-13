@@ -39,11 +39,6 @@ _: &default
         la a3, test_{num}_data;
         la a4, {mask_data};
 
-        vsetvli t0, a0, e{ebits},m1,tu,mu;
-        vle1.v v0, (a4);
-        {ldins} v2, (a2);
-        {name} v3, v2, {imm}, v0.t;
-
         li t1, 8;
         remu t2, a0, t1;
         bnez t2, 1f;
@@ -53,8 +48,14 @@ _: &default
         li t3,  {vlen} / 8 + 1;
       2:
         vsetvli t0, t3, e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        {ldins} v2, (a2);
+        {name} v3, v2, {imm}, v0.t;
+
+        vsetvli t0, t3, e8,m1,tu,mu;
         vse8.v v3, (a3);
-        
         .pushsection .data, 1;
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;

@@ -54,7 +54,7 @@ _: &default
           la a0, {mask_data} ; 
           la a3, {orig_data} ; 
           {ldins} v1, (a1) ; 
-          vle1.v v0, (a0) ; 
+          {ldins} v0, (a0) ; 
           {ldins} v3, (a3) ; 
           {name} v3, v1, v0.t ; 
           la a3, test_{num}_data ; 

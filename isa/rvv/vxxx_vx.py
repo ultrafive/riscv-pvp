@@ -148,5 +148,5 @@ class Vrem_vx(Inst):
     name = 'vrem.vx'
 
     def golden(self):
-        vd = np.fmod(self['vs2'], self['rs1'])
+        vd = np.remainder(self['vs2'], self['rs1'])
         return self.masked(vd)
