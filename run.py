@@ -158,18 +158,21 @@ if __name__ == "__main__":
                     if not spec.startswith(case):
                         continue
                     res = pool.apply_async(run_test, [inst, spec, sys.argv])
-                    ps.append(res)
+                    ps.append((inst, res))
             else:
                 res = pool.apply_async(run_test, [inst, spec, sys.argv])
-                ps.append(res)
+                ps.append((inst, res))
 
         failed = 0
-        for p in ps:
+        for n, p in ps:
             ok = True
             for line in p.get().getvalue().split('\n'):
                 if line.startswith('FAILED ') or line.startswith('ERROR '):
                     print(line)
                     ok = False
+            with open(f'build/{n}/test.log', 'w') as f:
+                print(p.get().getvalue(), file=f)
+
             if not ok:
                 failed += 1
         if failed == 0:
