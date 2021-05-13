@@ -181,13 +181,8 @@ def check(res_file, golden, check_str, workdir):
 
     result.dtype = golden.dtype
     result = result.reshape( golden.shape )
-    print(">> check")
-    print("-- golden ---")
-    print(golden)
-    print("-- result ---")
     diff_to_txt(golden, result, f'{workdir}/check.data')
     allure.attach.file(f'{workdir}/check.data', f'check result', attachment_type=allure.attachment_type.TEXT)
-    print(result)
     assert eval(check_str)
 
 @allure.step
@@ -195,13 +190,10 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
     if not isinstance(golden, np.ndarray):
         return
 
-    print(">> diff")
     itemsize = golden.itemsize
     size = golden.size
     dtype = golden.dtype
     gold = from_txt(res_file, itemsize, size, dtype)
-    print("-- golden ---")
-    print(gold)
 
     sims = { 'vcs': args.vcs, 'verilator': args.verilator }
     for k, sim in sims.items():
@@ -214,8 +206,6 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         assert ret == 0
 
         data = from_txt(f'{workdir}/{k}.sig', itemsize, size, dtype)
-        print(f"-- {k} ---")
-        print(data)
         diff_to_txt(gold, data, f'{workdir}/diff-{k}.data')
         allure.attach.file(f'{workdir}/diff-{k}.data', f'{k} diff', attachment_type=allure.attachment_type.TEXT)
         assert np.array_equal(gold, data)
