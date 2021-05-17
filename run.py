@@ -151,20 +151,22 @@ if __name__ == "__main__":
         specs = list(filter(lambda x: f'{fn}::' in x, out.getvalue().split('\n')))
         for spec in specs:
             spec = spec.replace(f'{fn}::', '')
-            inst = re.sub(r'[\[\]]', '_', spec)
+            subdir = re.sub(r'[\[\]]', '_', spec)
 
             if args.cases:
                 for case in args.cases.split(','):
                     if not spec.startswith(case):
                         continue
-                    res = pool.apply_async(run_test, [inst, spec, sys.argv])
-                    ps.append((inst, res))
+                    res = pool.apply_async(run_test, [subdir, spec, sys.argv])
+                    ps.append((spec, subdir, res))
             else:
-                res = pool.apply_async(run_test, [inst, spec, sys.argv])
-                ps.append((inst, res))
+                res = pool.apply_async(run_test, [subdir, spec, sys.argv])
+                ps.append((spec, subdir, res))
 
         failed = 0
-        for n, p in ps:
+
+        report = open(f'build/report.log', 'w')
+        for spec, n, p in ps:
             ok = True
             for line in p.get().getvalue().split('\n'):
                 if line.startswith('FAILED ') or line.startswith('ERROR '):
@@ -175,6 +177,10 @@ if __name__ == "__main__":
 
             if not ok:
                 failed += 1
+                print(f'FAIL {spec}', file=report)
+            else:
+                print(f'PASS {spec}', file=report)
+        report.close()
         if failed == 0:
             print(f'{len(ps)} tests finish, all pass.')
         else:
