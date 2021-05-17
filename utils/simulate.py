@@ -203,7 +203,11 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
     for k, sim in sims.items():
         if sim == None:
             continue
-        cmd = f'{sim} +signature={workdir}/{k}.sig +signature-granularity={32} {binary} > {workdir}/{k}.log 2>&1'
+        options = f'+signature={workdir}/{k}.sig +signature-granularity={32}'
+        if k == 'vcs' and args.fsdb:
+            options += f' +permissive +fsdbfile={workdir}/test.fsdb +permissive-off'
+
+        cmd = f'{sim} {options} {binary} > {workdir}/{k}.log 2>&1'
         ret = os.system(cmd)
         allure.attach(cmd, f'{k} command line', attachment_type=allure.attachment_type.TEXT)
         allure.attach.file(f'{workdir}/{k}.log', f'{k} log', attachment_type=allure.attachment_type.TEXT)

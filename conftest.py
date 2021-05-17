@@ -15,4 +15,5 @@ def pytest_addoption(parser):
 
     parser.addoption('--spike', help='path of spike simulator', default='spike')
     parser.addoption('--vcs', help='path of vcs simulator', default=None)
+    parser.addoption('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
     parser.addoption('--verilator', help='path of verilator simulator', default=None)
