@@ -56,7 +56,7 @@ def array_data(prefix, k, vv):
     return '\n'.join(lines) + '\n'
 
 @allure.step
-def compile(args, binary, mapfile, source, logfile, **kw):
+def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
     cc = f'{args.clang} --target=riscv{args.xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{args.xlen}gv0p10 -menable-experimental-extensions'
     defines = f'-DXLEN={args.xlen} -DVLEN={args.vlen}'
     cflags = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
@@ -67,6 +67,10 @@ def compile(args, binary, mapfile, source, logfile, **kw):
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'compile log', attachment_type=allure.attachment_type.TEXT)
+
+
+    cmd = f'riscv64-unknown-elf-objdump -S -D {binary} > {dumpfile}'
+    ret = os.system(cmd)
     assert ret == 0
 
 @allure.step
@@ -218,6 +222,7 @@ def simulate(testcase, args, template, check_str, **kw):
     source = f'{workdir}/test.S'
     binary = f'{workdir}/test.elf'
     mapfile = f'{workdir}/test.map'
+    dumpfile = f'{workdir}/test.dump'
     compile_log = f'{workdir}/compile.log'
     run_log = f'{workdir}/spike.log'
     run_mem = f'{workdir}/run.mem'
@@ -227,7 +232,7 @@ def simulate(testcase, args, template, check_str, **kw):
     golden = inst.golden()
 
     generate(source, template, testcase, inst, **kw)
-    compile(args, binary, mapfile, source, compile_log, **kw)
+    compile(args, binary, mapfile, dumpfile, source, compile_log, **kw)
     run(args, run_mem, binary, run_log, res_file, **kw)
     if check_str != '0':
         check(res_file, golden, check_str, workdir)
