@@ -166,7 +166,7 @@ def diff_to_txt(a, b, filename):
 
     with open(filename, 'w') as file:
         for i in range(a.shape[0]):
-            if a[i] == b[i]:
+            if a[i] == b[i] or (np.isnan(a[i]) and np.isnan(b[i])):
                 print(f'%3d: %{w+4}{t}(%0{w}x), %{w+4}{t}(%0{w}x)' % (i, a[i], ah[i], b[i], bh[i]), file=file)
             else:
                 print(f'%3d: %{w+4}{t}(%0{w}x), %{w+4}{t}(%0{w}x), mismatch' % (i, a[i], ah[i], b[i], bh[i]), file=file)
@@ -216,7 +216,7 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         data = from_txt(f'{workdir}/{k}.sig', itemsize, size, dtype)
         diff_to_txt(gold, data, f'{workdir}/diff-{k}.data')
         allure.attach.file(f'{workdir}/diff-{k}.data', f'{k} diff', attachment_type=allure.attachment_type.TEXT)
-        assert np.array_equal(gold, data)
+        assert np.array_equal(gold, data, equal_nan=True)
 
 
 def simulate(testcase, args, template, check_str, **kw):
