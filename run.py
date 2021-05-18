@@ -14,11 +14,15 @@ import argparse
 import io
 import sys, inspect
 from multiprocessing import Pool
+from tqdm import tqdm
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--nproc', help='run tests on n processes', type=int, default=1)
 parser.add_argument('--specs', help='test specs')
-parser.add_argument('--cases', help=textwrap.dedent('test cases,\nfor example: Test_addi::test_imm_op[0-0]'))
+parser.add_argument('--cases', help=textwrap.dedent('''\
+                                    test case list string or file, for example:
+                                    - Test_vsub_vv,Test_addi::test_imm_op[0-0]
+                                    - cases.list'''))
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
@@ -155,7 +159,13 @@ if __name__ == "__main__":
             subdir = re.sub(r'[\[\]]', '_', spec)
 
             if args.cases:
-                for case in args.cases.split(','):
+                if os.access(args.cases, os.R_OK):
+                    with open(args.cases) as fp:
+                        cases = fp.read().splitlines()
+                else:
+                    cases = args.cases.split(',')
+
+                for case in cases:
                     if not spec.startswith(case):
                         continue
                     res = pool.apply_async(run_test, [subdir, spec, sys.argv])
