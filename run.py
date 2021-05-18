@@ -14,7 +14,6 @@ import argparse
 import io
 import sys, inspect
 from multiprocessing import Pool
-from tqdm import tqdm
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--nproc', help='run tests on n processes', type=int, default=1)
