@@ -4,6 +4,7 @@ def pytest_addoption(parser):
     parser.addoption('--nproc', help='run tests on n processes', type=int, default=1)
     parser.addoption('--specs', help='test specs')
     parser.addoption('--cases', help='test case list string or file')
+    parser.addoption('--retry', help='retry last failed cases', action="store_true")
 
     parser.addoption('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
     parser.addoption('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)

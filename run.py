@@ -22,6 +22,7 @@ parser.add_argument('--cases', help=textwrap.dedent('''\
                                     test case list string or file, for example:
                                     - Test_vsub_vv,Test_addi::test_imm_op[0-0]
                                     - cases.list'''))
+parser.add_argument('--retry', help='retry last failed cases', action="store_true")
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
@@ -148,6 +149,29 @@ def collect_tests( argv):
 
 if __name__ == "__main__":
     os.makedirs('build', exist_ok=True)
+
+    if args.retry:
+        print("retry last failed cases...")
+        if os.access('build/report.log', os.R_OK):
+            with open('build/report.log') as fp:
+                cases = []
+                lines = fp.read().splitlines()
+                for line in lines:
+                    #print(line)
+                    if line.startswith('PASS '):
+                        continue
+                    cases.append(line.replace('FAIL ', ''))
+        else:
+            print('could not retry without last run log.')
+            os.exit(-1)
+    else:
+        if os.access(args.cases, os.R_OK):
+            with open(args.cases) as fp:
+                cases = fp.read().splitlines()
+        else:
+            cases = args.cases.split(',')
+
+
     with Pool(processes=args.nproc) as pool:
         ps = []
 
@@ -159,18 +183,13 @@ if __name__ == "__main__":
             subdir = spec.replace('::', '/')
             subdir = re.sub(r'[\[\]]', '/', subdir)
 
-            if args.cases:
-                if os.access(args.cases, os.R_OK):
-                    with open(args.cases) as fp:
-                        cases = fp.read().splitlines()
-                else:
-                    cases = args.cases.split(',')
-
+            if cases and len(cases) > 0:
                 for case in cases:
                     if not spec.startswith(case):
                         continue
                     res = pool.apply_async(run_test, [subdir, spec, sys.argv])
                     ps.append((spec, subdir, res))
+                    break
             else:
                 res = pool.apply_async(run_test, [subdir, spec, sys.argv])
                 ps.append((spec, subdir, res))
