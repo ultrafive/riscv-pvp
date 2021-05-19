@@ -124,6 +124,7 @@ for spec in specs:
             globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
 
 def run_test(name, cases, argv):
+    os.makedirs(f'build/{name}', exist_ok=True)
     output = io.StringIO()
     sys.stdout = output
     sys.stderr = output
@@ -155,7 +156,8 @@ if __name__ == "__main__":
         specs = list(filter(lambda x: f'{fn}::' in x, out.getvalue().split('\n')))
         for spec in specs:
             spec = spec.replace(f'{fn}::', '')
-            subdir = re.sub(r'[\[\]]', '_', spec)
+            subdir = spec.replace('::', '/')
+            subdir = re.sub(r'[\[\]]', '/', subdir)
 
             if args.cases:
                 if os.access(args.cases, os.R_OK):
