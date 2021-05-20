@@ -211,14 +211,15 @@ if __name__ == "__main__":
             ok = True
             for line in p.get().getvalue().split('\n'):
                 if line.startswith('FAILED ') or line.startswith('ERROR '):
+                    reason = re.sub(r'(FAILED|ERROR) [^\s\\]+ - ([^:]+):*.*', r'\2', line)
                     ok = False
             with open(f'build/{n}/test.log', 'w') as f:
                 print(p.get().getvalue(), file=f)
 
             if not ok:
                 failed += 1
-                print(f'FAIL build/{n}')
-                print(f'FAIL build/{n}', file=report)
+                print(f'FAIL build/{n} - {reason}')
+                print(f'FAIL build/{n} - {reason}', file=report)
             else:
                 print(f'PASS build/{n}', file=report)
         report.close()
