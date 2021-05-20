@@ -21,7 +21,7 @@ parser.add_argument('--specs', help='test specs')
 parser.add_argument('--cases', help=textwrap.dedent('''\
                                     test case list string or file, for example:
                                     - Test_vsub_vv,Test_addi::test_imm_op[0-0]
-                                    - cases.list'''))
+                                    - cases.list'''), default='')
 parser.add_argument('--retry', help='retry last failed cases', action="store_true")
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
@@ -161,16 +161,26 @@ if __name__ == "__main__":
                     if line.startswith('PASS '):
                         continue
                     cases.append(line.replace('FAIL ', ''))
+                if len(cases) == 0:
+                    print('all pass, retry abort.')
+                    sys.exit(0)
         else:
             print('could not retry without last run log.')
-            os.exit(-1)
+            sys.exit(-1)
     else:
         if os.access(args.cases, os.R_OK):
             with open(args.cases) as fp:
                 cases = fp.read().splitlines()
-        else:
+        elif args.cases != '':
             cases = args.cases.split(',')
+        else:
+            cases = []
 
+    # convert cases from dir to spec styles
+    cases = list(map(lambda c: re.sub(r'^build\/', '', c), cases))
+    cases = list(map(lambda c: re.sub(r'^([^/]+)\/([^/]+)\/([^/]+)\/*', r'\1::\2[\3]', c), cases))
+    cases = list(map(lambda c: re.sub(r'^([^/]+)\/([^/]+)\/*', r'\1::\2', c), cases))
+    cases = list(map(lambda c: re.sub(r'^([^/]+)\/*', r'\1', c), cases))
 
     with Pool(processes=args.nproc) as pool:
         ps = []
@@ -208,9 +218,9 @@ if __name__ == "__main__":
 
             if not ok:
                 failed += 1
-                print(f'FAIL {spec}', file=report)
+                print(f'FAIL build/{n}', file=report)
             else:
-                print(f'PASS {spec}', file=report)
+                print(f'PASS build/{n}', file=report)
         report.close()
         if failed == 0:
             print(f'{len(ps)} tests finish, all pass.')
