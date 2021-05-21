@@ -170,7 +170,7 @@ if __name__ == "__main__":
     else:
         if os.access(args.cases, os.R_OK):
             with open(args.cases) as fp:
-                cases = fp.read().splitlines()
+                cases = list(filter(lambda l: not l.startswith('#'), fp.read().splitlines()))
         elif args.cases != '':
             cases = args.cases.split(',')
         else:
