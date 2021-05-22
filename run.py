@@ -131,7 +131,8 @@ def run_test(name, cases, argv):
     sys.stderr = output
     print(name)
     argv[0] = f'{__file__}::{cases}'
-    pytest.main(['-q', '-p', 'no:warnings', f'--basetemp=build/{name}', '--alluredir=output', *argv])
+    os.environ["WORKDIR"] = f"build/{name}"
+    pytest.main(['-q', '-p', 'no:warnings', '--alluredir=output', *argv])
     return output
 
 def collect_tests( argv):

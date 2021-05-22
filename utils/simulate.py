@@ -220,7 +220,7 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
 
 
 def simulate(testcase, args, template, check_str, **kw):
-    workdir = testcase.workdir
+    workdir = os.environ.get("WORKDIR")
     instclass = testcase.inst
 
     source = f'{workdir}/test.S'

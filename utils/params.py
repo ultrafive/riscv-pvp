@@ -1127,9 +1127,3 @@ def linspace_rvv_v_special(type, offset, vlen):
     vs[:len(bound_data[offset])] = bound_data[offset]
 
     return vs
-
-@pytest.fixture(scope='function', autouse=True)
-def workdir(request, tmpdir_factory):
-    test_name = request.function.__self__.__class__.__name__ + '.' + request.function.__name__
-
-    request.cls.workdir = tmpdir_factory.getbasetemp()
