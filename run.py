@@ -168,11 +168,13 @@ if __name__ == "__main__":
             print('could not retry without last run log.')
             sys.exit(-1)
     else:
+        s = lambda l: l.strip()
+        f = lambda l: l != '' and not l.startswith('#')
         if os.access(args.cases, os.R_OK):
             with open(args.cases) as fp:
-                cases = list(filter(lambda l: not l.startswith('#'), fp.read().splitlines()))
+                cases = list(filter(f, map(s, fp.read().splitlines())))
         elif args.cases != '':
-            cases = args.cases.split(',')
+            cases = list(filter(f, map(s, args.cases.split(','))))
         else:
             cases = []
 
