@@ -92,3 +92,5 @@ from .vluxeix_v import *
 from .vloxeix_v import *
 from .vsuxeix_v import *
 from .vsoxeix_v import *
+
+from .vredxx_vs import *
