@@ -1,0 +1,124 @@
+# 6
+Test_vset
+# 7.4
+Test_vle8_v
+Test_vle16_v
+Test_vle32_v
+Test_vle64_v
+Test_vse8_v
+Test_vse16_v
+Test_vse32_v
+Test_vse64_v
+# 7.5
+# 7.6
+# 7.7
+# 7.8
+# 7.9
+# 8
+# 12.1
+Test_vadd
+Test_vsub
+Test_vrsub
+# 12.2 (missing _wv versions)
+Test_vwaddu_v
+Test_vwsubu_v
+Test_vwadd_v
+Test_vwsub_v
+# 12.3
+# 12.4
+# 12.5
+Test_vand_v
+Test_vor_v
+Test_vxor_v
+# 12.6
+Test_vsll_v
+Test_vsrl_v
+Test_vsra_v
+# 12.7
+# 12.8
+# 12.9
+Test_vminu_
+Test_vmaxu_
+Test_vmin_
+Test_vmax_
+# 12.10
+Test_vmul_
+Test_vmulh_
+Test_vmulhu_
+Test_vmulhsu_
+# 12.11
+# 12.12
+Test_vwmul_
+Test_vwmulu_
+Test_vwmulsu_
+# 12.13
+Test_vmacc_
+Test_vnmsac_
+Test_vmadd_
+Test_vnmsub_
+# 12.14
+Test_vwmaccu_
+Test_vwmacc_
+Test_vwmaccsu_
+Test_vwmaccus_
+# 12.15
+# 12.16
+# 13.1
+# 13.2
+# 13.3
+# 13.4
+# 13.5
+# 14.2
+Test_vfadd
+Test_vfsub
+Test_vfrsub
+# 14.3
+Test_vfwadd
+Test_vfwsub
+# 14.4 (missing vf(r)div)
+Test_vfmul
+# 14.5
+Test_vfwmul
+# 14.6
+Test_vfmacc
+Test_vfnmacc
+Test_vfmsac
+Test_vfnmsac
+Test_vfmadd
+Test_vfnmadd
+Test_vfmsub
+Test_vfnmsub
+# 14.7
+Test_vfwmacc
+Test_vfwnmacc
+Test_vfwmsac
+Test_vfwnmsac
+# 14.8, 14.9 and 14.10
+# 14.11
+Test_vfmin
+Test_vfmax
+# 14.12
+# 14.13
+# 14.14
+# 14.15
+# 14.16
+# 14.17
+# 14.18
+# 14.19
+# 15.1
+# 15.2
+# 15.3
+# 15.4
+# 16.1
+# 16.2
+# 16.3
+# 16.4
+# 16.5
+# 16.6
+# 16.8
+# 17.1
+# 17.2
+# 17.3
+# 17.4
+# 17.5
+# 17.6
