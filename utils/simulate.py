@@ -63,7 +63,8 @@ def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
     incs = '-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc'
     linkflags = '-Tenv/p/link.ld'
 
-    cmd = f'{cc} {defines} {cflags} {incs} {linkflags} -Wl,-Map,{mapfile} {source} -o {binary} > {logfile} 2>&1'
+    cmd = f'{cc} {defines} {cflags} {incs} {linkflags} -Wl,-Map,{mapfile} {source} -o {binary} >> {logfile} 2>&1'
+    print(f'# {cmd}\n', file=open(logfile, 'w'))
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'compile log', attachment_type=allure.attachment_type.TEXT)
@@ -77,7 +78,8 @@ def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
 def run(args, memfile, binary, logfile, res_file, **kw):
     sim = f'{args.spike} --isa=rv{args.xlen}gcv --varch=vlen:{args.vlen},elen:{args.elen},slen:{args.slen}'
 
-    cmd = f'{sim} +signature={res_file} +signature-granularity={32} {binary} > {logfile} 2>&1'
+    cmd = f'{sim} +signature={res_file} +signature-granularity={32} {binary} >> {logfile} 2>&1'
+    print(f'# {cmd}\n', file=open(logfile, 'w'))
     ret = os.system(cmd)
     allure.attach(cmd, 'command line', attachment_type=allure.attachment_type.TEXT)
     allure.attach.file(logfile, 'run log', attachment_type=allure.attachment_type.TEXT)
@@ -207,7 +209,8 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         if k == 'vcs' and args.fsdb:
             options += f' +permissive +fsdbfile={workdir}/test.fsdb +permissive-off'
 
-        cmd = f'{sim} {options} {binary} > {workdir}/{k}.log 2>&1'
+        cmd = f'{sim} {options} {binary} >> {workdir}/{k}.log 2>&1'
+        print(f'# {cmd}\n', file=open(f'{workdir}/{k}.log', 'w'))
         ret = os.system(cmd)
         allure.attach(cmd, f'{k} command line', attachment_type=allure.attachment_type.TEXT)
         allure.attach.file(f'{workdir}/{k}.log', f'{k} log', attachment_type=allure.attachment_type.TEXT)
