@@ -1127,3 +1127,7 @@ def linspace_rvv_v_special(type, offset, vlen):
     vs[:len(bound_data[offset])] = bound_data[offset]
 
     return vs
+
+
+def packbits(a):
+    return np.packbits(np.array(a, dtype=np.uint8), bitorder='little')
