@@ -5,7 +5,7 @@ _: &default
     #include "test_macros_v.h"
 
   templates:
-    test_vmxxx_mm @ vs2, vs1, vlen @ ebits=32, ldins='vle1.v', stins='vse1.v': |
+    test_vmxxx_mm @ vs2, vs1, vlen @ ebits=32, ldins='vle8.v', stins='vse8.v': |
       test_{num}:
         li TESTNUM, {num};
 
@@ -17,14 +17,15 @@ _: &default
         li t2, 8;
         div t1, t1, t2;
 
-        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        vsetvli t0, t1, e{ebits},m1,tu,mu;
         {ldins} v1, (a1);
         {ldins} v2, (a2);
 
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
         {name} v3, v2, v1;
         la a3, test_{num}_data;
 
-        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        vsetvli t0, t1, e{ebits},m1,tu,mu;
         {stins} v3, (a3);
         .pushsection .data, 1;
       test_{num}_data:
