@@ -34,8 +34,12 @@ _: &default
 
   cases:
     test_vmxxx_mm:
+      - '[np.array([0x0c], dtype=np.uint8), np.array([0x06], dtype=np.uint8), 4]'
+      - '[np.array([0x0f], dtype=np.uint8), np.array([0x3c], dtype=np.uint8), 7]'
       - '[np.array([0x0f], dtype=np.uint8), np.array([0x3c], dtype=np.uint8), 8]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f], dtype=np.uint8), 9]'
       - '[np.array([0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f], dtype=np.uint8), 16]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31]'
       - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32]'
          
   check:
