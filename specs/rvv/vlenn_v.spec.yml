@@ -13,7 +13,6 @@ _: &default
         la a3, test_{num}_data; 
         vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
         {name} v8, (a1);
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
         {stins} v8, (a3);
         .pushsection .data, 1;
       test_{num}_data:
