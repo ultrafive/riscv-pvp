@@ -9,4 +9,9 @@ class Vlsegxex_v(Inst):
         nf = self['nfields']
         vlen = self['vlen']
         assert int(self['rs1'].size / nf) == vlen
-        return self.masked(self['rs1'].reshape((vlen, nf)).T).reshape((vlen * nf))
+
+        vlmax = int(self['lmul'] * self['VLEN'] / (self['rs1'].itemsize * 8))
+
+        vds = self.masked(self['rs1'].reshape((vlen, nf)).T)
+        vds = np.pad(vds, [(0,0),(0, int(vlmax - vlen))])
+        return vds.reshape((vlmax * nf))
