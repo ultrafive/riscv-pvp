@@ -201,15 +201,40 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
     dtype = golden.dtype
     gold = from_txt(res_file, itemsize, size, dtype)
 
-    sims = { 'vcs': args.vcs, 'verilator': args.verilator }
+    sims = { 'vcs': args.vcs, 'verilator': args.verilator, 'gem5': args.gem5 }
+    options = ''
     for k, sim in sims.items():
         if sim == None:
             continue
-        options = f'+signature={workdir}/{k}.sig +signature-granularity={32}'
+        if k != 'gem5':
+            options = f'+signature={workdir}/{k}.sig +signature-granularity={32}'
+
         if k == 'vcs' and args.fsdb:
             options += f' +permissive +fsdbfile={workdir}/test.fsdb +permissive-off'
+        elif k == 'gem5':
+            config_file = '/'
+            config_file = config_file.join(sim.split('/')[:-3]) + '/configs/example/fs.py'
+            options += f'--debug-flags=Fetch,Exec \
+                        {config_file} \
+                        --cpu-type=MinorCPU \
+                        --bp-type=LTAGE \
+                        --num-cpu=1 \
+                        --mem-channels=1 \
+                        --mem-size=3072MB \
+                        --caches \
+                        --l1d_size=32kB \
+                        --l1i_size=32kB \
+                        --cacheline_size=64 \
+                        --l1i_assoc=8 \
+                        --l1d_assoc=8 \
+                        --l2cache \
+                        --l2_size=512kB \
+                        --signature={workdir}{k}.sig'
 
-        cmd = f'{sim} {options} {binary} >> {workdir}/{k}.log 2>&1'
+        if k == 'gem5':
+            cmd = f'{sim} {options} --kernel={binary} >> {workdir}/{k}.log 2>&1'
+        else:
+            cmd = f'{sim} {options} {binary} >> {workdir}/{k}.log 2>&1'
         print(f'# {cmd}\n', file=open(f'{workdir}/{k}.log', 'w'))
         ret = os.system(cmd)
         allure.attach(cmd, f'{k} command line', attachment_type=allure.attachment_type.TEXT)

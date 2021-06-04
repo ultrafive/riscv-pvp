@@ -33,6 +33,7 @@ parser.add_argument('--clang', help='path of clang compiler', default='clang')
 
 parser.add_argument('--spike', help='path of spike simulator', default='spike')
 parser.add_argument('--vcs', help='path of vcs simulator', default=None)
+parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
 parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
 parser.add_argument('--verilator', help='path of verilator simulator', default=None)
 
