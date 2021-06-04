@@ -29,4 +29,4 @@ class Vfmv_f_s(Inst):
 
     def golden(self):
 
-        return self['orig'].astype(np.float32)[0]        
+        return np.array(self['orig'].astype(np.float32)[0])
