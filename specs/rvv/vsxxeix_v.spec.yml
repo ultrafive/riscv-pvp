@@ -34,9 +34,9 @@ vsuxei8_v:
   <<: *default
   templates:
     <<: *_templates
-    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=8, lmul_vs2='m1', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
       {inherit}
-    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=8, lmul_vs2='m1', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
       {inherit}
   cases:
     test_basic_without_mask:
@@ -52,9 +52,9 @@ vsuxei16_v:
   <<: *default
   templates:
     <<: *_templates
-    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=16, lmul_vs2='m1', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
       {inherit}
-    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=16, lmul_vs2='m1', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
       {inherit}
   cases:
     test_basic_without_mask:
@@ -106,9 +106,9 @@ vsoxei8_v:
   <<: *default
   templates:
     <<: *_templates
-    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=8, lmul_vs2='m1', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
       {inherit}
-    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=8, lmul_vs2='mf4', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=8, lmul_vs2='m1', ldins_vs2='vle8.v', ebits=32, ldins='vle32.v': |
       {inherit}
   cases:
     test_basic_without_mask:
@@ -124,9 +124,9 @@ vsoxei16_v:
   <<: *default
   templates:
     <<: *_templates
-    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+    test_basic_without_mask @ rs1, vs2, vs3 @ ebits_vs2=16, lmul_vs2='m1', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
       {inherit}
-    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=16, lmul_vs2='mf2', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
+    test_basic_with_mask @ rs1, vs2, vs3, mask, vlen @ ebits_vs2=16, lmul_vs2='m1', ldins_vs2='vle16.v', ebits=32, ldins='vle32.v': |
       {inherit}
   cases:
     test_basic_without_mask:

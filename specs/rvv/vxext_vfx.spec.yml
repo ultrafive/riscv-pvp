@@ -60,10 +60,10 @@ _: &default
 vzext_vf2:
   templates:
     <<: *_templates
-    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=16, eewbits=8, ldins='vle16.v', stins='vse16.v', emul='mf2' : |
+    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=16, eewbits=16, ldins='vle16.v', stins='vse16.v', emul='m1' : |
       {inherit}
 
-    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=16, eewbits=8, ldins='vle16.v', stins='vse16.v', emul='mf2' : |
+    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=16, eewbits=16, ldins='vle16.v', stins='vse16.v', emul='m1' : |
       {inherit}
 
   <<: *default
@@ -89,10 +89,10 @@ vzext_vf2:
 vzext_vf4:
   templates:
     <<: *_templates
-    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=32, eewbits=8, ldins='vle32.v', stins='vse32.v', emul='mf4' : |
+    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=32, eewbits=32, ldins='vle32.v', stins='vse32.v', emul='m1' : |
       {inherit}
 
-    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=32, eewbits=8, ldins='vle32.v', stins='vse32.v', emul='mf4' : |
+    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=32, eewbits=32, ldins='vle32.v', stins='vse32.v', emul='m1' : |
       {inherit}
 
   <<: *default
@@ -113,10 +113,10 @@ vzext_vf4:
 vzext_vf8:
   templates:
     <<: *_templates
-    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=64, eewbits=8, ldins='vle64.v', stins='vse64.v', emul='mf8' : |
+    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=64, eewbits=64, ldins='vle64.v', stins='vse64.v', emul='m1' : |
       {inherit}
 
-    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=64, eewbits=8, ldins='vle64.v', stins='vse64.v', emul='mf8' : |
+    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=64, eewbits=64, ldins='vle64.v', stins='vse64.v', emul='m1' : |
       {inherit}
 
   <<: *default
@@ -138,10 +138,10 @@ vzext_vf8:
 vsext_vf2:
   templates:
     <<: *_templates
-    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=16, eewbits=8, ldins='vle16.v', stins='vse16.v', emul='mf2' : |
+    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=16, eewbits=16, ldins='vle16.v', stins='vse16.v', emul='m1' : |
       {inherit}
 
-    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=16, eewbits=8, ldins='vle16.v', stins='vse16.v', emul='mf2' : |
+    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=16, eewbits=16, ldins='vle16.v', stins='vse16.v', emul='m1' : |
       {inherit}
 
   <<: *default
@@ -166,10 +166,10 @@ vsext_vf2:
 vsext_vf4:
   templates:
     <<: *_templates
-    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=32, eewbits=8, ldins='vle32.v', stins='vse32.v', emul='mf4' : |
+    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=32, eewbits=32, ldins='vle32.v', stins='vse32.v', emul='m1' : |
       {inherit}
 
-    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=32, eewbits=8, ldins='vle32.v', stins='vse32.v', emul='mf4' : |
+    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=32, eewbits=32, ldins='vle32.v', stins='vse32.v', emul='m1' : |
       {inherit}
 
   <<: *default
@@ -190,10 +190,10 @@ vsext_vf4:
 vsext_vf8:
   templates:
     <<: *_templates
-    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=64, eewbits=8, ldins='vle64.v', stins='vse64.v', emul='mf8' : |
+    test_vxext_vfx_without_mask @ vs2, vlen @ sewbits=64, eewbits=64, ldins='vle64.v', stins='vse64.v', emul='m1' : |
       {inherit}
 
-    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=64, eewbits=8, ldins='vle64.v', stins='vse64.v', emul='mf8' : |
+    test_vxext_vfx_with_mask @ vs2, mask, vlen @ sewbits=64, eewbits=64, ldins='vle64.v', stins='vse64.v', emul='m1' : |
       {inherit}
 
   <<: *default
