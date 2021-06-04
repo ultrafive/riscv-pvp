@@ -5,7 +5,7 @@ _: &default
     #include "test_macros_v.h"
 
   templates:
-    test_vmxxx_mm @ vs2, vs1, vlen @ ebits=32, ldins='vle8.v', stins='vse8.v': |
+    test_vmxxx_mm @ vs2, vs1, vlen, lmul @ ebits=8, ldins='vle8.v', stins='vse8.v': |
       test_{num}:
         li TESTNUM, {num};
 
@@ -21,7 +21,7 @@ _: &default
         {ldins} v1, (a1);
         {ldins} v2, (a2);
 
-        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
         {name} v3, v2, v1;
         la a3, test_{num}_data;
 
@@ -34,14 +34,22 @@ _: &default
 
   cases:
     test_vmxxx_mm:
-      - '[np.array([0x0c], dtype=np.uint8), np.array([0x06], dtype=np.uint8), 4]'
-      - '[np.array([0x0f], dtype=np.uint8), np.array([0x3c], dtype=np.uint8), 7]'
-      - '[np.array([0x0f], dtype=np.uint8), np.array([0x3c], dtype=np.uint8), 8]'
-      - '[np.array([0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f], dtype=np.uint8), 9]'
-      - '[np.array([0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f], dtype=np.uint8), 16]'
-      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31]'
-      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32]'
+      - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   8,    1]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             9,    1]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             16,   1]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31,   1]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32,   1]'
+      - '[np.linspace(-127, 127, 8, dtype=np.uint8),          np.linspace(0, 255, 8, dtype=np.uint8),             64,   1]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  1]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            256,  2]'
+      - '[np.linspace(-127, 127, 33, dtype=np.uint8),         np.linspace(0, 255, 33, dtype=np.uint8),            257,  4]'
+      - '[np.linspace(-127, 127, 64, dtype=np.uint8),         np.linspace(0, 255, 64, dtype=np.uint8),            512,  4]'
+      - '[np.linspace(-127, 127, 64, dtype=np.uint8),         np.linspace(0, 255, 64, dtype=np.uint8),            1023, 8]'
+      - '[np.linspace(-127, 127, 128, dtype=np.uint8),        np.linspace(0, 255, 128, dtype=np.uint8),           1024, 8]'
          
+
   check:
     test_vmxxx_mm: np.array_equal(result, golden)
 
