@@ -111,6 +111,14 @@ Test_vfmax
 # 15.4
 # 16.1
 # 16.2
+Test_vmand_mm
+Test_vmnand_mm
+Test_vmandnot_mm
+Test_vmxor_mm
+Test_vmor_mm
+Test_vmnor_mm
+Test_vmornot_mm
+Test_vmxnor_mm
 # 16.3
 # 16.4
 # 16.5
