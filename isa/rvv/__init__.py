@@ -95,3 +95,6 @@ from .vsoxeix_v import *
 
 from .vredxx_vs import *
 from .vmxxx_mm import *
+
+from .vmv_x_s import *
+from .vmv_s_x import *
