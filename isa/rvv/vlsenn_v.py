@@ -8,9 +8,10 @@ class _Vlsenn_v(Inst):
 
     def golden(self):
         if self['rs2'] == 0:
-            vd= np.full([self['vlen']], self['rs1'][0])
+            vd= np.full([self['vlen']], self['vs1'][0])
         else:
-            vd = self['rs1'][::int(self['rs2']/self.sew)]
+            self['rs2'] = np.asarray(self['rs2'], dtype=np.int32)
+            vd = self['vs1'][::int(self['rs2']/self.sew)]
             vd = vd[:self['vlen']]
 
         return self.masked(vd)
