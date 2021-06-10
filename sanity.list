@@ -123,6 +123,8 @@ Test_vfwadd
 Test_vfwsub
 # 14.4 (missing vf(r)div)
 Test_vfmul
+Test_vfdiv
+Test_vfrdiv
 # 14.5
 Test_vfwmul
 # 14.6
@@ -140,18 +142,24 @@ Test_vfwnmacc
 Test_vfwmsac
 Test_vfwnmsac
 # 14.8, 14.9 and 14.10
+Test_vfsqrt
 # 14.11
 Test_vfmin
 Test_vfmax
 # 14.12
+Test_vfsgnj
 # 14.13
 # 14.14
+Test_vfclass
 # 14.15
 # 14.16
 Test_vfmv_v_f
 # 14.17
+Test_vfcvt
 # 14.18
+Test_vfwcvt
 # 14.19
+Test_vfncvt
 # 15.1
 # 15.2
 # 15.3
