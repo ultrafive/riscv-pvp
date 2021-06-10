@@ -16,7 +16,7 @@ _: &default
         li a0, VLEN / 8 * 8
         vsetvli t0, a0, e8,m8,tu,mu;
         la a1, test_{num}_data;
-        vse8.v v8, (a1);
+        vse8.v {vreg}, (a1);
 
         .pushsection .data, 1;
       test_{num}_data:
@@ -39,7 +39,7 @@ _: &default
         li a0, VLEN / 8 * 8
         vsetvli t0, a0, e8,m8,tu,mu;
         la a1, test_{num}_data;
-        vse8.v v8, (a1);
+        vse8.v {vreg}, (a1);
 
         .pushsection .data, 1;
       test_{num}_data:
