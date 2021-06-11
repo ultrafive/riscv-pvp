@@ -67,6 +67,7 @@ Getting the source from github.
 
 ```bash
 git clone https://github.com/ultrafive/riscv-pvp.git
+git submodule update --init
 ```
 
 Install dependencies and run.

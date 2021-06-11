@@ -98,3 +98,7 @@ from .vmxxx_mm import *
 
 from .vmv_x_s import *
 from .vmv_s_x import *
+from .vmask_m import *
+from .vmsxx_m import *
+from .viota_m import *
+from .vid_v import *

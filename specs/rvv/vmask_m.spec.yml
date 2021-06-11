@@ -5,12 +5,12 @@ _: &default
     #include "test_macros_v.h"
   
   templates:
-    test_vmxxx_mm @ vs2, vs1, vlen, lmul, ebits @ ldins='vle8.v', stins='vse8.v': |
+    test_vmask_m @ vs2, mask, vlen, lmul, ebits @ ldins='vle8.v', stins='vse8.v': |
       test_{num}:
         li TESTNUM, {num};
 
         li a0, {vlen};
-        la a1, {vs1_data};
+        la a1, {mask_data};
         la a2, {vs2_data};
 
         addi t1, a0, 7;
@@ -18,25 +18,23 @@ _: &default
         div t1, t1, t2;
 
         vsetvli t0, t1, e8,m1,tu,mu;
-        {ldins} v1, (a1);
+        {ldins} v0, (a1);
         {ldins} v2, (a2);
 
         vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        {name} v3, v2, v1;
-        la a3, test_{num}_data;
+        {name} a4, v2, v0.t;
 
-        vsetvli t0, t1, e8,m1,tu,mu;
-        {stins} v3, (a3);
+        la a3, test_{num}_data;
+        sd a4, (a3);
         .pushsection .data, 1;
       test_{num}_data:
-        .fill (({vlen}+7)/8), 1, 0;
+        .fill {ebits}, 1, 0;
         .popsection
     
 
-
   cases:
-    test_vmxxx_mm:
-      - '[np.array([0x01], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 8 ]'
+    test_vmask_m:
+      - '[np.array([0x00], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   8,    1, 8 ]'
@@ -120,28 +118,11 @@ _: &default
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  8, 64]'
 
   check:
-    test_vmxxx_mm: np.array_equal(result, golden)
+    test_vmask_m: np.equal(result, golden)
 
-vmand_mm:
+vpopc_m:
   <<: *default
 
-vmnand_mm:
+vfirst_m:
   <<: *default
 
-vmandnot_mm:
-  <<: *default
-
-vmxor_mm:
-  <<: *default
-
-vmor_mm:
-  <<: *default
-
-vmnor_mm:
-  <<: *default
-
-vmornot_mm:
-  <<: *default
-
-vmxnor_mm:
-  <<: *default
