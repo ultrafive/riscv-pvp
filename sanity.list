@@ -62,7 +62,9 @@ Test_vwmacc_
 Test_vwmaccsu_
 Test_vwmaccus_
 # 12.15
+Test_vmerge
 # 12.16
+Test_vmv_v
 # 13.1
 # 13.2
 # 13.3
@@ -102,6 +104,7 @@ Test_vfmax
 # 14.14
 # 14.15
 # 14.16
+Test_vfmv_v_f
 # 14.17
 # 14.18
 # 14.19
@@ -126,6 +129,8 @@ Test_vmxnor_mm
 # 16.8
 # 17.1
 # 17.2
+Test_vfmv_s_f
+Test_vfmv_f_s
 # 17.3
 # 17.4
 # 17.5
