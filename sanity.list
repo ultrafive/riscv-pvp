@@ -10,9 +10,41 @@ Test_vse16_v
 Test_vse32_v
 Test_vse64_v
 # 7.5
+Test_vlse8_v
+Test_vlse16_v
+Test_vlse32_v
+Test_vlse64_v
+Test_vsse8_v
+Test_vsse16_v
+Test_vsse32_v
+Test_vsse64_v
 # 7.6
+Test_vluxei8_v
+Test_vluxei16_v
+Test_vluxei32_v
+Test_vluxei64_v
+Test_vsuxei8_v
+Test_vsuxei16_v
+Test_vsuxei32_v
+Test_vsuxei64_v
+Test_vloxei8_v
+Test_vloxei16_v
+Test_vloxei32_v
+Test_vloxei64_v
+Test_vsoxei8_v
+Test_vsoxei16_v
+Test_vsoxei32_v
+Test_vsoxei64_v
 # 7.7
 # 7.8
+Test_vlsegxex_v
+Test_vssegxex_v
+Test_vlssegxex_v
+Test_vsssegxex_v
+Test_vluxsegxeix_v
+Test_vsuxsegxeix_v
+Test_vloxsegxeix_v
+Test_vsoxsegxeix_v
 # 7.9
 # 8
 # 12.1

@@ -4,8 +4,10 @@ output/
 build/
 report/
 *.fsdb
+*.fsdb.*
 novas*
 *.rc
 verdi*
 ucli.key
 batch.sh
+DVEfiles/
