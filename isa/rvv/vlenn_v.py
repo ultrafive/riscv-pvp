@@ -16,3 +16,14 @@ class Vle32_v(_Vlenn_v):
 
 class Vle64_v(_Vlenn_v):
     name = 'vle64.v'
+
+class Vle1_v(Inst):
+    name = 'vle1.v'
+    def golden(self):
+        newLen = math.ceil(self['vlen']/8) * 8
+        if 'mask' not in self:
+            return np.packbits(np.unpackbits(self['rs1'], bitorder='little')[0: newLen], bitorder='little')
+        else:
+            tmp = np.unpackbits(self['rs1'] & self['mask'], bitorder='little')[0: newLen]
+            return np.packbits(tmp, bitorder='little')
+
