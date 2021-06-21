@@ -7,7 +7,7 @@ class Vpopc_m(Inst):
 
     def golden(self):
         tmp = np.unpackbits(self['vs2'] & self['mask'], bitorder='little')[0: self['vlen']]
-        return np.sum(tmp)
+        return np.array([np.sum(tmp)])
 
 class Vfirst_m(Inst):
     name = 'vfirst.m'
@@ -16,6 +16,6 @@ class Vfirst_m(Inst):
         tmp = np.unpackbits(self['vs2'] & self['mask'], bitorder='little')[0: self['vlen']]
         firstOne = np.where(tmp==1)
         if np.size(firstOne) > 0:
-          return np.min(firstOne)
+          return np.array(np.min(firstOne))
         else:
           return np.array([-1], dtype=int)

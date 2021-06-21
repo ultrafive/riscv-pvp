@@ -229,5 +229,7 @@ if __name__ == "__main__":
         report.close()
         if failed == 0:
             print(f'{len(ps)} tests finish, all pass.')
+            sys.exit(0)
         else:
             print(f'{len(ps)} tests finish, {failed} failed.')
+            sys.exit(-1)
