@@ -58,6 +58,10 @@ Test_vwadd_v
 Test_vwsub_v
 # 12.3
 # 12.4
+Test_vadc_v
+Test_vmadc_v
+Test_vsbc_v
+Test_vmsbc_v
 # 12.5
 Test_vand_v
 Test_vor_v
@@ -68,6 +72,14 @@ Test_vsrl_v
 Test_vsra_v
 # 12.7
 # 12.8
+Test_vmseq_v
+Test_vmsne_v
+Test_vmsltu_v
+Test_vmslt_v
+Test_vmsleu_v
+Test_vmsle_v
+Test_vmsgtu_v
+Test_vmsgt_v
 # 12.9
 Test_vminu_
 Test_vmaxu_
