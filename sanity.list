@@ -143,6 +143,8 @@ Test_vfwmsac
 Test_vfwnmsac
 # 14.8, 14.9 and 14.10
 Test_vfsqrt
+Test_vfrsqrt7
+Test_vfrec7
 # 14.11
 Test_vfmin
 Test_vfmax
