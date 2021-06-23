@@ -6,16 +6,17 @@ class Vsuxsegxeix_v(Inst):
     name = 'vsuxsegxeix.v'
 
     def golden(self):
-        vl = self['vs2'].size
-        vd_size = vl * self['nfields']
-        vd = np.zeros( vd_size, dtype=self['vs3'].dtype )
-        for no in range( 0, self['vs2'].size ):
-            if 'mask' in self:
-                mask = ( self['mask'][np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1
-            else:
-                mask = 1
-            if mask == 1:
-                for idx in range( 0, self['nfields']):
-                    vd[int( self['vs2'][no]/self['vs3'].itemsize + idx)] = self['vs3'][ no*self['nfields']+idx]
-
+        vd = np.zeros( self['vs3'].size, dtype=self['vs3'].dtype )
+        for no in range(0, self['vlen']):
+            start = int(self['idx'][no]/self['vs3'].itemsize)
+            if 'mask' not in self:
+                for idx in range(0, self['nfields']):
+                    vd[start+idx] = self['vs3'][int(no*self['nfields']+idx)]
+            else :
+                mask_arr = np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']]
+                mask_bit = mask_arr[no]
+                if mask_bit == 1:
+                    for idx in range(0, self['nfields']):
+                        vd[start+idx] = self['vs3'][int(no*self['nfields']+idx)]
+        
         return vd

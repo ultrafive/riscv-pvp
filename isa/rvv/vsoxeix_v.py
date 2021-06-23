@@ -7,11 +7,17 @@ class Vsoxeix_v(Inst):
 
     def golden(self):
 
-        vd = np.zeros( self['vs2'].size, dtype=self['vs3'].dtype )
-        for no in range( 0, self['vs2'].size ):
-            vd[int( self['vs2'][no]/self['vs3'].itemsize )] = self['vs3'][no]
+        vd = np.zeros( self['rs1'].size, dtype=self['rs1'].dtype )
+        if 'mask' not in self:
+            for no in range( 0, self['vlen'] ):
+                vd[int( self['vs2'][no]/self['rs1'].itemsize )] = self['rs1'][no]
+        else:
+            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']]
+            for no in range( 0, self['vlen'] ):
+                if mask[no] != 0:
+                    vd[int( self['vs2'][no]/self['rs1'].itemsize )] = self['rs1'][no]
 
-        return self.masked( vd, self['rs1'] )
+        return vd
 
 class Vsoxei8_v(Vsoxeix_v):
     name = 'vsoxei8.v'

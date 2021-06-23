@@ -7,8 +7,8 @@ class Vsssegxex_v(Inst):
 
     def golden(self):
 
-        vl = self['vs3'].size/self['nfields']
-        vd_size = vl * self['rs2']/self['vs3'].itemsize
+        vl = self['vlen']
+        vd_size = (self['vlen'] - 1) * self['rs2'] + self['nfields']
         stride = self['rs2']/self['vs3'].itemsize
         vd = np.zeros( int(vd_size), dtype=self['vs3'].dtype )
         for no in range( 0, int(vl)):
@@ -18,7 +18,7 @@ class Vsssegxex_v(Inst):
 
         if 'mask' in self:
             mask = []
-            for no in range(0, int(self['vs3'].size/self['nfields'])):
+            for no in range(0, vl):
                 mask = ( self['mask'][np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1
                 if mask != 1:
                     for idx in range( 0, self['nfields'] ):
