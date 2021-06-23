@@ -102,3 +102,5 @@ from .vmask_m import *
 from .vmsxx_m import *
 from .viota_m import *
 from .vid_v import *
+
+from .vaxxx_vv import *

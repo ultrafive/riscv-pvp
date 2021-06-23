@@ -24,3 +24,16 @@ class Inst(dict):
             return True
         else:
             return np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']] == 1
+    
+    def rounding(self, value):
+        if self['mode'] == 0:
+            res = value + 1
+        elif self['mode'] == 1:
+            res = np.where(value%4==3, value+1, value)
+        elif self['mode'] == 2:
+            res = value
+        elif self['mode'] == 3:
+            res = np.where(value%4==1, value+2, value)
+
+        return res
+
