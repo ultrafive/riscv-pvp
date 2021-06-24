@@ -29,6 +29,32 @@ _: &default
       test_{num}_data:
         .fill {vlen}, {ebits}, 0;
         .popsection
+    test_basic_with_mask @ vs2, mask, vlen, lmul, ebits: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vlen};
+        la a2, {vs2_data};
+        la a4, {mask_data};
+
+        addi t1, a0, 7;
+        li t2, 8;
+        div t1, t1, t2;
+
+        vsetvli t0, t1, e8,m1,tu,mu;
+        vle8.v v0, (a4);
+        vle8.v v1, (a2);
+
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        {name} v8, v1, v0.t;
+        la a3, test_{num}_data;
+        
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        vse{ebits}.v v8, (a3);
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {vlen}, {ebits}, 0;
+        .popsection
 
 
 
@@ -116,9 +142,93 @@ _: &default
       - '[np.linspace(-127, 127, 9, dtype=np.uint8),           65,   8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          127,  8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          128,  8, 64]'
+    test_basic_with_mask:
+      - '[np.array([0x00], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 8 ]'
+      - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 8 ]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 8 ]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   8,    1, 8 ]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             9,    1, 8 ]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             15,   1, 8 ]'
+      - '[np.array([0xff, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             16,   1, 8 ]'
+      - '[np.array([0x0, 0x0f, 0x3c], dtype=np.uint8),        np.array([0x1, 0x3c, 0x0f], dtype=np.uint8),        17,   1, 8 ]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31,   1, 8 ]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32,   1, 8 ]'
+      - '[np.linspace(-127, 127, 5, dtype=np.uint8),          np.linspace(0, 255, 5, dtype=np.uint8),             33,   1, 8 ]'
+      - '[np.linspace(-127, 127, 8, dtype=np.uint8),          np.linspace(0, 255, 8, dtype=np.uint8),             64,   1, 8 ]'
+      - '[np.linspace(-127, 127, 9, dtype=np.uint8),          np.linspace(0, 255, 9, dtype=np.uint8),             65,   1, 8 ]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            127,  1, 8 ]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  1, 8 ]'
+      - '[np.linspace(-127, 127, 17, dtype=np.uint8),         np.linspace(0, 255, 17, dtype=np.uint8),            129,  2, 8 ]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            255,  2, 8 ]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            256,  2, 8 ]'
+      - '[np.linspace(-127, 127, 33, dtype=np.uint8),         np.linspace(0, 255, 33, dtype=np.uint8),            257,  4, 8 ]'
+      - '[np.linspace(-127, 127, 64, dtype=np.uint8),         np.linspace(0, 255, 64, dtype=np.uint8),            511,  4, 8 ]'
+      - '[np.linspace(-127, 127, 64, dtype=np.uint8),         np.linspace(0, 255, 64, dtype=np.uint8),            512,  4, 8 ]'
+      - '[np.linspace(-127, 127, 65, dtype=np.uint8),         np.linspace(0, 255, 65, dtype=np.uint8),            513,  8, 8 ]'
+      - '[np.linspace(-127, 127, 128, dtype=np.uint8),        np.linspace(0, 255, 128, dtype=np.uint8),           1023, 8, 8 ]'
+      - '[np.linspace(-127, 127, 128, dtype=np.uint8),        np.linspace(0, 255, 128, dtype=np.uint8),           1024, 8, 8 ]'
+      - '[np.array([0x01], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 16]'
+      - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 16]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 16]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   8,    1, 16]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             9,    1, 16]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             15,   1, 16]'
+      - '[np.array([0xff, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             16,   1, 16]'
+      - '[np.array([0x0, 0x0f, 0x3c], dtype=np.uint8),        np.array([0x1, 0x3c, 0x0f], dtype=np.uint8),        17,   1, 16]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31,   1, 16]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32,   1, 16]'
+      - '[np.linspace(-127, 127, 5, dtype=np.uint8),          np.linspace(0, 255, 5, dtype=np.uint8),             33,   1, 16]'
+      - '[np.linspace(-127, 127, 8, dtype=np.uint8),          np.linspace(0, 255, 8, dtype=np.uint8),             64,   1, 16]'
+      - '[np.linspace(-127, 127, 9, dtype=np.uint8),          np.linspace(0, 255, 9, dtype=np.uint8),             65,   2, 16]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            127,  2, 16]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  2, 16]'
+      - '[np.linspace(-127, 127, 17, dtype=np.uint8),         np.linspace(0, 255, 17, dtype=np.uint8),            129,  4, 16]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            255,  4, 16]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            256,  4, 16]'
+      - '[np.linspace(-127, 127, 33, dtype=np.uint8),         np.linspace(0, 255, 33, dtype=np.uint8),            257,  8, 16]'
+      - '[np.linspace(-127, 127, 64, dtype=np.uint8),         np.linspace(0, 255, 64, dtype=np.uint8),            511,  8, 16]'
+      - '[np.linspace(-127, 127, 64, dtype=np.uint8),         np.linspace(0, 255, 64, dtype=np.uint8),            512,  8, 16]'
+      - '[np.array([0x01], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 32]'
+      - '[np.array([0x03], dtype=np.uint8),                   np.array([0x05], dtype=np.uint8),                   3,    1, 32]'
+      - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 32]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x15], dtype=np.uint8),                   5,    1, 32]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 32]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   8,    1, 32]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             9,    1, 32]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             15,   1, 32]'
+      - '[np.array([0xff, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             16,   1, 32]'
+      - '[np.array([0x0, 0x0f, 0x3c], dtype=np.uint8),        np.array([0x1, 0x3c, 0x0f], dtype=np.uint8),        17,   1, 32]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31,   1, 32]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32,   1, 32]'
+      - '[np.linspace(-127, 127, 5, dtype=np.uint8),          np.linspace(0, 255, 5, dtype=np.uint8),             33,   2, 32]'
+      - '[np.linspace(-127, 127, 8, dtype=np.uint8),          np.linspace(0, 255, 8, dtype=np.uint8),             64,   2, 32]'
+      - '[np.linspace(-127, 127, 9, dtype=np.uint8),          np.linspace(0, 255, 9, dtype=np.uint8),             65,   4, 32]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            127,  4, 32]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  4, 32]'
+      - '[np.linspace(-127, 127, 17, dtype=np.uint8),         np.linspace(0, 255, 17, dtype=np.uint8),            129,  8, 32]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            255,  8, 32]'
+      - '[np.linspace(-127, 127, 32, dtype=np.uint8),         np.linspace(0, 255, 32, dtype=np.uint8),            256,  8, 32]'
+      - '[np.array([0x01], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 64]'
+      - '[np.array([0x03], dtype=np.uint8),                   np.array([0x05], dtype=np.uint8),                   3,    1, 64]'
+      - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 64]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x15], dtype=np.uint8),                   5,    1, 64]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 64]'
+      - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   8,    1, 64]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             9,    1, 64]'
+      - '[np.array([0x0f, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             15,   1, 64]'
+      - '[np.array([0xff, 0x3c], dtype=np.uint8),             np.array([0x3c, 0x0f], dtype=np.uint8),             16,   1, 64]'
+      - '[np.array([0x0, 0x0f, 0x3c], dtype=np.uint8),        np.array([0x1, 0x3c, 0x0f], dtype=np.uint8),        17,   2, 64]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 31,   2, 64]'
+      - '[np.array([0x0f, 0x3c, 0x0f, 0x3c], dtype=np.uint8), np.array([0x3c, 0x0f, 0x3c, 0x0f], dtype=np.uint8), 32,   2, 64]'
+      - '[np.linspace(-127, 127, 5, dtype=np.uint8),          np.linspace(0, 255, 5, dtype=np.uint8),             33,   4, 64]'
+      - '[np.linspace(-127, 127, 8, dtype=np.uint8),          np.linspace(0, 255, 8, dtype=np.uint8),             64,   4, 64]'
+      - '[np.linspace(-127, 127, 9, dtype=np.uint8),          np.linspace(0, 255, 9, dtype=np.uint8),             65,   8, 64]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            127,  8, 64]'
+      - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  8, 64]'
 
   check:
     test_basic_without_mask: np.array_equal(result, golden)
+    test_basic_with_mask: np.array_equal(result, golden)
 
 
 viota_m:
