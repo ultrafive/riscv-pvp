@@ -105,3 +105,6 @@ from .vid_v import *
 
 from .vaxxx_vv import *
 from .vrgather_vx import *
+
+from .vlxr_v import *
+from .vsxr_v import *

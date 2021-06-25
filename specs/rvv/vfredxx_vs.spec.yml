@@ -121,7 +121,7 @@ _: &default
           la a0, {mask_data};
           {ldins} v2, (a2) ; 
           {ldins} v3, (a3) ; 
-          {ldins} v0, (a0) ;           
+          vle1.v v0, (a0) ;           
           {name} v3, v2, v1, v0.t ; 
           la a4, test_{num}_data ; 
           {stins} v3, (a4); 

@@ -34,19 +34,9 @@ _: &default
         li a1, {rs1};
         la a2, {vs2_data};
         la a4, {mask_data};
-
-        li t1, 8;
-        remu t2, a0, t1;
-        bnez t2, 1f;
-        li t3,  {vlen} / 8;
-        j 2f;
-      1:
-        li t3,  {vlen} / 8 + 1;
-      2:
-        vsetvli t0, t3, e8, m1, tu, mu;
-        vle8.v v0, (a4);
-
+     
         vsetvli t0, a0, e{ebits}, m1, tu, mu;
+        vle1.v v0, (a4);
         {ldins} v3, (a2);
 
         {name} v2, v3, a1, v0.t;
@@ -102,7 +92,7 @@ vwsubu_vx:
 vwsub_vx:
   <<: *default
 
-vmul_vx:
+vwmul_vx:
   <<: *default
 
 vwmulu_vx:

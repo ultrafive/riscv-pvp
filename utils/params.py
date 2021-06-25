@@ -952,6 +952,13 @@ def linspace_rvv_m_vf(type, vlen):
 def random_mask( vlen ):
     return np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int16)), dtype=np.uint8)
 
+def random_e1( vlen ):
+    return np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.uint8)), dtype=np.uint8)
+
+def res_len_e1( vlen ):
+    return np.ceil( vlen/8 ).astype( np.uint8 )
+
+
 def linspace_rvv_vv_with_mask(type, vlen):
 
     return pytest.param(

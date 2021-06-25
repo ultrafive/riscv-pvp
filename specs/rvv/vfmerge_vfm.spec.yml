@@ -13,7 +13,7 @@ _: &default
         la a2, {vs2_data};
         {ldins} v2, (a2);
         la a3, {mask_data};
-        {ldins} v0, (a3);
+        vle1.v v0, (a3);
         {name} v3, v2, fa1, v0
         la a3, test_{num}_data;
         {stins} v3, (a3);
@@ -31,7 +31,7 @@ _: &default
         la a2, {vs2_data};
         {ldins} v2, (a2);
         la a3, {mask_data};
-        {ldins} v0, (a3);
+        vle1.v v0, (a3);
         {name} v2, v2, fa1, v0
         la a3, test_{num}_data;
         {stins} v2, (a3);
