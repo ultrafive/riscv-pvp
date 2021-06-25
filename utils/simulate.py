@@ -199,6 +199,8 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
     itemsize = golden.itemsize
     size = golden.size
     dtype = golden.dtype
+    if golden.dtype == np.bool_:
+        itemsize = 0.1
     gold = from_txt(res_file, itemsize, size, dtype)
 
     sims = { 'vcs': args.vcs, 'verilator': args.verilator, 'gem5': args.gem5 }
