@@ -55,10 +55,17 @@ class Vwsub_vx(Inst):
 
 
 class Vwmul_vx(Inst):
-    name = 'vmul.vx'
+    name = 'vwmul.vx'
 
     def golden(self):
-        return self.masked(self['vs2'] * self['rs1'])
+        if self['ebits'] == 32:
+            vd = self['vs2'].astype(np.int64) * self['rs1']
+        elif self['ebits'] == 16:
+            vd = self['vs2'].astype(np.int32) * self['rs1']
+        elif  self['ebits'] == 8:
+            vd = self['vs2'].astype(np.int16) * self['rs1']
+
+        return self.masked(vd)
 
 class Vwmulu_vx(Inst):
     name = 'vwmulu.vx'

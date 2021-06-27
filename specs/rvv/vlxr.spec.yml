@@ -8,6 +8,8 @@ _: &default
         li TESTNUM, {num}
         la a0, {rs1_data};
         {name} {vreg}, (a0);
+        li a0, VLEN*{nf}/8;
+        vsetvli a1, a0, e8,m{nf},ta,ma;
         la a1, test_{num}_data;
         {stins} {vreg}, (a1);
         .pushsection .data, 1;
@@ -27,7 +29,7 @@ vl1r_v: &vl1r
   <<: *default
   cases:
     test_basic:
-      - "[ np.linspace(0, 255, 128, dtype=np.uint8), 1, 'v3', 'vs1r.v' ]"
+      - "[ np.linspace(0, 255, 128, dtype=np.uint8), 1, 'v3', 'vse8.v' ]"
 
 vl1re8_v:
   <<: *vl1r
@@ -46,7 +48,7 @@ vl2r_v: &vl2r
   <<: *default
   cases:
     test_basic:
-      - "[ np.linspace(0, 255, 128*2, dtype=np.uint8), 2, 'v2', 'vs2r.v' ]"
+      - "[ np.linspace(0, 255, 128*2, dtype=np.uint8), 2, 'v2', 'vse8.v' ]"
 
 vl2re8_v:
   <<: *vl2r
@@ -65,7 +67,7 @@ vl4r_v: &vl4r
   <<: *default
   cases:
     test_basic:
-      - "[ np.linspace(0, 255, 128*4, dtype=np.uint8), 4, 'v4', 'vs4r.v' ]"
+      - "[ np.linspace(0, 255, 128*4, dtype=np.uint8), 4, 'v4', 'vse8.v' ]"
 
 vl4re8_v:
   <<: *vl4r
@@ -84,7 +86,7 @@ vl8r_v: &vl8r
   <<: *default
   cases:
     test_basic:
-      - "[ np.linspace(0, 255, 128*8, dtype=np.uint8), 8, 'v8', 'vs8r.v' ]"
+      - "[ np.linspace(0, 255, 128*8, dtype=np.uint8), 8, 'v8', 'vse8.v' ]"
 
 vl8re8_v:
   <<: *vl8r

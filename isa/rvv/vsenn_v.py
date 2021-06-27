@@ -6,10 +6,6 @@ class _Vsenn_v(Inst):
     def golden(self):
         return self.masked(self['rs1'])
 
-class Vse1_v(_Vsenn_v):
-    name = 'vse1.v'
-    def golden( self ):
-        return self['rs1']    
 class Vse8_v(_Vsenn_v):
     name = 'vse8.v'
 
