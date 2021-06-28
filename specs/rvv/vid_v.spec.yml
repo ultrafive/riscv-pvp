@@ -21,7 +21,27 @@ _: &default
       test_{num}_data:
         .fill {vlen}, {ebits}, 0;
         .popsection
-    
+    test_basic_with_mask @ vlen, lmul, ebits, mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vlen};
+
+        la a4, {mask_data};
+        li a5, ({vlen} + 7) /8;
+        vsetvli t0, a5, e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        {name} v8;
+        la a3, test_{num}_data;
+        
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        vse{ebits}.v v8, (a3), v0.t;
+        .pushsection .data, 1;
+      test_{num}_data:
+        .fill {vlen}, {ebits}, 0;
+        .popsection
 
 
   cases:
@@ -108,9 +128,93 @@ _: &default
       - '[65,   8, 64]'
       - '[127,  8, 64]'
       - '[128,  8, 64]'
+    test_basic_with_mask:
+      - '[1,    1, 8 , random_mask(1   )]'
+      - '[4,    1, 8 , random_mask(4   )]'
+      - '[7,    1, 8 , random_mask(7   )]'
+      - '[8,    1, 8 , random_mask(8   )]'
+      - '[9,    1, 8 , random_mask(9   )]'
+      - '[15,   1, 8 , random_mask(15  )]'
+      - '[16,   1, 8 , random_mask(16  )]'
+      - '[17,   1, 8 , random_mask(17  )]'
+      - '[31,   1, 8 , random_mask(31  )]'
+      - '[32,   1, 8 , random_mask(32  )]'
+      - '[33,   1, 8 , random_mask(33  )]'
+      - '[64,   1, 8 , random_mask(64  )]'
+      - '[65,   1, 8 , random_mask(65  )]'
+      - '[127,  1, 8 , random_mask(127 )]'
+      - '[128,  1, 8 , random_mask(128 )]'
+      - '[129,  2, 8 , random_mask(129 )]'
+      - '[255,  2, 8 , random_mask(255 )]'
+      - '[256,  2, 8 , random_mask(256 )]'
+      - '[257,  4, 8 , random_mask(257 )]'
+      - '[511,  4, 8 , random_mask(511 )]'
+      - '[512,  4, 8 , random_mask(512 )]'
+      - '[513,  8, 8 , random_mask(513 )]'
+      - '[1023, 8, 8 , random_mask(1023)]'
+      - '[1024, 8, 8 , random_mask(1024)]'
+      - '[1,    1, 16, random_mask(1   )]'
+      - '[4,    1, 16, random_mask(4   )]'
+      - '[7,    1, 16, random_mask(7   )]'
+      - '[8,    1, 16, random_mask(8   )]'
+      - '[9,    1, 16, random_mask(9   )]'
+      - '[15,   1, 16, random_mask(15  )]'
+      - '[16,   1, 16, random_mask(16  )]'
+      - '[17,   1, 16, random_mask(17  )]'
+      - '[31,   1, 16, random_mask(31  )]'
+      - '[32,   1, 16, random_mask(32  )]'
+      - '[33,   1, 16, random_mask(33  )]'
+      - '[64,   1, 16, random_mask(64  )]'
+      - '[65,   2, 16, random_mask(65  )]'
+      - '[127,  2, 16, random_mask(127 )]'
+      - '[128,  2, 16, random_mask(128 )]'
+      - '[129,  4, 16, random_mask(129 )]'
+      - '[255,  4, 16, random_mask(255 )]'
+      - '[256,  4, 16, random_mask(256 )]'
+      - '[257,  8, 16, random_mask(257 )]'
+      - '[511,  8, 16, random_mask(511 )]'
+      - '[512,  8, 16, random_mask(512 )]'
+      - '[1,    1, 32, random_mask(1   )]'
+      - '[3,    1, 32, random_mask(3   )]'
+      - '[4,    1, 32, random_mask(4   )]'
+      - '[5,    1, 32, random_mask(5   )]'
+      - '[7,    1, 32, random_mask(7   )]'
+      - '[8,    1, 32, random_mask(8   )]'
+      - '[9,    1, 32, random_mask(9   )]'
+      - '[15,   1, 32, random_mask(15  )]'
+      - '[16,   1, 32, random_mask(16  )]'
+      - '[17,   1, 32, random_mask(17  )]'
+      - '[31,   1, 32, random_mask(31  )]'
+      - '[32,   1, 32, random_mask(32  )]'
+      - '[33,   2, 32, random_mask(33  )]'
+      - '[64,   2, 32, random_mask(64  )]'
+      - '[65,   4, 32, random_mask(65  )]'
+      - '[127,  4, 32, random_mask(127 )]'
+      - '[128,  4, 32, random_mask(128 )]'
+      - '[129,  8, 32, random_mask(129 )]'
+      - '[255,  8, 32, random_mask(255 )]'
+      - '[256,  8, 32, random_mask(256 )]'
+      - '[1,    1, 64, random_mask(1   )]'
+      - '[3,    1, 64, random_mask(3   )]'
+      - '[4,    1, 64, random_mask(4   )]'
+      - '[5,    1, 64, random_mask(5   )]'
+      - '[7,    1, 64, random_mask(7   )]'
+      - '[8,    1, 64, random_mask(8   )]'
+      - '[9,    1, 64, random_mask(9   )]'
+      - '[15,   1, 64, random_mask(15  )]'
+      - '[16,   1, 64, random_mask(16  )]'
+      - '[17,   2, 64, random_mask(17  )]'
+      - '[31,   2, 64, random_mask(31  )]'
+      - '[32,   2, 64, random_mask(32  )]'
+      - '[33,   4, 64, random_mask(33  )]'
+      - '[64,   4, 64, random_mask(64  )]'
+      - '[65,   8, 64, random_mask(65  )]'
+      - '[127,  8, 64, random_mask(127 )]'
+      - '[128,  8, 64, random_mask(128 )]'
 
   check:
     test_basic_without_mask: np.array_equal(result, golden)
+    test_basic_with_mask: np.array_equal(result, golden)
 
 vid_v:
   <<: *default
