@@ -71,6 +71,8 @@ Test_vsll_v
 Test_vsrl_v
 Test_vsra_v
 # 12.7
+Test_vnsrl
+Test_vnsra
 # 12.8
 Test_vmseq_v
 Test_vmsne_v
@@ -151,6 +153,12 @@ Test_vfmax
 # 14.12
 Test_vfsgnj
 # 14.13
+Test_vmfeq
+Test_vmfne
+Test_vmflt
+Test_vmfle
+Test_vmfgt
+Test_vmfge
 # 14.14
 Test_vfclass
 # 14.15
