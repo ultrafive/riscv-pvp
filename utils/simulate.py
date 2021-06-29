@@ -203,6 +203,8 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         itemsize = 0.1
     gold = from_txt(res_file, itemsize, size, dtype)
 
+    lsf_cmd = 'bsub -n 1 -J simv -Ip'
+
     sims = { 'vcs': args.vcs, 'verilator': args.verilator, 'gem5': args.gem5 }
     options = ''
     for k, sim in sims.items():
@@ -238,11 +240,15 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
         else:
             cmd = f'{sim} {options} {binary} >> {workdir}/{k}.log 2>&1'
         print(f'# {cmd}\n', file=open(f'{workdir}/{k}.log', 'w'))
+
+        if args.lsf:
+            cmd = f'{lsf_cmd} {cmd}'
         ret = os.system(cmd)
         allure.attach(cmd, f'{k} command line', attachment_type=allure.attachment_type.TEXT)
         allure.attach.file(f'{workdir}/{k}.log', f'{k} log', attachment_type=allure.attachment_type.TEXT)
         assert ret == 0
 
+        os.system(f'touch {workdir}/{k}.sig')
         data = from_txt(f'{workdir}/{k}.sig', itemsize, size, dtype)
         diff_to_txt(gold, data, f'{workdir}/diff-{k}.data')
         allure.attach.file(f'{workdir}/diff-{k}.data', f'{k} diff', attachment_type=allure.attachment_type.TEXT)

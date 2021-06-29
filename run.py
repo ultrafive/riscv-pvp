@@ -17,11 +17,13 @@ from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--nproc', help='run tests on n processes', type=int, default=1)
+parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")
 parser.add_argument('--specs', help='test specs')
 parser.add_argument('--cases', help=textwrap.dedent('''\
                                     test case list string or file, for example:
                                     - Test_vsub_vv,Test_addi::test_imm_op[0-0]
                                     - cases.list'''), default='')
+parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true")
 parser.add_argument('--retry', help='retry last failed cases', action="store_true")
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
@@ -98,14 +100,20 @@ for spec in specs:
                 else:
                     continue
 
-                if not name in cfg['cases'] or cfg['cases'][name] is None:
+                cases = cfg['cases']
+                if not name in cases or cases[name] is None:
                     continue
                 if _args:
                     argnames = re.split(r'\s*,\s*', _args)
                 else:
                     argnames = []
                 attrs['argnames'][name] = argnames
-                params = cfg['cases'][name]
+
+                params = cases[name]
+                if args.basic_only:
+                    l = len(params)
+                    if l > 4:
+                        params = [ c for i, c in enumerate(params) if i in [int(l/4), int(l*2/4), int(l*3/4), l-1]]
                 attrs['params'][name] = params
 
                 if template.strip() == '{inherit}':

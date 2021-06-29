@@ -2,8 +2,10 @@ option = None
 
 def pytest_addoption(parser):
     parser.addoption('--nproc', help='run tests on n processes', type=int, default=1)
+    parser.addoption('--lsf', help='run tests on with lsf clusters', action="store_true")
     parser.addoption('--specs', help='test specs')
     parser.addoption('--cases', help='test case list string or file')
+    parser.addoption('--basic-only', help='only run basic test cases for instructions', action="store_true")
     parser.addoption('--retry', help='retry last failed cases', action="store_true")
 
     parser.addoption('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
