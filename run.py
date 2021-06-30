@@ -37,6 +37,7 @@ parser.add_argument('--spike', help='path of spike simulator', default='spike')
 parser.add_argument('--vcs', help='path of vcs simulator', default=None)
 parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
 parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
+parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor way', action="store_true")
 parser.add_argument('--verilator', help='path of verilator simulator', default=None)
 
 args, pytest_args = parser.parse_known_args()
@@ -140,7 +141,8 @@ def run_test(name, cases, argv):
     sys.stderr = output
     print(name)
     argv[0] = f'{__file__}::{cases}'
-    os.environ["WORKDIR"] = f"build/{name}"
+    workdir = f"build/{name}"
+    os.environ["WORKDIR"] = workdir[:-1] # remove trailing '/'
     pytest.main(['-q', '-p', 'no:warnings', '--alluredir=output', *argv])
     return output
 
