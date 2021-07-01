@@ -4,4 +4,4 @@ script_dir=`dirname $0`
 
 . $script_dir/env.common
 
-python run.py --nproc `nproc` --lsf --basic-only "$@"
+python run.py --nproc `nproc` --basic-only "$@"
