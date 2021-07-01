@@ -113,6 +113,10 @@ Test_vmerge
 Test_vmv_v
 # 13.1
 # 13.2
+Test_vaaddu_v
+Test_vaadd_v
+Test_vasubu_v
+Test_vasub_v
 # 13.3
 # 13.4
 # 13.5
