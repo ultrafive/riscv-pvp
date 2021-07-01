@@ -71,9 +71,9 @@ def compile(args, binary, mapfile, dumpfile, hexfile, source, logfile, **kw):
 
 
     cmd = f'riscv64-unknown-elf-objdump -S -D {binary} > {dumpfile}'
-    ret = os.system(cmd)
+    ret += os.system(cmd)
     cmd = f'smartelf2hex.sh {binary} > {hexfile}'
-    ret = os.system(cmd)
+    ret += os.system(cmd)
     assert ret == 0
 
 @allure.step
