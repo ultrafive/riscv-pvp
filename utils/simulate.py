@@ -215,9 +215,9 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
             options = f'+signature={workdir}/{k}.sig +signature-granularity={32}'
 
         if k == 'vcs':
-            opt_ldmem = f'+loadmem={workdir}/test.hex +loadmem_addr=80000000 +max-cycles=100000'
+            opt_ldmem = f'+loadmem={workdir}/test.hex +loadmem_addr=80000000 +max-cycles={args.vcstimeout}'
             if args.tsiloadmem:
-                opt_ldmem = '+max-cycles=1000000'
+                opt_ldmem = f'+max-cycles={args.vcstimeout}'
             opt_fsdb = ''
             if args.fsdb:
                 opt_fsdb = f'+fsdbfile={workdir}/test.fsdb'

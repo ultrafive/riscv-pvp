@@ -20,4 +20,6 @@ def pytest_addoption(parser):
     parser.addoption('--vcs', help='path of vcs simulator', default=None)
     parser.addoption('--gem5', help='path of gem5 simulator', default=None)
     parser.addoption('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
+    parser.addoption('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
+    parser.addoption('--vcstimeout', help='Number of cycles after which VCS stops', default=1000000, type=int)
     parser.addoption('--verilator', help='path of verilator simulator', default=None)
