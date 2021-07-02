@@ -104,6 +104,8 @@ from .viota_m import *
 from .vid_v import *
 
 from .vaxxx_vv import *
+from .vsaddx_xx import *
+from .vssubx_xx import *
 from .vrgather_vx import *
 
 from .vlxr_v import *
