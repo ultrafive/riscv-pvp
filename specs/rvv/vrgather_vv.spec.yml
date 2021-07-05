@@ -81,5 +81,24 @@ _: &default
 vrgather_vv:
   <<: *default
 
-#vrem_vv:
-#  <<: *default
+__: &u_default
+  <<: *default
+  cases:
+    test_vxxx_vv_without_mask:
+      - "[np.random.randint(0, 1, 1, dtype=np.uint16), np.random.randint(25, 1052, 1, dtype=np.uint32), 1, 1]"
+      - "[np.random.randint(0, 16, 16, dtype=np.uint16), np.random.randint(25, 1052, 16, dtype=np.uint32), 16, 1]"
+      - "[np.random.randint(0, 31, 31, dtype=np.uint16), np.random.randint(10, 885, 31, dtype=np.uint32), 31, 1]"
+      - "[np.random.randint(0, 32, 32, dtype=np.uint16), np.random.randint(2, 104, 32, dtype=np.uint32), 32, 1]"
+      - "[np.random.randint(4, 12, 12, dtype=np.uint16), np.random.randint(10, 885, 12, dtype=np.uint32), 12, 'f2']"
+      - "[np.random.randint(0, 32, 16, dtype=np.uint16), np.random.randint(2, 104, 16, dtype=np.uint32), 16, 'f2']"
+
+    test_vxxx_vv_with_mask:
+      - "[np.random.randint(0, 1, 1, dtype=np.uint16),   np.random.randint(25, 1052, 1, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 1, 1]"
+      - "[np.random.randint(0, 16, 16, dtype=np.uint16), np.random.randint(25, 1052, 16, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 16, 1]"
+      - "[np.random.randint(0, 30, 30, dtype=np.uint16), np.random.randint(10, 885, 30, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 30, 1]"
+      - "[np.random.randint(0, 16, 32, dtype=np.uint16), np.random.randint(25, 1052, 32, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 32, 1]"
+      - "[np.random.randint(0, 20, 16, dtype=np.uint16), np.random.randint(25, 1052, 16, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 16, 'f2']"
+      - "[np.random.randint(2, 12, 12, dtype=np.uint16), np.random.randint(25, 1052, 12, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 12, 'f2']"
+
+vrgatherei16_vv:
+  <<: *u_default

@@ -44,3 +44,17 @@ class Vrgather_vv(Inst):
                 vd[i] = self['vs2'][self['vs1'][i]]
 
         return self.masked(vd)
+
+class Vrgatherei16_vv(Inst):
+    name = 'vrgatherei16.vv'
+
+    def golden(self):
+        vd = np.zeros(self['vs1'].size, dtype = np.uint32)
+        vlmax = int(lmul[str(self['lmul'])] * self['VLEN'] / self['ebits'])
+        for i in range (0, self['vlen']):
+            if self['vs1'][i] >= vlmax:
+                vd[i] = 0
+            else:
+                vd[i] = self['vs2'][self['vs1'][i]]
+
+        return self.masked(vd)
