@@ -3,19 +3,19 @@ import math
 
 class Vsxr_v(Inst):
     def golden(self):
-        return self['vs']
+        return self['rs1']
 
-class Vs1r_v(Vsxr_v):
-    name = 'vs1r.v'
+class Vsxre8_v(Vsxr_v):
+    name = 'vsxre8.v'
 
-class Vs2r_v(Vsxr_v):
-    name = 'vs2r.v'
+class Vsxre16_v(Vsxr_v):
+    name = 'vsxre16.v'
 
-class Vs4r_v(Vsxr_v):
-    name = 'vs4r.v'
+class Vsxre32_v(Vsxr_v):
+    name = 'vsxre32.v'
 
-class Vs8r_v(Vsxr_v):
-    name = 'vs8r.v'    
+class Vsxre64_v(Vsxr_v):
+    name = 'vsxre64.v'    
 
   
           

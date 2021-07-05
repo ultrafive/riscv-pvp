@@ -2,100 +2,73 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  _templates: &_templates
-    test_basic: |
+  templates: &_templates
+    test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num}
+
         la a0, {rs1_data};
-        {name} {vreg}, (a0);
+        vl{nf}re{ebits}.v v8, (a0);
+
         li a0, VLEN*{nf}/8;
-        vsetvli a1, a0, e8,m{nf},ta,ma;
+        vsetvli a1, a0, e8,m{nf},tu,mu;
         la a1, test_{num}_data;
-        {stins} {vreg}, (a1);
+        vse8.v v8, (a1);
+
         .pushsection .data, 1;
       test_{num}_data:
-        .fill ({vlen}/8*{nf}), 1, 0;
+        .fill (VLEN/8*{nf}), 1, 0;
         .popsection
 
-  templates: 
+
+vlxre8_v:
+  <<: *default
+  templates:
     <<: *_templates
-    test_basic @ rs1, nf, vreg, stins @ vlen=1024 : |
+    test_basic_without_mask @ rs1, nf       @ ebits = 8: |
       {inherit}
-  check:
-    test_basic: np.equal( result, golden ).all()
-
-
-vl1r_v: &vl1r
-  <<: *default
   cases:
-    test_basic:
-      - "[ np.linspace(0, 255, 128, dtype=np.uint8), 1, 'v3', 'vse8.v' ]"
-
-vl1re8_v:
-  <<: *vl1r
-
-vl1re16_v:
-  <<: *vl1r
-
-vl1re32_v:
-  <<: *vl1r
-
-vl1re64_v:
-  <<: *vl1r 
-
-
-vl2r_v: &vl2r
+    test_basic_without_mask :
+      - "[ np.linspace(0, 255, 1024*1, dtype=np.uint8), 1]"
+      - "[ np.linspace(0, 255, 1024*2, dtype=np.uint8), 2]"
+      - "[ np.linspace(0, 255, 1024*4, dtype=np.uint8), 4]"
+      - "[ np.linspace(0, 255, 1024*8, dtype=np.uint8), 8]"
+    
+vlxre16_v:
   <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, nf       @ ebits = 16: |
+      {inherit}
   cases:
-    test_basic:
-      - "[ np.linspace(0, 255, 128*2, dtype=np.uint8), 2, 'v2', 'vse8.v' ]"
+    test_basic_without_mask :
+      - "[ np.linspace(0, 255, 512*1, dtype=np.uint16), 1]"
+      - "[ np.linspace(0, 255, 512*2, dtype=np.uint16), 2]"
+      - "[ np.linspace(0, 255, 512*4, dtype=np.uint16), 4]"
+      - "[ np.linspace(0, 255, 512*8, dtype=np.uint16), 8]"
 
-vl2re8_v:
-  <<: *vl2r
-
-vl2re16_v:
-  <<: *vl2r
-
-vl2re32_v:
-  <<: *vl2r
-
-vl2re64_v:
-  <<: *vl2r  
-
-
-vl4r_v: &vl4r
+vlxre32_v:
   <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, nf       @ ebits = 32: |
+      {inherit}
   cases:
-    test_basic:
-      - "[ np.linspace(0, 255, 128*4, dtype=np.uint8), 4, 'v4', 'vse8.v' ]"
+    test_basic_without_mask :
+      - "[ np.linspace(0, 255, 256*1, dtype=np.uint32), 1]"
+      - "[ np.linspace(0, 255, 256*2, dtype=np.uint32), 2]"
+      - "[ np.linspace(0, 255, 256*4, dtype=np.uint32), 4]"
+      - "[ np.linspace(0, 255, 256*8, dtype=np.uint32), 8]"
 
-vl4re8_v:
-  <<: *vl4r
-
-vl4re16_v:
-  <<: *vl4r
-
-vl4re32_v:
-  <<: *vl4r
-
-vl4re64_v:
-  <<: *vl4r 
-
-
-vl8r_v: &vl8r
+vlxre64_v:
   <<: *default
+  templates:
+    <<: *_templates
+    test_basic_without_mask @ rs1, nf       @ ebits = 64: |
+      {inherit}
   cases:
-    test_basic:
-      - "[ np.linspace(0, 255, 128*8, dtype=np.uint8), 8, 'v8', 'vse8.v' ]"
-
-vl8re8_v:
-  <<: *vl8r
-
-vl8re16_v:
-  <<: *vl8r
-
-vl8re32_v:
-  <<: *vl8r
-
-vl8re64_v:
-  <<: *vl8r                     
+    test_basic_without_mask :
+      - "[ np.linspace(0, 255, 128*1, dtype=np.uint64), 1]"
+      - "[ np.linspace(0, 255, 128*2, dtype=np.uint64), 2]"
+      - "[ np.linspace(0, 255, 128*4, dtype=np.uint64), 4]"
+      - "[ np.linspace(0, 255, 128*8, dtype=np.uint64), 8]"
