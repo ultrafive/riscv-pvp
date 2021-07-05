@@ -56,7 +56,7 @@ def array_data(prefix, k, vv):
     return '\n'.join(lines) + '\n'
 
 @allure.step
-def compile(args, binary, mapfile, dumpfile, hexfile, source, logfile, **kw):
+def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
     cc = f'{args.clang} --target=riscv{args.xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{args.xlen}gv0p10 -menable-experimental-extensions'
     defines = f'-DXLEN={args.xlen} -DVLEN={args.vlen}'
     cflags = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
@@ -71,8 +71,6 @@ def compile(args, binary, mapfile, dumpfile, hexfile, source, logfile, **kw):
 
 
     cmd = f'riscv64-unknown-elf-objdump -S -D {binary} > {dumpfile}'
-    ret += os.system(cmd)
-    cmd = f'smartelf2hex.sh {binary} > {hexfile}'
     ret += os.system(cmd)
     assert ret == 0
 
@@ -215,6 +213,8 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
             options = f'+signature={workdir}/{k}.sig +signature-granularity={32}'
 
         if k == 'vcs':
+            ret = os.system(f'smartelf2hex.sh {binary} > {workdir}/test.hex')
+            assert ret == 0
             opt_ldmem = f'+loadmem={workdir}/test.hex +loadmem_addr=80000000 +max-cycles={args.vcstimeout}'
             if args.tsiloadmem:
                 opt_ldmem = f'+max-cycles={args.vcstimeout}'
@@ -270,7 +270,6 @@ def simulate(testcase, args, template, check_str, **kw):
     binary = f'{workdir}/test.elf'
     mapfile = f'{workdir}/test.map'
     dumpfile = f'{workdir}/test.dump'
-    hexfile = f'{workdir}/test.hex'
     compile_log = f'{workdir}/compile.log'
     run_log = f'{workdir}/spike.log'
     run_mem = f'{workdir}/run.mem'
@@ -280,7 +279,7 @@ def simulate(testcase, args, template, check_str, **kw):
     golden = inst.golden()
 
     generate(source, template, testcase, inst, **kw)
-    compile(args, binary, mapfile, dumpfile, hexfile, source, compile_log, **kw)
+    compile(args, binary, mapfile, dumpfile, source, compile_log, **kw)
     run(args, run_mem, binary, run_log, res_file, **kw)
     if check_str != '0':
         check(res_file, golden, check_str, workdir)
