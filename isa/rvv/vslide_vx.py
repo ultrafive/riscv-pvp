@@ -25,7 +25,7 @@ class Vslide1up_vx(Inst):
         vl   = self['vl']   if 'vl'   in self else 0 
         maskflag = 1 if 'mask' in self else 0       
         if vstart == 0:
-            if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**1)) ):
+            if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**0)) ):
                 result[0] = self['rs1']
       
         idx = max(vstart, 1)   
