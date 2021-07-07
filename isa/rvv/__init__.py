@@ -108,3 +108,7 @@ from .vrgather_vx import *
 
 from .vlxr_v import *
 from .vsxr_v import *
+
+from .vslide_vx import *
+from .vslide_vi import *
+from .vmvnr_v import *
