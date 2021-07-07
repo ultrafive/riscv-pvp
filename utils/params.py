@@ -1138,3 +1138,51 @@ def linspace_rvv_v_special(type, offset, vlen):
 
 def packbits(a):
     return np.packbits(np.array(a, dtype=np.uint8), bitorder='little')
+
+def special_vv_fp16():
+    # special float table          -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
+    fpt0 = np.array([[0x0000]*6, [0x8000, 0x7c00,         0x7e00,                 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    fpt1 = np.array([[0x7c00]*8, [        0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    fpt2 = np.array([[0x7e00]*6, [                        0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    fpt3 = np.array([[0x2e66]*3, [                                                0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    fpt4 = np.array([[0x4900]*3, [                                                0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    fpt5 = np.array([[0x7bff]*3, [                                                0x7bff, 0x0400, 0x0001]], dtype=np.int16)
+    fpt6 = np.array([[0x0400]*2, [                                                        0x0400, 0x0001]], dtype=np.int16)
+    fpt7 = np.array([[0x0001]*1, [                                                                0x0001]], dtype=np.int16)   
+
+    fpt_data = np.concatenate((fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7), axis=1)
+    fpt_data.dtype = np.float16
+
+    return [ fpt_data[0], fpt_data[1] ] 
+
+def special_vv_fp32():
+    # special float table                  -0   ,       inf  ,       -inf ,       nan  ,      0.1  ,      10  , 3.40282e+38,  1.1755e-38,      1e-45
+    fpt0 = np.array([[0x00000000]*6, [0x80000000,  0x7f800000,               0x7fc00000,                         0x7f7fffff,  0x00800000, 0x00000001]], dtype=np.int32)
+    fpt1 = np.array([[0x7f800000]*8, [             0x7f800000,  0xff800000,  0x7fc00000, 0x3dcccccd, 0x41200000, 0x7f7fffff,  0x00800000, 0x00000001]], dtype=np.int32)
+    fpt2 = np.array([[0x7fc00000]*6, [                                       0x7fc00000, 0x3dcccccd, 0x41200000, 0x7f7fffff,  0x00800000, 0x00000001]], dtype=np.int32)
+    fpt3 = np.array([[0x3dcccccd]*3, [                                                                           0x7f7fffff,  0x00800000, 0x00000001]], dtype=np.int32)
+    fpt4 = np.array([[0x41200000]*3, [                                                                           0x7f7fffff,  0x00800000, 0x00000001]], dtype=np.int32)
+    fpt5 = np.array([[0x7f7fffff]*3, [                                                                           0x7f7fffff,  0x00800000, 0x00000001]], dtype=np.int32)
+    fpt6 = np.array([[0x00800000]*2, [                                                                                        0x00800000, 0x00000001]], dtype=np.int32)
+    fpt7 = np.array([[0x00000001]*1, [                                                                                                    0x00000001]], dtype=np.int32)   
+
+    fpt_data = np.concatenate((fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7), axis=1)
+    fpt_data.dtype = np.float32
+
+    return [ fpt_data[0], fpt_data[1] ]     
+
+def special_vv_fp64():
+    # special float table                                  -0   ,               inf  ,               -inf ,               nan  ,              0.1  ,               10  ,    1.79769313e+308,     2.22507386e-308,         5.e-324
+    fpt0 = np.array([[0x0000000000000000]*6, [0x8000000000000000,  0x7ff0000000000000,                       0x7ff8000000000000,                                         0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt1 = np.array([[0x7ff0000000000000]*8, [                     0x7ff0000000000000,  0xfff0000000000000,  0x7ff8000000000000, 0x3fb999999999999a, 0x4024000000000000, 0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt2 = np.array([[0x7ff8000000000000]*6, [                                                               0x7ff8000000000000, 0x3fb999999999999a, 0x4024000000000000, 0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt3 = np.array([[0x3fb999999999999a]*3, [                                                                                                                           0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt4 = np.array([[0x4024000000000000]*3, [                                                                                                                           0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt5 = np.array([[0x7fefffffffffffff]*3, [                                                                                                                           0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt6 = np.array([[0x0010000000000000]*2, [                                                                                                                                                0x0010000000000000, 0x0000000000000001]], dtype=np.uint64)
+    fpt7 = np.array([[0x0000000000000001]*1, [                                                                                                                                                                    0x0000000000000001]], dtype=np.uint64)   
+
+    fpt_data = np.concatenate((fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7), axis=1)
+    fpt_data.dtype = np.float64
+
+    return [ fpt_data[0], fpt_data[1] ] 

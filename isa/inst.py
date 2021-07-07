@@ -8,12 +8,13 @@ class Inst(dict):
     def golden(self):
         raise NotImplementedError()
 
-    def masked(self, value, old = 0):
+    def masked(self, value, old = 0, vstart = 0):
         if 'mask' not in self:
             return value
         else:
-            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']]
+            mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vlen']]
             return np.where( mask == 1, value, old)
+
 
     def as_mask(self, value):
         return np.packbits(np.unpackbits(value, bitorder='little')[0: self['vlen']], bitorder='little')
