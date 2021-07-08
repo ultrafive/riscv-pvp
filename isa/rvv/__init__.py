@@ -111,4 +111,6 @@ from .vsxr_v import *
 
 from .vslide_vx import *
 from .vslide_vi import *
-from .vmvnr_v import *
+from .vmvnr_v import *  
+from .vcompress_vm import * 
+from .vssrx import * 
