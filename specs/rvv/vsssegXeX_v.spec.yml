@@ -2,7 +2,7 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  _templates: &_templates
+  templates:
     test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -16,6 +16,7 @@ _: &default
 
         {inst_name} v8, (a3), a1;
         .pushsection .data, 1;
+        .balign ({ebits}/8)
       test_{num}_data:
         .fill (({vlen} - 1) * {rs2} + {nfields}), ({ebits}/8), 0;
         .popsection
@@ -37,6 +38,7 @@ _: &default
 
         {inst_name} {vreg}, (a3), a1, v0.t;
         .pushsection .data, 1;
+        .balign ({ebits}/8)
       test_{num}_data:
         .fill (({vlen} - 1) * {rs2} + {nfields}), ({ebits}/8), 0;
         .popsection
@@ -47,14 +49,8 @@ _: &default
 
 vsssegxex_v:
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ vs3, vlen, lmul, inst_name, nfields, ebits, rs2, ldins @ vreg='v8': |
-      {inherit}
-    test_basic_with_mask @ vs3, vlen, lmul, mask, inst_name, nfields, ebits, ldins, rs2 @ vreg='v8': |
-      {inherit}
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ vs3, vlen, lmul, inst_name, nfields, ebits, rs2, ldins @ vreg='v8':
       #sew=8
       - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int8 ),   1, 1, 'vssseg2e8.v',  2,  8, 2*1, 'vlseg2e8.v' ]"
       - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int8 ),   1, 1, 'vssseg3e8.v',  3,  8, 3*1, 'vlseg3e8.v' ]"
@@ -392,7 +388,7 @@ vsssegxex_v:
       # - "[ np.linspace( -1000, 1000,  33*7, dtype=np.int64),  33, 4, 'vssseg2e64.v', 2, 64, 7*8, 'vlseg2e64.v']"
       # - "[ np.linspace( -1000, 1000,  64*7, dtype=np.int64),  64, 4, 'vssseg2e64.v', 2, 64, 7*8, 'vlseg2e64.v']"
 
-    test_basic_with_mask:
+    test_basic_with_mask @ vs3, vlen, lmul, mask, inst_name, nfields, ebits, ldins, rs2 @ vreg='v8':
       #sew=8
       - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int8 ),   1, 1, random_mask(1),   'vssseg2e8.v',  2, 8,   'vlseg2e8.v', 2*1]"
       - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int8 ),   1, 1, random_mask(1),   'vssseg3e8.v',  3, 8,   'vlseg3e8.v', 3*1]"

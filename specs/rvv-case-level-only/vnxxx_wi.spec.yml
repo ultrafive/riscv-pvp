@@ -1,0 +1,88 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_vnxxx_wi_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vlen};
+        la a2, {vs2_data};
+
+        vsetvli t0, a0, e{stebits}, m1, tu, mu;
+        {vs2ldins} v4, (a2);
+
+        vsetvli t0, a0, e{ebits}, m1, tu, mu;
+        {name} v2, v4, {imm};
+        la a3, test_{num}_data;
+
+        {stins} v2, (a3);
+
+        .pushsection .data, 1;
+        .balign ({ebits}/8)*2
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8)*2, 0;
+        .popsection
+
+    test_vnxxx_wi_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vlen};
+        la a2, {vs2_data};
+        la a4, {mask_data};
+
+        vsetvli t0, a0, e{stebits}, m1, tu, mu;
+        vle1.v v0, (a4);
+        {vs2ldins} v4, (a2);
+
+        vsetvli t0, a0, e{ebits}, m1, tu, mu;
+        {name} v2, v4, {imm}, v0.t;
+        la a3, test_{num}_data;
+        {stins} v2, (a3);
+
+        .pushsection .data, 1;
+        .balign ({ebits}/8)*2
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8)*2, 0;
+        .popsection
+
+  check:
+    test_vnxxx_wi_without_mask: np.array_equal(result, golden)
+    test_vnxxx_wi_with_mask: np.array_equal(result, golden)
+
+vnsrl_wi:
+  <<: *default
+
+  cases:
+    test_vnxxx_wi_without_mask @ vs2, imm, vlen @ ebits=32, stebits=64, vs2ldins='vle64.v', stins='vse32.v':
+      # 5-bit immediate
+      - '[np.array([4], dtype=np.uint64), 4, 1]'
+      - '[np.array([0x1fffffff], dtype=np.uint64), 0xf, 1]'
+      - '[np.linspace(0, 0xffff, 16, dtype=np.uint64), 0xc, 16]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.uint64), 0x1e, 15]'
+      - '[np.linspace(0x1000000000000000, 0xffffffffffffffff, 16, dtype=np.uint64), 0x1f, 16]'
+    test_vnxxx_wi_with_mask @ vs2, imm, mask, vlen @ ebits=32, stebits=64, vs2ldins='vle64.v', stins='vse32.v':
+      - '[np.array([4], dtype=np.uint64), 4, np.array([0x5a], dtype=np.uint8), 1]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 5, dtype=np.uint64), 0xf, np.array([0x5a], dtype=np.uint8), 5]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.uint64), 0x1e, np.array([0x5a, 0x55], dtype=np.uint8), 15]'
+      - '[np.linspace(0x1000000000000000, 0xffffffffffffffff, 16, dtype=np.uint64), 0x1f, np.array([0xaa, 0x55], dtype=np.uint8), 16]'
+
+vnsra_wi:
+  <<: *default
+
+  cases:
+    test_vnxxx_wi_without_mask @ vs2, imm, vlen @ ebits=32, stebits=64, vs2ldins='vle64.v', stins='vse32.v':
+      # 5-bit immediate
+      - '[np.array([4], dtype=np.int64), 4, 1]'
+      - '[np.array([0x1fffffff], dtype=np.int64), 0xf, 1]'
+      - '[np.linspace(0, 0xffff, 16, dtype=np.int64), 0xc, 16]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.int64), 0x1e, 15]'
+      - '[np.linspace(0x1000000000000, 0xffffffffffffffff, 16, dtype=np.int64), 0x1f, 16]'
+    test_vnxxx_wi_with_mask @ vs2, imm, mask, vlen @ ebits=32, stebits=64, vs2ldins='vle64.v', stins='vse32.v':
+      - '[np.array([4], dtype=np.int64), 4, np.array([0x5a], dtype=np.uint8), 1]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 5, dtype=np.int64), 0xf, np.array([0x5a], dtype=np.uint8), 5]'
+      - '[np.linspace(0x100000000, 0xffffffffffffff, 15, dtype=np.int64), 0x1e, np.array([0x5a, 0x55], dtype=np.uint8), 15]'
+      - '[np.linspace(0x1000000000000000, 0xffffffffffffffff, 16, dtype=np.int64), 0x1f, np.array([0xaa, 0x55], dtype=np.uint8), 16]'

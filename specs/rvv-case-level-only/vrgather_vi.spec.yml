@@ -1,0 +1,81 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_vxxx_vv_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vlen};
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        la a2, {vs2_data};
+        {ldins} v2, (a2);
+        {name} v3, v2, {imm};
+        la a3, test_{num}_data;
+        {stins} v3, (a3);
+
+        .pushsection .data, 1;
+        .balign ({ebits}/8)
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8), 0;
+        .popsection
+  
+    test_vxxx_vv_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vlen};
+        la a2, {vs2_data};
+        la a4, {mask_data};
+
+        li t1, 8;
+        remu t2, a0, t1;
+        bnez t2, 1f;
+        li t3,  {vlen} / 8;
+        j 2f;
+      1:
+        li t3,  {vlen} / 8 + 1;
+      2:
+        vsetvli t0, t3, e8,m{lmul},tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        {ldins} v2, (a2);
+
+        {name} v3, v2, {imm}, v0.t;
+        la a3, test_{num}_data;
+        {stins} v3, (a3);
+
+        .pushsection .data, 1;
+        .balign ({ebits}/8)
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8), 0;
+        .popsection
+
+  cases:
+    test_vxxx_vv_without_mask @ vs2, imm, vlen, lmul @ ebits=32, ldins="vle32.v", stins="vse32.v", VLEN=1024:
+      - "[np.random.randint(140, 542, 1, dtype=np.uint32), 0, 1, 1]"
+      - "[np.random.randint(140, 542, 16, dtype=np.uint32), 15, 16, 1]"
+      - "[np.random.randint(0, 31, 31, dtype=np.uint32), 2, 31, 1]"
+      - "[np.random.randint(854, 7854, 32, dtype=np.uint32), 0, 32, 1]"
+      - "[np.random.randint(854, 7854, 16, dtype=np.uint32), 10, 16, 'f2']"
+      - "[np.random.randint(854, 7854, 16, dtype=np.uint32), 17, 16, 'f2']"
+    test_vxxx_vv_with_mask @ vs2, imm, mask, vlen, lmul @ ebits=32, ldins="vle32.v", stins="vse32.v", VLEN=1024:
+      - "[np.random.randint(0, 16, 1, dtype=np.uint32), 0, np.linspace(0, 255, 4, dtype=np.uint8), 1, 1]"
+      - "[np.random.randint(0, 16, 16, dtype=np.uint32), 10, np.linspace(0, 255, 4, dtype=np.uint8), 16, 1]"
+      - "[np.random.randint(10, 885, 30, dtype=np.uint32), 2, np.linspace(0, 255, 4, dtype=np.uint8), 30, 1]"
+      - "[np.random.randint(241, 885, 32, dtype=np.uint32), 30, np.linspace(0, 255, 4, dtype=np.uint8), 32, 1]"
+      - "[np.random.randint(10, 885, 15, dtype=np.uint32), 21, np.linspace(0, 255, 4, dtype=np.uint8), 15, 'f2']"
+      - "[np.random.randint(241, 885, 16, dtype=np.uint32), 15, np.linspace(0, 255, 4, dtype=np.uint8), 16, 'f2']"
+
+  check:
+    test_vxxx_vv_without_mask: np.array_equal(result, golden)
+    test_vxxx_vv_with_mask: np.array_equal(result, golden)
+
+vrgather_vi:
+  <<: *default
+
+#vrem_vv:
+#  <<: *default

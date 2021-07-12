@@ -4,7 +4,7 @@ _: &default
     #include "exception.h"
     #include "test_macros_v.h"
 
-  _templates: &_templates
+  templates: 
     test_vssx_v_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -19,6 +19,7 @@ _: &default
         {name} v8, (a3), a2;
 
         .pushsection .data, 1;
+        .balign ({ebits}/8)
       test_{num}_data:
       .fill ({vlen} - 1) * {rs2} + 1, ({ebits}/8), 0;
       .popsection
@@ -48,6 +49,7 @@ _: &default
         {name} v8, (a3), a2, v0.t;
 
         .pushsection .data, 1;
+        .balign ({ebits}/8)
       test_{num}_data:
         .fill ({vlen} - 1) * {rs2} + 1 , ({ebits}/8), 0;
         .popsection
@@ -57,18 +59,10 @@ _: &default
     test_vssx_v_with_mask: np.array_equal(result, golden)
 
 vsse8_v:
-  templates:
-    <<: *_templates
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=8, ldins='vle8.v': |
-      {inherit}
-
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=8, ldins='vle8.v': |
-      {inherit}
-
   <<: *default
 
   cases:
-    test_vssx_v_without_mask:
+    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=8, ldins='vle8.v':
       - '[np.linspace(-128,  127,  64, dtype=np.int8),         0,   64, 1]'
       - '[np.linspace(   0,    0, 128, dtype=np.int8),         0,  128, 1]'
       - '[np.linspace(0xff, 0xff, 400, dtype=np.int8),         4,   80, 1]'
@@ -204,7 +198,7 @@ vsse8_v:
       #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   16,   16, "f8"]'
       #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f8"]'
 
-    test_vssx_v_with_mask:
+    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=8, ldins='vle8.v':
       - '[np.linspace(   0,    0,  128,     dtype=np.int8),    0,   32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-128,  127,  256,     dtype=np.int8),    2,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
       - '[np.linspace(-128,  127,  256,     dtype=np.int8),    4,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
@@ -338,18 +332,11 @@ vsse8_v:
       #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
 
 vsse16_v:
-  templates:
-    <<: *_templates
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=16, ldins='vle16.v': |
-      {inherit}
-
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=16, ldins='vle16.v': |
-      {inherit}
 
   <<: *default
 
   cases:
-    test_vssx_v_without_mask:
+    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=16, ldins='vle16.v':
       - '[np.linspace(-32767,  32767,  64,      dtype=np.int16),    0,   64, 1]'
       - '[np.linspace(     0,      0,  64,      dtype=np.int16),    0,   64, 1]'
       - '[np.linspace(0xffff, 0xffff, 512,      dtype=np.int16),    4,   64, 1]'
@@ -430,7 +417,7 @@ vsse16_v:
       #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   16,   16, "f4"]'
       #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   20,   16, "f4"]'
 
-    test_vssx_v_with_mask:
+    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=16, ldins='vle16.v':
       - '[np.linspace(     0,      0, 128,      dtype=np.int16),    0,   32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-32768,  32767, 128,      dtype=np.int16),    2,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
       - '[np.linspace(-32768,  32767, 256,      dtype=np.int16),    4,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
@@ -512,18 +499,11 @@ vsse16_v:
 
 
 vsse32_v:
-  templates:
-    <<: *_templates
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=32, ldins='vle32.v': |
-      {inherit}
-
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=32, ldins='vle32.v': |
-      {inherit}
 
   <<: *default
 
   cases:
-    test_vssx_v_without_mask:
+    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=32, ldins='vle32.v':
       - '[np.linspace(-32768,  32767,  32, dtype=np.int32),  0, 15, 1]'
       - '[np.linspace(     0,      0,  32, dtype=np.int32),  0, 31, 1]'
       - '[np.linspace(0xffff, 0xffff, 128, dtype=np.int32),  4, 32, 1]'
@@ -600,7 +580,7 @@ vsse32_v:
       #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,   16, "f2"]'
       #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   64,   16, "f2"]'
 
-    test_vssx_v_with_mask:
+    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=32, ldins='vle32.v':
       - '[np.linspace(     0,      0, 128, dtype=np.int32),  0, 32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-32768,  32767, 256, dtype=np.int32),  8, 31, 1, np.linspace(1, 255, 4, dtype=np.uint8)]'
       - '[np.linspace(0,  0xffffffff, 256, dtype=np.int32), 16, 32, 1, np.linspace(1, 255, 4, dtype=np.uint8)]'
@@ -677,18 +657,11 @@ vsse32_v:
       #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   64,   16, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
 
 vsse64_v:
-  templates:
-    <<: *_templates
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=64, ldins='vle64.v': |
-      {inherit}
-
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=64, ldins='vle64.v': |
-      {inherit}
 
   <<: *default
 
   cases:
-    test_vssx_v_without_mask:
+    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=64, ldins='vle64.v':
       - '[np.linspace(    -32768,      32767,  32, dtype=np.int64),  0,  3, 1]'
       - '[np.linspace(         0,          0,  32, dtype=np.int64),  0, 15, 1]'
       - '[np.linspace(0xffffffff, 0xffffffff, 256, dtype=np.int64),  8, 16, 1]'
@@ -737,7 +710,7 @@ vsse64_v:
       #- '[np.linspace(0,  0x7fffffff,  16384,   dtype=np.int64),  128,  128, 8]'
       #- '[np.linspace(0,  0x7fffffff,  17408,   dtype=np.int64),  136,  128, 8]'
 
-    test_vssx_v_with_mask:
+    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=64, ldins='vle64.v':
       - '[np.linspace(     0,          0, 128,  dtype=np.int64),    0,   15, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-32768,      32767, 256,  dtype=np.int64),    8,   16, 1, np.linspace(1, 255, 2, dtype=np.uint8)]'
       - '[np.linspace(     0, 0xffffffff, 256,  dtype=np.int64),   16,   16, 1, np.linspace(1, 255, 2, dtype=np.uint8)]'

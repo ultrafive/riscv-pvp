@@ -2,7 +2,7 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  _templates: &_templates
+  templates:
     test_basic_without_mask: |
       test_{num}: 
           li TESTNUM, {num};
@@ -16,6 +16,7 @@ _: &default
           la a3, test_{num}_data; 
           {stins} v2, (a3); 
           .pushsection .data, 1; 
+          .balign ({ebits}/8)
       test_{num}_data: 
           .fill {vs2_shape[0]}, ({ebits}/8), 0; 
           .popsection     
@@ -32,6 +33,7 @@ _: &default
           la a3, test_{num}_data; 
           {stins} v2, (a3); 
           .pushsection .data, 1; 
+          .balign ({ebits}/8)
       test_{num}_data: 
           .fill {vs2_shape[0]}, ({ebits}/8), 0; 
           .popsection
@@ -48,6 +50,7 @@ _: &default
           la a3, test_{num}_data; 
           {stins} v1, (a3); 
           .pushsection .data, 1; 
+          .balign ({ebits}/8)
       test_{num}_data: 
           .fill {vs2_shape[0]}, ({ebits}/8), 0; 
           .popsection
@@ -68,29 +71,18 @@ _: &default
           la a3, test_{num}_data ; 
           {stins} v3, (a3); 
           .pushsection .data, 1; 
+          .balign ({ebits}/8)
       test_{num}_data: 
           .fill {vs2_shape[0]}, ({ebits}/8), 0; 
           .popsection
-
-  templates: 
-    <<: *_templates
-    test_basic_without_mask @ vs2, frm @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_special_without_mask @ vs2, frm @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_dest_eq_vs2_without_mask @ vs2, frm @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-
 vfrec7_v:
   <<: *default
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ vs2, frm @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -1e10, 1e10, 1, dtype=np.float32), 0]"
       - "[np.linspace( -1e10, 1e10, 10, dtype=np.float32), 0]"
       - "[np.linspace( -1e10, 1e10, 32, dtype=np.float32), 0]"                      
-    test_special_without_mask:
+    test_special_without_mask @ vs2, frm @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[ np.array( [np.float32('-inf')]*32 ), 0 ] "
       - "[ np.linspace( -np.power(2, 128, dtype=np.float32), -np.power(2, 127, dtype=np.float32), 32, dtype=np.float32), 0]"   
       - "[ np.linspace( -np.power(2, 127, dtype=np.float32), -np.power(2, 126, dtype=np.float32), 32, dtype=np.float32), 0]"  
@@ -117,11 +109,11 @@ vfrec7_v:
       - "[ np.array( [np.float32('+inf')]*32 ), 0]"
       - "[ np.frombuffer( struct.pack('I', 0x7F800001), dtype=np.float32 ), 0 ] "  
       - "[ np.frombuffer( struct.pack('I', 0x7FC00000), dtype=np.float32 ), 0 ] "                                   
-    test_dest_eq_vs2_without_mask:
+    test_dest_eq_vs2_without_mask @ vs2, frm @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -1e10, 1e10, 1, dtype=np.float32), 0]"
       - "[np.linspace( -1e10, 1e10, 10, dtype=np.float32), 0]"
       - "[np.linspace( -1e10, 1e10, 32, dtype=np.float32), 0]"     
-    test_basic_with_mask:
+    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -1e10, 1e10, 1, dtype=np.float32), 0, random_mask(1), np.linspace( 100, 127, 1, dtype=np.float32), 1 ]"
       - "[np.linspace( -1e10, 1e10, 10, dtype=np.float32), 0, random_mask(10), np.linspace( 100, 127, 10, dtype=np.float32), 10 ]"
       - "[np.linspace( -1e10, 1e10, 32, dtype=np.float32), 0, random_mask(32), np.linspace( 100, 127, 32, dtype=np.float32), 32 ]" 

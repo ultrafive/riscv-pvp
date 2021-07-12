@@ -2,7 +2,7 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  _templates: &_templates
+  templates:
     test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -19,6 +19,7 @@ _: &default
         {name} v16, (a3), v8;
 
         .pushsection .data,1;
+        .balign ({ebits}/8)
       test_{num}_data:
         .fill {rs1_shape[0]}, ({ebits}/8), 0;
         .popsection
@@ -43,6 +44,7 @@ _: &default
         {name} v16, (a3), v8, v0.t;
 
         .pushsection .data,1;
+        .balign ({ebits}/8)
       test_{num}_data:
         .fill {rs1_shape[0]}, ({ebits}/8), 0;
         .popsection
@@ -50,14 +52,8 @@ _: &default
 
 _vsxxei8_v: &vsxxei8_v
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=8, ldins_vs2='vle8.v': |
-      {inherit}
-    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=8, ldins_vs2='vle8.v' : |
-      {inherit}
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=8, ldins_vs2='vle8.v':
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,   1,    1, dtype=np.uint8)*  1,    8,    1,    1]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,   3,    4, dtype=np.uint8)*  1,    8,    4,    1]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,   3,    4, dtype=np.uint8)*  2,    8,    4,    1]'
@@ -174,7 +170,7 @@ _vsxxei8_v: &vsxxei8_v
       - '[ np.linspace( -32768,  32767,  128, dtype=np.int64),  np.linspace(0, 127,  128, dtype=np.uint8)*  8,   64,  128,    8]'
       - '[ np.linspace( -32768,  32767, 1664, dtype=np.int64),  np.linspace(0, 127,  128, dtype=np.uint8)*104,   64,  128,    8]'
 
-    test_basic_with_mask:
+    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=8, ldins_vs2='vle8.v':
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,   1,    1, dtype=np.uint8)*  1,    8,    1,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,   3,    4, dtype=np.uint8)*  1,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,   3,    4, dtype=np.uint8)*  2,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
@@ -297,14 +293,8 @@ _vsxxei8_v: &vsxxei8_v
 
 _vsxxei16_v: &vsxxei16_v
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=16, ldins_vs2='vle16.v': |
-      {inherit}
-    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=16, ldins_vs2='vle16.v' : |
-      {inherit}
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=16, ldins_vs2='vle16.v':
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,    1,    1, dtype=np.uint16)*  1,    8,    1,    1]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint16)*  1,    8,    4,    1]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint16)*  2,    8,    4,    1]'
@@ -415,7 +405,7 @@ _vsxxei16_v: &vsxxei16_v
       - '[ np.linspace( -32768,  32767,  128, dtype=np.int64),  np.linspace(0,  127,  128, dtype=np.uint16)*  8,   64,  128,    8]'
       - '[ np.linspace( -32768,  32767, 1664, dtype=np.int64),  np.linspace(0,  127,  128, dtype=np.uint16)*104,   64,  128,    8]'
 
-    test_basic_with_mask:
+    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=16, ldins_vs2='vle16.v':
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,    1,    1, dtype=np.uint16)*  1,    8,    1,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint16)*  1,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint16)*  2,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
@@ -533,14 +523,9 @@ _vsxxei16_v: &vsxxei16_v
 
 _vsxxei32_v: &vsxxei32_v
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=32, ldins_vs2='vle32.v': |
-      {inherit}
-    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=32, ldins_vs2='vle32.v' : |
-      {inherit}
+
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=32, ldins_vs2='vle32.v':
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,    1,    1, dtype=np.uint32)*  1,    8,    1,    1]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint32)*  1,    8,    4,    1]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint32)*  2,    8,    4,    1]'
@@ -639,7 +624,7 @@ _vsxxei32_v: &vsxxei32_v
       - '[ np.linspace( -32768,  32767,  128, dtype=np.int64),  np.linspace(0,  127,  128, dtype=np.uint32)*  8,   64,  128,    8]'
       - '[ np.linspace( -32768,  32767, 1664, dtype=np.int64),  np.linspace(0,  127,  128, dtype=np.uint32)*104,   64,  128,    8]'
 
-    test_basic_with_mask:
+    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=32, ldins_vs2='vle32.v' :
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,    1,    1, dtype=np.uint32)*  1,    8,    1,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint32)*  1,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint32)*  2,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
@@ -745,14 +730,8 @@ _vsxxei32_v: &vsxxei32_v
 
 _vsxxei64_v: &vsxxei64_v
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=64, ldins_vs2='vle64.v': |
-      {inherit}
-    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=64, ldins_vs2='vle64.v' : |
-      {inherit}
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ rs1, vs2, ebits, vlen, lmul       @ ebits_vs2=64, ldins_vs2='vle64.v':
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,    1,    1, dtype=np.uint64)*  1,    8,    1,    1]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint64)*  1,    8,    4,    1]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint64)*  2,    8,    4,    1]'
@@ -833,7 +812,7 @@ _vsxxei64_v: &vsxxei64_v
       - '[ np.linspace( -32768,  32767,  128, dtype=np.int64),  np.linspace(0,  127,  128, dtype=np.uint64)*  8,   64,  128,    8]'
       - '[ np.linspace( -32768,  32767, 1664, dtype=np.int64),  np.linspace(0,  127,  128, dtype=np.uint64)*104,   64,  128,    8]'
 
-    test_basic_with_mask:
+    test_basic_with_mask    @ rs1, vs2, ebits, vlen, lmul, mask @ ebits_vs2=64, ldins_vs2='vle64.v' :
       - '[ np.linspace(   -128,    127,    1, dtype=np.int8 ),  np.linspace(0,    1,    1, dtype=np.uint64)*  1,    8,    1,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    4, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint64)*  1,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'
       - '[ np.linspace(   -128,    127,    8, dtype=np.int8 ),  np.linspace(0,    3,    4, dtype=np.uint64)*  2,    8,    4,    1, np.linspace(1, 255,   1, dtype=np.uint8)]'

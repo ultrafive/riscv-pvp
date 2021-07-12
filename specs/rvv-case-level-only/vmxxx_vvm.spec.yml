@@ -1,0 +1,57 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_vmxxx_vvm: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vlen};
+        la a1, {vs1_data};
+        la a2, {vs2_data};
+        la a4, {v0_data};
+
+        vsetvli t0, a0, e{ebits},m1,tu,mu;
+        vle1.v v0, (a4);
+        {ldins} v1, (a1);
+        {ldins} v2, (a2);
+
+        {name} v3, v2, v1, v0;
+        la a3, test_{num}_data;
+
+        li t1, 8;
+        remu t2, a0, t1;
+        bnez t2, 1f;
+        li t3,  {vlen} / 8;
+        j 2f;
+      1:
+        li t3,  {vlen} / 8 + 1;
+      2:
+        vsetvli t0, t3, e8,m1,tu,mu;
+        vse8.v v3, (a3);
+        .pushsection .data, 1;
+        .balign ({ebits}/8)
+      test_{num}_data:
+        .fill {vlen}, ({ebits}/8), 0;
+        .popsection
+
+  cases:
+    test_vmxxx_vvm @ vs2, vs1, v0, vlen @ ebits=32, ldins='vle32.v':
+      - '[np.array([4], dtype=np.uint32), np.array([4], dtype=np.uint32), np.array([0x5a], dtype=np.uint8), 1]'
+      - '[np.array([0xfffffff0], dtype=np.uint32), np.array([0x100], dtype=np.uint32), np.array([0x3], dtype=np.uint8), 1]'
+      - '[np.array([0xffff, 6], dtype=np.uint32), np.array([0x10000, 3], dtype=np.uint32), np.array([0x1], dtype=np.uint8), 2]'
+      - '[np.linspace(0x1000000, 0xffffffff, 8, dtype=np.uint32), np.linspace(0x0, 0xffffff, 8, dtype=np.uint32), np.array([0xff], dtype=np.uint8), 8]'
+      - '[np.linspace(0x0, 0xffffff, 31, dtype=np.uint32), np.linspace(0x1000000, 0xffffffff, 31, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 31]'
+      - '[np.linspace(0x1000000, 0xffffffff, 32, dtype=np.uint32), np.linspace(0x0, 0xffffff, 32, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 32]'
+  
+  check:
+    test_vmxxx_vvm: np.array_equal(result, golden)
+
+vmadc_vvm:
+  <<: *default
+
+vmsbc_vvm:
+  <<: *default
