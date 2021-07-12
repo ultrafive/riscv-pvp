@@ -240,7 +240,7 @@ def diff(args, run_mem, binary, res_file, golden, workdir):
                         --l1d_assoc=8 \
                         --l2cache \
                         --l2_size=512kB \
-                        --signature={workdir}{k}.sig'
+                        --signature={workdir}/{k}.sig'
 
         if k == 'gem5':
             cmd = f'{sim} {options} --kernel={binary} >> {workdir}/{k}.log 2>&1'
