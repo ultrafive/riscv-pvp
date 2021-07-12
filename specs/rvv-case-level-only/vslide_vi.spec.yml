@@ -1,0 +1,131 @@
+_: &default
+  head: |
+    #include "exception.h"
+  env: RVTEST_RV64UV
+  templates:
+    test_basic_without_mask: |
+      test_{num}:          
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew}, m1, tu, ma;
+        la a2, {vs2_data};
+        la a3, {ori_data};
+        {ldins} v1, (a2);
+        {ldins} v2, (a3);
+        {name} v2, v1, {uimm};
+        la a3, test_{num}_data;
+        {stins} v2, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection 
+    test_basic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew}, m1, tu, ma;
+        la a2, {vs2_data};
+        la a3, {ori_data};
+        la a0, {mask_data};
+        {ldins} v1, (a2);
+        {ldins} v0, (a0); 
+        {ldins} v3, (a3);
+        {name} v3, v1, {uimm}, v0.t;
+        la a3, test_{num}_data;
+        {stins} v3, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection  
+    test_vstart_not_eq_zero_without_mask: |   
+      test_{num}: 
+        li TESTNUM, {num};                            
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew}, m{lmul}, tu, ma;
+        la a2, {vs2_data};            
+        la a3, {ori_data};            
+        {ldins} v1, (a2);
+        {ldins} v2, (a3);
+        li t0, {vstart};
+        csrw vstart, t0;              
+        {name} v2, v1, {uimm};            
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:la a3, test_{num}_data; 
+        {stins} v2, (a3);             
+        .pushsection .data, 1; 
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0; 
+        .popsection           
+    test_vstart_not_eq_zero_with_mask: |   
+      test_{num}: 
+        li TESTNUM, {num};            // {num} set automatically
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew}, m{lmul}, tu, ma;
+        la a2, {vs2_data};            // vs2 data label
+        la a3, {ori_data};            // original data label of target register 
+        {ldins} v1, (a2);
+        {ldins} v2, (a3);
+        la a0, {mask_data} ;
+        {ldins} v0, (a0);
+        li t0, {vstart};
+        csrw vstart, t0;              // set vstart 
+        {name} v2, v1, {uimm}, v0.t ; // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;                  // test if vstart==0 after the instruction
+        j fail;
+      1:vsetvli x0, x0, e{sew}, m{lmul}, ta, ma; 
+        la a3, test_{num}_data; 
+        {stins} v2, (a3);             // save the result data into test_{num}_data memory
+        .pushsection .data, 1; 
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;     // {vl} sets of ({sew}/8) bytes 0
+        .popsection 
+  check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True )
+    test_basic_with_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True ) 
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True )
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True )   
+
+vslideup_vi:
+  <<: *default 
+  cases:
+    test_basic_without_mask @vs2, uimm, ori, sew, vl @ ldins='vle64.v', stins='vse64.v':
+      - '[np.array([0x1,0x1],dtype=np.uint64), 0x4, np.array([0x3, 0x3],dtype=np.uint64), 64, 2]'
+      - '[np.linspace(0x0,0xf,15,dtype=np.uint64), 0x1, np.linspace(0x10,0x1f,15,dtype=np.uint64), 64, 15]'
+    test_basic_with_mask @vs2, uimm, ori, mask, sew, vl @ ldins='vle64.v', stins='vse64.v':
+      - '[np.array([0x1,0x11], dtype=np.uint64), 0x4, np.array([0x3,0x13], dtype=np.uint64), np.array([0xf], dtype=np.uint64), 64, 2]'
+      - '[np.linspace(0x10, 0x1f, 15, dtype=np.uint64), 0x3, np.linspace(0x20, 0x2f, 15, dtype=np.uint64), np.array([0xff], dtype=np.uint64), 64, 15]'
+      - '[np.linspace(0x1000, 0xffff, 16, dtype=np.uint64), 0x6, np.linspace(0x2000, 0xffff, 16, dtype=np.uint64), np.array([0xffff], dtype=np.uint64), 64, 16]'
+    test_vstart_not_eq_zero_without_mask @vs2, uimm, ori, sew, lmul, vl, ldins, stins, vstart:
+      - '[np.linspace(0x00,0x20,12,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,12,dtype=np.uint64), 64, 1, 12, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,16,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,16,dtype=np.uint64), 64, 1, 16, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,32,dtype=np.uint32), 0x3, np.linspace(0x20,0x40,32,dtype=np.uint32), 32, 1, 32, "vle32.v", "vse32.v", 0x4]'
+    test_vstart_not_eq_zero_with_mask @vs2, uimm, ori, mask, sew, lmul, vl, ldins, stins, vstart:
+      - '[np.linspace(0x00,0x20,12,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,12,dtype=np.uint64), np.array([0x00ff],dtype=np.uint64), 64, 1, 12, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,16,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,16,dtype=np.uint64), np.array([0x0fff],dtype=np.uint64), 64, 1, 16, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,32,dtype=np.uint64), 0x3, np.linspace(0x20,0x40,32,dtype=np.uint64), np.array([0xffff],dtype=np.uint64), 64, 1, 32, "vle64.v", "vse64.v", 0x4]'
+
+vslidedown_vi:
+  <<: *default 
+  cases:
+    test_basic_without_mask @vs2, uimm, ori, sew, vl @ ldins='vle64.v', stins='vse64.v':
+      - '[np.array([0x1,0x1],dtype=np.uint64), 0x4, np.array([0x3, 0x3],dtype=np.uint64), 64, 2]'
+      - '[np.linspace(0x0,0xf,15,dtype=np.uint64), 0x1, np.linspace(0x10,0x1f,15,dtype=np.uint64), 64, 15]'
+    test_basic_with_mask @vs2, uimm, ori, mask, sew, vl @ ldins='vle64.v', stins='vse64.v':
+      - '[np.array([0x1,0x11], dtype=np.uint64), 0x4, np.array([0x3,0x13], dtype=np.uint64), np.array([0xf], dtype=np.uint64), 64, 2]'
+      - '[np.linspace(0x10, 0x1f, 15, dtype=np.uint64), 0x3, np.linspace(0x20, 0x2f, 15, dtype=np.uint64), np.array([0xff], dtype=np.uint64), 64, 15]'
+      - '[np.linspace(0x1000, 0xffff, 16, dtype=np.uint64), 0x6, np.linspace(0x2000, 0xffff, 16, dtype=np.uint64), np.array([0xffff], dtype=np.uint64), 64, 16]'
+    test_vstart_not_eq_zero_without_mask @vs2, uimm, ori, sew, lmul, vl, ldins, stins, vstart:
+      - '[np.linspace(0x00,0x20,12,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,12,dtype=np.uint64), 64, 1, 12, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,16,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,16,dtype=np.uint64), 64, 1, 16, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,32,dtype=np.uint32), 0x3, np.linspace(0x20,0x40,32,dtype=np.uint32), 32, 1, 32, "vle32.v", "vse32.v", 0x4]'
+    test_vstart_not_eq_zero_with_mask @vs2, uimm, ori, mask, sew, lmul, vl, ldins, stins, vstart:
+      - '[np.linspace(0x00,0x20,12,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,12,dtype=np.uint64), np.array([0x00ff],dtype=np.uint64), 64, 1, 12, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,16,dtype=np.uint64), 0x2, np.linspace(0x20,0x40,16,dtype=np.uint64), np.array([0xff0f],dtype=np.uint64), 64, 1, 16, "vle64.v", "vse64.v", 0x2]'
+      - '[np.linspace(0x00,0x20,32,dtype=np.uint32), 0x3, np.linspace(0x20,0x40,32,dtype=np.uint32), np.array([0xffff],dtype=np.uint32), 32, 1, 32, "vle32.v", "vse32.v", 0x4]'

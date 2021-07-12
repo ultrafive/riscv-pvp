@@ -4,7 +4,7 @@ _: &default
     #include "exception.h"
     #include "test_macros_v.h"
 
-  _templates: &_templates
+  templates:
     test_vxxx_v_v: |
       test_{num}:
         li TESTNUM, {num};
@@ -17,6 +17,7 @@ _: &default
         la a3, test_{num}_data;
         {stins} v3, (a3);
         .pushsection .data, 1;
+        .balign ({ebits}/8)
       test_{num}_data:
         .fill {vlen}, ({ebits}/8), 0;
         .popsection
@@ -25,15 +26,10 @@ _: &default
     test_vxxx_v_v: np.array_equal(result, golden)
 
 vmv_v_v:
-  templates:
-    <<: *_templates
-    test_vxxx_v_v @ vs1, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-
   <<: *default
 
   cases:
-    test_vxxx_v_v:
+    test_vxxx_v_v @ vs1, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - '[np.array([1], dtype=np.int32), 1]'
       - '[np.array([1, 1, -1, 64], dtype=np.int32), 4]'
       - '[np.linspace(-255, 0xffff, 31, dtype=np.int32), 31]'

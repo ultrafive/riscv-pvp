@@ -4,7 +4,7 @@ _: &default
     #include "exception.h"
     #include "test_macros_v.h"
 
-  _templates: &_templates
+  templates:
     test_vmvnv_v: |
       test_{num}:
         li TESTNUM, {num};       
@@ -16,6 +16,7 @@ _: &default
         la a2, test_{num}_data;
         {stins} v0, (a2);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill {vl}, ({sew}/8), 0;
         .popsection
@@ -24,51 +25,38 @@ _: &default
     test_vmvnv_v: np.array_equal(result, golden)
 
 vmv1r_v:
-  templates:
-    <<: *_templates
-    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins : |
-      {inherit}
+
   <<: *default
   cases:
-    test_vmvnv_v:
+    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins:
       - '[np.linspace(0x0,0x10,16,dtype=np.uint64), 16, 64, 1, "vle64.v", "vse64.v"]'
       - '[np.linspace(0x0,0x20,32,dtype=np.uint32), 32, 32, 1, "vle32.v", "vse32.v"]'
       - '[np.linspace(0x0,0x40,64,dtype=np.uint16), 64, 16, 1, "vle16.v", "vse16.v"]'
 
 vmv2r_v:
-  templates:
-    <<: *_templates
-    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins : |
-      {inherit}
+
   <<: *default
   cases:
-    test_vmvnv_v:
+    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins:
       - '[np.linspace(0x0,0x20,32,dtype=np.uint64),  32,  64, 2, "vle64.v", "vse64.v"]'
       - '[np.linspace(0x0,0x40,64,dtype=np.uint32),  64,  32, 2, "vle32.v", "vse32.v"]'
       - '[np.linspace(0x0,0x20,128,dtype=np.uint16), 128, 16, 2, "vle16.v", "vse16.v"]'
       - '[np.linspace(0x0,0x40,256,dtype=np.uint8),  256, 8,  2, "vle8.v",  "vse8.v"]'
 
 vmv4r_v:
-  templates:
-    <<: *_templates
-    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins : |
-      {inherit}
+
   <<: *default
   cases:
-    test_vmvnv_v:
+    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins:
       - '[np.linspace(0x0,0x40,64,dtype=np.uint64),  64,  64, 4, "vle64.v", "vse64.v"]'
       - '[np.linspace(0x0,0x80,128,dtype=np.uint32), 128, 32, 4, "vle32.v", "vse32.v"]'
       - '[np.linspace(0x0,0xa0,256,dtype=np.uint16), 256, 16, 4, "vle16.v", "vse16.v"]'
       - '[np.linspace(0x0,0xf0,512,dtype=np.uint8),  512, 8,  4, "vle8.v",  "vse8.v"]'
       
 vmv8r_v:
-  templates:
-    <<: *_templates
-    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins : |
-      {inherit}
   <<: *default
   cases:
-    test_vmvnv_v:
+    test_vmvnv_v @ vs2, vl, sew, mul, ldins, stins:
       - '[np.linspace(0x0,0x080,128,dtype=np.uint64),  128, 64, 8, "vle64.v", "vse64.v"]'
       - '[np.linspace(0x0,0x100,256,dtype=np.uint32),  256, 32, 8, "vle32.v", "vse32.v"]'
       - '[np.linspace(0x0,0x200,512,dtype=np.uint16),  512, 16, 8, "vle16.v", "vse16.v"]'

@@ -3,27 +3,24 @@ import random
 import pytest
 
 def linspace_mm(type, w, h):
-    return pytest.param(
+    return [
         np.linspace(-127, 200, w*h, dtype=type).reshape(w, h), 
         np.linspace(-127, 200, w*h, dtype=type).reshape(w, h), 
-        id=f'{w}x{h}'
-    )
+    ]
 
 def linspace_mm_stride(type, w, h, dstride, sstride1, sstride2 ):
-    return pytest.param(
+    return [
         np.linspace(-127, 200, w*h, dtype=type).reshape(w, h), 
         np.linspace(-127, 200, w*h, dtype=type).reshape(w, h), 
         dstride,
         sstride1,
         sstride2,
-        id=f'{w}x{h}'
-    )
+    ]
 
 def linspace_mm_rs1_eq_rs2(type, w, h):
-    return pytest.param(
+    return [
         np.linspace(-127, 200, w*h, dtype=type).reshape(w, h),  
-        id=f'{w}x{h}'
-    )
+    ]
 
 def special_float_mm(type, w, h):
     # special float table        -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
@@ -38,11 +35,10 @@ def special_float_mm(type, w, h):
     fpt_data = np.concatenate((fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7),axis=1)
     fpt_data.dtype = type
 
-    return pytest.param(
+    return [
         fpt_data[0].reshape(w, h), 
         fpt_data[1].reshape(w, h),
-        id=f'{w}x{h}'
-    )
+    ]
 
 def linespace_mv( type, w, h, dim_h ):
     rs1 = np.linspace(-127, 200, w*h, dtype=type).reshape(h, w)
@@ -50,12 +46,11 @@ def linespace_mv( type, w, h, dim_h ):
         vs2 = np.linspace(300, 40, w, dtype=type).reshape(1, w)
     else:
         vs2 = np.linspace(300, 40, h, dtype=type).reshape(h, 1)
-    return pytest.param(
+    return [
         rs1, 
         vs2,
         dim_h,
-        id=f'{w}x{h}x{dim_h}'
-    )
+    ]
 
 def linespace_mv_stride( type, w, h, dim_h, dstride, sstride1 ):
     rs1 = np.linspace(-127, 200, w*h, dtype=type).reshape(h, w)
@@ -63,14 +58,13 @@ def linespace_mv_stride( type, w, h, dim_h, dstride, sstride1 ):
         vs2 = np.linspace(300, 40, w, dtype=type).reshape(1, w)
     else:
         vs2 = np.linspace(300, 40, h, dtype=type).reshape(h, 1)
-    return pytest.param(
+    return [
         rs1, 
         vs2,
         dim_h,
         dstride,
         sstride1,
-        id=f'{w}x{h}x{dim_h}x{dstride}x{sstride1}'
-    )
+    ]
 
 def linespace_mv_x32( type, w, h, dim_h ):
     rs1 = np.linspace(-127, 200, w*h, dtype=np.int32).reshape(h, w)
@@ -78,12 +72,11 @@ def linespace_mv_x32( type, w, h, dim_h ):
         vs2 = np.linspace(300, 40, w, dtype=type).reshape(1, w)
     else:
         vs2 = np.linspace(300, 40, h, dtype=type).reshape(h, 1)
-    return pytest.param(
+    return [
         rs1, 
         vs2,
         dim_h,
-        id=f'{w}x{h}x{dim_h}'
-    )
+    ]
 
 def linespace_mv_stride_x32( type, w, h, dim_h, dstride, sstride1 ):
     rs1 = np.linspace(-127, 200, w*h, dtype=np.int32).reshape(h, w)
@@ -91,14 +84,13 @@ def linespace_mv_stride_x32( type, w, h, dim_h, dstride, sstride1 ):
         vs2 = np.linspace(300, 40, w, dtype=type).reshape(1, w)
     else:
         vs2 = np.linspace(300, 40, h, dtype=type).reshape(h, 1)
-    return pytest.param(
+    return [
         rs1, 
         vs2,
         dim_h,
         dstride,
         sstride1,
-        id=f'{w}x{h}x{dim_h}x{dstride}x{sstride1}'
-    )
+    ]
 
 def special_float_mv(type, w, h, dim_h):
     # special float table        -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
@@ -113,91 +105,82 @@ def special_float_mv(type, w, h, dim_h):
     fpt_data = np.concatenate((fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7),axis=1)
     fpt_data.dtype = type
 
-    return pytest.param(
+    return [
         fpt_data[0].reshape(h, w), 
         fpt_data[1].reshape(h, w),
         dim_h,
-        id=f'{dim_h}'
-    )
+    ]
 
 def random_mf( height, width ):
     rs1 = np.random.random((height, width)).astype('float16') * ( 1 - ( -1 ) ) + ( -1 )
     rs2 = np.random.random((1, 1)).astype('float32')
-    return pytest.param(
+    return [
         rs1,
         rs2,
-        id=f'{height}x{width}'
-    )
+    ]
 
 def random_mf_stride( height, width, stride_s1, stride_rd ):
     rs1 = np.random.random((height, width)).astype('float16') * ( 1 - ( -1 ) ) + ( -1 )
     rs2 = np.random.random((1, 1)).astype('float32')
-    return pytest.param(
+    return [
         rs1,
         rs2,
         stride_s1,
         stride_rd,
-        id=f'{height}x{width}x{stride_s1}x{stride_rd}'
-    )
+    ]
 
 def random_mf_x32( height, width ):
     rs1 = np.random.random((height, width)).astype('float16') * ( 1 - ( -1 ) ) + ( -1 )
     rs1 = (rs1 * np.iinfo(np.int8).max).astype(np.int32)
     rs2 = np.random.random((1, 1)).astype('float32')
-    return pytest.param(
+    return [
         rs1,
         rs2,
-        id=f'{height}x{width}'
-    )
+    ]
 
 def random_mf_stride_x32( height, width, stride_s1, stride_rd ):
     rs1 = np.random.random((height, width)).astype('float16') * ( 1 - ( -1 ) ) + ( -1 )
     rs1 = (rs1 * np.iinfo(np.int8).max).astype(np.int32)
     rs2 = np.random.random((1, 1)).astype('float32')
-    return pytest.param(
+    return [
         rs1,
         rs2,
         stride_s1,
         stride_rd,
-        id=f'{height}x{width}x{stride_s1}x{stride_rd}'
-    )
+    ]
 
 def random_mf_x8_hf( height, width ):
     rs1 = np.random.random((height, width)).astype('float16') * ( 1 - ( -1 ) ) + ( -1 )
     rs2 = np.random.random((1, 1)).astype('float32')
     rs2 = rs2 * 128
-    return pytest.param(
+    return [
         rs1,
         rs2,
-        id=f'{height}x{width}'
-    )
+    ]
 
 def random_mf_stride_x8_hf( height, width, stride_s1, stride_rd ):
     rs1 = np.random.random((height, width)).astype('float16') * ( 1 - ( -1 ) ) + ( -1 )
     rs2 = np.random.random((1, 1)).astype('float32')
     rs2 = rs2 * 128
-    return pytest.param(
+    return [
         rs1,
         rs2,
         stride_s1,
         stride_rd,
-        id=f'{height}x{width}x{stride_s1}x{stride_rd}'
-    )
+    ]
 
 def random_m( dtype, width, height ):
     rs1 = np.random.normal( size = (height, width)).astype(dtype)
-    return pytest.param(
+    return [
         rs1,
-        id=f'{width}x{height}'
-    )
+    ]
 
 def random_m_stride( dtype, width, height, sstride1 ):
     rs1 = np.random.normal( size = (height, width)).astype(dtype)
-    return pytest.param(
+    return [
         rs1,
         sstride1,
-        id=f'{width}x{height}x{sstride1}'
-    )
+    ]
 
 def special_float_m( dtype, num, special_hex ):
     s1 = np.linspace( -1, 1, 256, dtype=dtype ).reshape( 16, 16 )
@@ -205,27 +188,24 @@ def special_float_m( dtype, num, special_hex ):
     sa.dtype = dtype
     s1[num % 15][6] = sa[0]
 
-    return pytest.param(
+    return [
         s1,
-        id=f'{num}x{special_hex}'
-    )
+    ]
 
 def random_m_dim( dtype, width, height, dim ):
     rs1 = np.random.normal( size = (height, width)).astype(dtype)
-    return pytest.param(
+    return [
         rs1,
         dim,
-        id=f'{width}x{height}x{dim}'
-    )
+    ]
 
 def random_m_stride_dim( dtype, width, height, sstride1, dim ):
     rs1 = np.random.normal( size = (height, width)).astype(dtype)
-    return pytest.param(
+    return [
         rs1,
         sstride1,
         dim,
-        id=f'{width}x{height}x{sstride1}x{dim}'
-    )
+    ]
 
 def special_float_m_dim( dtype, num, special_hex, dim ):
     s1 = np.linspace( -1, 1, 256, dtype=dtype ).reshape( 16, 16 )
@@ -233,69 +213,63 @@ def special_float_m_dim( dtype, num, special_hex, dim ):
     sa.dtype = dtype
     s1[num % 15][6] = sa[0]
 
-    return pytest.param(
+    return [
         s1,
         dim,
-        id=f'{num}x{special_hex}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mm_all_sum( height, width ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((height, width)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
-        id=f'{height}x{width}'
-    )
+    ]
 
 def ramdom_veemacc_mm_all_sum_stride( height, width, stride_s1, stride_s2 ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((height, width)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         stride_s1,
         stride_s2,
-        id=f'{height}x{width}x{stride_s1}x{stride_s2}'
-    )
+    ]
 
 def ramdom_veemacc_mm( height, width, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((height, width)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         dim, 
-        id=f'{height}x{width}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mm_stride( height, width, stride_s1, stride_s2, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((height, width)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         stride_s1,
         stride_s2,
         dim,
-        id=f'{height}x{width}x{stride_s1}x{stride_s2}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mm_overlap( height, width, overlap_addr, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((height, width)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         overlap_addr,
         dim,
-        id=f'{height}x{width}x{overlap_addr}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mv( height, width, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
@@ -304,12 +278,11 @@ def ramdom_veemacc_mv( height, width, dim ):
     else:
         rs2 = np.random.random((height, 1)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         dim,
-        id=f'{height}x{width}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mv_stride( height, width, stride_s1, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
@@ -318,13 +291,12 @@ def ramdom_veemacc_mv_stride( height, width, stride_s1, dim ):
     else:
         rs2 = np.random.random((height, 1)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         stride_s1,
         dim,
-        id=f'{height}x{width}x{stride_s1}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mv_overlap( height, width, overlap_addr, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
@@ -333,36 +305,33 @@ def ramdom_veemacc_mv_overlap( height, width, overlap_addr, dim ):
     else:
         rs2 = np.random.random((height, 1)).astype('float16')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         overlap_addr,
         dim,
-        id=f'{height}x{width}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mf( height, width, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((1, 1)).astype('float32')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         dim,
-        id=f'{height}x{width}x{dim}'
-    )
+    ]
 
 def ramdom_veemacc_mf_stride( height, width, stride_s1, dim ):
     rs1 = np.random.random((height, width)).astype('float16')
     rs2 = np.random.random((1, 1)).astype('float32')
 
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         stride_s1,
         dim,
-        id=f'{height}x{width}x{stride_s1}x{dim}'
-    )
+    ]
 
 def linspace_xx_m( start, stop, stype, height, width ):
     rs1 = np.linspace( start=start, stop=stop, num=width*height, dtype=stype ).reshape( height, width )
@@ -377,35 +346,31 @@ def special_float_xx_m( stype, height, width ):
     rs1 = np.array([0x3c00,    0x8000, 0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001], dtype=np.int16)
     rs1.dtype=stype
     rs1.reshape(2, 5)
-    return pytest.param(
+    return [
         rs1, 
-        id = f'{height}x{width}'
-    )
+    ]
 
 def metr_m( height, weight ):
     rs = np.random.random( ( height, weight ) ).astype( 'float16' ) * 2 - 1
-    return pytest.param(
+    return [
         rs,
-        id = f'{height}x{weight}'
-    )
+    ]
 
 def metr_m_stride( height, weight, stride_s, stride_d ):
     rs = np.random.random( ( height, weight ) ).astype( 'float16' ) * 2 - 1
-    return pytest.param(
+    return [
         rs,
         stride_s,
         stride_d,
-        id = f'{height}x{weight}x{stride_s}x{stride_d}'
-    )
+    ]
 
 def metr_m_misaligned_block( height, weight, off_s, off_d ):
     rs = np.random.random( ( height, weight ) ).astype( 'float16' ) * 2 - 1
-    return pytest.param(
+    return [
         rs,
         off_s,
         off_d,
-        id = f'{height}x{weight}x{off_s}x{off_d}'
-    )
+    ]
 
 def random_memul_mm( l ):
     [ lb, ub, m, k, n] = l
@@ -508,12 +473,11 @@ def random_velkrelu_mv( height, width, vlen, dim_flag ):
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
-    return pytest.param( 
+    return [ 
         rs1, 
         rs2,
         dim_flag,
-        id = f'{height}x{width}x{vlen}x{dim_flag}'
-    )
+    ]
 
 def random_velkrelu_special_mv( height, width, vlen, dim_flag ):
     special_fp16_less_eq_zero = np.array([0, 0.0, np.half('inf'), np.half('-inf'), np.half('nan'), 0.1, 10, 65500, 6.104e-5], dtype=np.float16)
@@ -529,12 +493,11 @@ def random_velkrelu_special_mv( height, width, vlen, dim_flag ):
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
-    return pytest.param( 
+    return [ 
         rs1, 
         rs2,
         dim_flag,
-        id = f'{height}x{width}x{vlen}x{dim_flag}'
-    )
+    ]
 
 def random_velkrelu_stride_mv( height, width, vlen, stride_s, stride_d, dim_flag ):
     rs1 = np.random.normal( 0.0, 1.0, height*width ).astype( np.float16 ).reshape( height, width )
@@ -542,14 +505,13 @@ def random_velkrelu_stride_mv( height, width, vlen, stride_s, stride_d, dim_flag
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
-    return pytest.param( 
+    return [ 
         rs1, 
         rs2,
         dim_flag,
         stride_s, 
         stride_d,
-        id = f'{height}x{width}x{vlen}x{dim_flag}x{stride_s}x{stride_d}'
-    )
+    ]
 
 def random_velkrelu_misaligned_mv( height, width, vlen, offset, dim_flag ):
     rs1 = np.random.normal( 0.0, 1.0, height*width ).astype( np.float16 ).reshape( height, width )
@@ -557,67 +519,62 @@ def random_velkrelu_misaligned_mv( height, width, vlen, offset, dim_flag ):
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
-    return pytest.param( 
+    return [ 
         rs1, 
         rs2,
         dim_flag,
         offset,
-        id = f'{height}x{width}x{vlen}x{dim_flag}x{offset}'
-    )
+    ]
 
 def random_velut_m( width, height, tsize ):
     rs1 = np.random.randint( 29, size = width * height ).astype(np.int16).reshape( height, width )
     rs1.dtype = np.half
     rs2 = np.linspace( -3.0, 3.0, 30 ).astype( np.half )
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         tsize,
-        id = f'{width}x{height}x{tsize}'
-    )
+    ]
 
 def random_velut_m_full_fill_l1b( width, height, tsize ):
     rs1 = np.random.randint( 64 * 1024 - 1, size = width * height ).astype(np.int16).reshape( height, width )
     rs1.dtype = np.half
     rs2 = np.linspace( -3.0, 3.0, 64 * 1024 ).astype( np.half )
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         tsize,
-        id = f'{width}x{height}x{tsize}'
-    )
+    ]
 
 def random_velut_m_special( width, height, tsize ):
     # special float table   0,    -0,     inf,   -inf,    nan,    0.1,   10,    65500,  6.104e-05, 6.e-08
     rs1 = np.array( [0000, 0x8000, 0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff,  0x0400,    0x0001], dtype=np.int16).reshape( height, width )
     rs1.dtype = np.half
     rs2 = np.linspace(-3.0, 3.0, 0xfc01).astype(np.half)
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         tsize,
-        id = f'{width}x{height}x{tsize}'
-    )
+    ]
 
 def random_velut_m_stride( width, height, tsize, dstride, sstride ):
     rs1 = np.random.randint( 29, size = width * height ).astype(np.int16).reshape( height, width )
     rs1.dtype = np.half
     rs2 = np.linspace( -3.0, 3.0, 30 ).astype( np.half )
-    return pytest.param(
+    return [
         rs1, 
         rs2,
         tsize,
         dstride,
         sstride,
-        id = f'{width}x{height}x{tsize}x{dstride}x{sstride}'
-    )
+    ]
 
 def random_meconv_mm( h, w, cin, cout, kh, kw, padding, sk, dl ):
     shape_input = [1, h, w, cin]
     shape_filter = [kh, kw, cin, cout]
     vs1 = np.random.random(shape_input).astype('float16') * 2 - 1
     vs2 = np.random.random(shape_filter).astype('float16') * 2 - 1
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -629,15 +586,14 @@ def random_meconv_mm( h, w, cin, cout, kh, kw, padding, sk, dl ):
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2, stride_d, padding, sk, dl ):
     shape_input = [1, h, w, cin]
     shape_filter = [kh, kw, cin, cout]
     vs1 = np.random.random(shape_input).astype('float16') * 2 - 1
     vs2 = np.random.random(shape_filter).astype('float16') * 2 - 1
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -652,15 +608,14 @@ def random_meconv_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2, stri
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{stride_s1}x{stride_s2}x{stride_d}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, off_s2, off_d, padding, sk, dl ):
     shape_input = [1, h, w, cin]
     shape_filter = [kh, kw, cin, cout]
     vs1 = np.random.random(shape_input).astype('float16') * 2 - 1
     vs2 = np.random.random(shape_filter).astype('float16') * 2 - 1
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -675,15 +630,14 @@ def random_meconv_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, off_s2, 
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{off_s1}x{off_s2}x{off_d}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def meconv_mm_special_fp( h, w, cin, cout, kh, kw, padding, sk, dl ):
     vs1 = np.array([0.0, -0.0, np.half('inf'), np.half('-inf'), np.half('nan'),
                     0.1, 10, 65500, 6.104e-05, 6.e-08], dtype=np.float16).reshape((1, 1, 10, 1))
     vs2 = np.array([0.0, -0.0, np.half('inf'), np.half('-inf'), np.half('nan'),
                     0.1, 10, 65500, 6.104e-05, 6.e-08], dtype=np.float16).reshape((1, 1, 1, 10))
-    return pytest.param(
+    return [
         vs1, 
         vs2,
         h,
@@ -695,15 +649,14 @@ def meconv_mm_special_fp( h, w, cin, cout, kh, kw, padding, sk, dl ):
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_x8_mm( h, w, cin, cout, kh, kw, padding, sk, dl ):
     shape_input = [1, h, w, cin]
     shape_filter = [kh, kw, cin, cout]
     vs1 = (np.random.random(shape_input) * ( 256 ) - 128 ).astype('int8')
     vs2 = (np.random.random(shape_filter) * ( 256 ) - 128 ).astype('int8')
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -715,15 +668,14 @@ def random_meconv_x8_mm( h, w, cin, cout, kh, kw, padding, sk, dl ):
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_x8_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2, stride_d, padding, sk, dl ):
     shape_input = [1, h, w, cin]
     shape_filter = [kh, kw, cin, cout]
     vs1 = (np.random.random(shape_input) * ( 256 ) - 128 ).astype('int8')
     vs2 = (np.random.random(shape_filter) * ( 256 ) - 128 ).astype('int8')
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -738,15 +690,14 @@ def random_meconv_x8_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2, s
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{stride_s1}x{stride_s2}x{stride_d}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, off_s2, off_d, padding, sk, dl ):
     shape_input = [1, h, w, cin]
     shape_filter = [kh, kw, cin, cout]
     vs1 = (np.random.random(shape_input) * ( 256 ) - 128 ).astype('int8')
     vs2 = (np.random.random(shape_filter) * ( 256 ) - 128 ).astype('int8')
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -761,8 +712,7 @@ def random_meconv_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, off_s
         padding,
         sk,
         dl,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{off_s1}x{off_s2}x{off_d}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_hf_x8_mm( h, w, cin, cout, kh, kw, padding, sk, dl, dequant_fp=None ):
     shape_input = [1, h, w, cin]
@@ -774,7 +724,7 @@ def random_meconv_hf_x8_mm( h, w, cin, cout, kh, kw, padding, sk, dl, dequant_fp
         dequant.fill(dequant_fp)
     vs1 = (np.random.random(shape_input) * (256) - 128).astype('int8')
     vs2 = (np.random.random(shape_filter) * (256) - 128).astype('int8')
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -787,8 +737,7 @@ def random_meconv_hf_x8_mm( h, w, cin, cout, kh, kw, padding, sk, dl, dequant_fp
         sk,
         dl,
         dequant,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_hf_x8_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2, stride_d, padding, sk, dl, dequant_fp=None ):
     shape_input = [1, h, w, cin]
@@ -800,7 +749,7 @@ def random_meconv_hf_x8_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2
         dequant.fill(dequant_fp)
     vs1 = (np.random.random(shape_input) * (256) - 128).astype('int8')
     vs2 = (np.random.random(shape_filter) * (256) - 128).astype('int8')
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -816,8 +765,7 @@ def random_meconv_hf_x8_mm_stride( h, w, cin, cout, kh, kw, stride_s1, stride_s2
         sk,
         dl,
         dequant, 
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{stride_s1}x{stride_s2}x{stride_d}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def random_meconv_hf_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, off_s2, off_d, padding, sk, dl, dequant_fp=None ):
     shape_input = [1, h, w, cin]
@@ -829,7 +777,7 @@ def random_meconv_hf_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, of
         dequant.fill(dequant_fp)
     vs1 = (np.random.random(shape_input) * (256) - 128).astype('int8')
     vs2 = (np.random.random(shape_filter) * (256) - 128).astype('int8')
-    return pytest.param( 
+    return [ 
         vs1, 
         vs2,
         h,
@@ -845,110 +793,109 @@ def random_meconv_hf_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, of
         sk,
         dl,
         dequant,
-        id=f'{h}x{w}x{cin}x{cout}x{kh}x{kw}x{off_s1}x{off_s2}x{off_d}x{padding}x{sk}x{dl}'
-    )
+    ]
 
 def rvv_v_generator(vlen, dtype=np.int16):
     return np.linspace(1, 0xffff, vlen, dtype=dtype)
 
 def linspace_rvv_vv(type, vlen):
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_wv(type, vlen):
     if type == np.float16:
         type_vs2 = np.float32
     elif type == np.float32:
         type_vs2 = np.float64
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type_vs2)
-    )
+    ]
 
 def linspace_rvv_m_v(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type_vd),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_vf(type, vlen):
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-127, 128, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_m_vf_w(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-5, 5, vlen, dtype=type_vd),
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_wf(type, vlen):
     if type == np.float16:
         type_vs2 = np.float32
     elif type == np.float32:
         type_vs2 = np.float64
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-127, 128, vlen, dtype=type_vs2)
-    )
+    ]
 
 def linspace_rvv_vvv(type, vlen):
-    return pytest.param(
+    return [
         np.linspace(-5, 5, vlen, dtype=type),
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_m_vv_w(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-5, 5, vlen, dtype=type_vd),
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_vvv_wred(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-5, 5, vlen, dtype=type_vd),
         np.linspace(-127, 128, vlen, dtype=type_vd),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_vv_wred(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type_vd),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 
 def linspace_rvv_m_vf(type, vlen):
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.array(random.random(), dtype=type),
         np.linspace(-120, 135, vlen, dtype=type)
-    )
+    ]
 def random_mask( vlen ):
     return np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int16)), dtype=np.uint8)
 
@@ -961,22 +908,22 @@ def res_len_e1( vlen ):
 
 def linspace_rvv_vv_with_mask(type, vlen):
 
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vlen, dtype=type),
         vlen
-    )
+    ]
 
 def linspace_rvv_vf_with_mask(type, vlen):
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vlen, dtype=type),
         vlen
-    )
+    ]
 
 def linspace_rvv_slide1up_vf_with_mask(type, vlen, fmask):
     mask = np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
@@ -984,13 +931,13 @@ def linspace_rvv_slide1up_vf_with_mask(type, vlen, fmask):
         mask[0] = mask[0] | 1
     else:
         mask[0] = mask[0] & 0xFE
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type),
         mask,
         np.linspace(-1, 1, vlen, dtype=type), 
         vlen
-    )
+    ]
 
 def linspace_rvv_slide1down_vf_with_mask(type, vlen, fmask):
     mask = np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
@@ -1001,118 +948,118 @@ def linspace_rvv_slide1down_vf_with_mask(type, vlen, fmask):
     else:
         mask[idx] = mask[idx] & ( 0xFF - ( 1<<bitx ) )
 
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type),
         mask,
         np.linspace(-1, 1, vlen, dtype=type),
         vlen
-    )
+    ]
 
 def linspace_rvv_wf_with_mask(type, vlen):
     if type == np.float16:
         type_vs2 = np.float32
     elif type == np.float32:
         type_vs2 = np.float64
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type_vs2),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vlen, dtype=type_vs2),
         vlen
-    )
+    ]
 
 def linspace_rvv_m_vv_with_mask(type, vlen):
-    return pytest.param(
+    return [
         np.linspace(-1, 1, vlen, dtype=type),
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         vlen
-    )
+    ]
 def linspace_rvv_m_vf_with_mask(type, vlen):
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         vlen
-    )
+    ]
 def linspace_rvv_vv_w_with_mask(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vlen, dtype=type_vd),
         vlen
-    )
+    ]
 def linspace_rvv_m_vv_w_with_mask(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-1, 1, vlen, dtype=type_vd),        
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         vlen
-    )
+    ]
 
 def linspace_rvv_wred_with_mask(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-1, 1, vlen, dtype=type_vd),        
         np.linspace(-127, 128, vlen, dtype=type_vd),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
-    )
+    ]
 
 def linspace_rvv_m_vf_w_with_mask(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-1, 1, vlen, dtype=type_vd),        
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         vlen
-    )
+    ]
 
 def linspace_rvv_vf_w_with_mask(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.array(random.random(), dtype=np.float32),
         np.linspace(-120, 135, vlen, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vlen, dtype=type_vd),
         vlen
-    )
+    ]
 
 def linspace_rvv_wv_w_with_mask(type, vlen):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
-    return pytest.param(
+    return [
         np.linspace(-127, 128, vlen, dtype=type),
         np.linspace(-120, 135, vlen, dtype=type_vd),
         np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vlen, dtype=type_vd),
         vlen
-    )
+    ]
 #special vector data
 def linspace_rvv_v_special(type, offset, vlen):
     # boundary number table        -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08

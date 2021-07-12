@@ -10,48 +10,58 @@ import textwrap
 import argparse
 import io
 import sys, inspect
-from multiprocessing import Pool, Manager, Condition
+from multiprocessing import Pool, Manager, Condition, Value
 from string import Template
 import shutil
+from rich.progress import (
+    Progress,
+    TextColumn,
+    BarColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn
+)
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+
+# options to configure the test frame
 parser.add_argument('--nproc', help='generate elf files on n processes', type=int, default=1)
 parser.add_argument('--specs', help='test specs')
 parser.add_argument('--cases', help=textwrap.dedent('''\
                                     test case list string or file, for example:
                                     - vsub_vv,addi/test_imm_op/
                                     - cases.list
-                                    you can find more examples with option --collect'''), default='')
+                                    you can find more examples with option --collect'''), default='')                                    
 parser.add_argument('--retry', help='retry last failed cases', action="store_true")
+parser.add_argument('--level', help='''put which level of cases together to compile and run:
+                                                - inst for one instruction case, 
+                                                - type for one test_type cases of one instruction, 
+                                                - case for one case in one file''', default="inst")
+parser.add_argument('--collect', help='just collect the test case to know what cases we can test', action="store_true")
+parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true") 
+parser.add_argument('--clang', help='path of clang compiler', default='clang')                                               
+
+#options to configure the test CPU
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
 parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
 parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
 parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
 
-parser.add_argument('--clang', help='path of clang compiler', default='clang')
-parser.add_argument('--level', help='''put which level of cases together to compile and run:
-                                                - inst for one instruction case, 
-                                                - type for one test_type cases of one instruction, 
-                                                - case for one case in one file''', default="inst")
-parser.add_argument('--collect', help='just collect the test case to know what cases we can test', action="store_true")
-parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true")
-parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")
-parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
-parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
-parser.add_argument('--vcstimeout', help='Number of cycles after which VCS stops', default=1000000, type=int)
-
-
 args, unknown_args = parser.parse_known_args()
+if unknown_args:
+    print("Please check your arguments")
+    sys.exit(-1)
 
-if __name__ != "__main__":
-    sys.argv[1:] = unknown_args
 
+# to synchronize the generator processes and the main process
 manager = Manager()
 result_dict = manager.dict()
 result_condition = Condition()
 result_detail_dict = manager.dict()
+tests = Value('L', 0)
+fails = Value('L', 0) 
+
 
 if not args.specs or len(args.specs.split()) == 0:
     # default find the case from specs folder
@@ -61,8 +71,9 @@ else:
     specs = args.specs.split()
 
 
-collected_case_list = []
-
+collected_case_list = [] # for --collect and generator use this list to generate files
+all_case_list = [] # take all cases in specs, used to compute the sum of cases which will be generated
+# analyze yml file to find the test cases
 for spec in specs:
     if os.path.isdir(spec):
         spec = f'{spec}/**/*.spec.yml'
@@ -130,7 +141,7 @@ for spec in specs:
                 test_info["params"] = params
                 test_info['default'] = _defaults
 
-                if test_type in cfg['check']:
+                if 'check' in cfg.keys() and test_type in cfg['check']:
                     test_info['check'] = cfg['check'][test_type]
                 else:
                     test_info['check'] = ''
@@ -141,33 +152,31 @@ for spec in specs:
             if args.level == "inst":
                 # just collect the instruction
                 collected_case_list.append(inst)
-            elif args.level == "type":
-                # collect the instruction and test_type
-                for test_type in attrs['test'].keys():
-                    collected_case_list.append(inst+'/'+test_type)
-            elif args.level == "case":
-                # collect the instruction, test_type and test_param
-                for test_type in attrs['test'].keys():
-                    test_info = attrs['test'][test_type]
-                    attrs['test'][test_type]["case_param"] = dict()
-                    if test_info["params"]:
-                        num = 0
-                        for param in test_info["params"]:
-                            # get the param
-                            param_value = eval(param) if isinstance(param,str) else param
-                            case_name = ''
-                            for i in range(len(param_value)):
-                                if i != 0:
-                                    case_name += '-'
-                                if isinstance(param_value[i], np.ndarray):
-                                    case_name += test_info["args"][i] 
-                                else:
-                                    case_name += test_info["args"][i]
-                            case_name += '_' + str(num)                            
-                            attrs['test'][test_type]["case_param"][case_name] = param
+
+            # collect the instruction, test_type and test_param
+            for test_type in attrs['test'].keys():
+                if args.level == "type":
+                    # collect the instruction and test_type
+                    collected_case_list.append(inst+'/'+test_type)                    
+                test_info = attrs['test'][test_type]
+                attrs['test'][test_type]["case_param"] = dict()
+                if test_info["params"]:
+                    num = 0
+                    for param in test_info["params"]:
+                        case_name = ''
+                        for i in range(len(test_info["args"])):
+                            if i != 0:
+                                case_name += '-'
+                            case_name += test_info["args"][i]
+                        case_name += '_' + str(num)                            
+                        attrs['test'][test_type]["case_param"][case_name] = param
+                        all_case_list.append(inst+'/'+test_type+'/'+case_name)
+                        if args.level == "case":
                             collected_case_list.append(inst+'/'+test_type+'/'+case_name)
-                            num += 1
-                    else:
+                        num += 1
+                else:
+                    all_case_list.append(inst+'/'+test_type)
+                    if args.level == "case":
                         # if npo param, just one case
                         collected_case_list.append(inst+'/'+test_type)
 
@@ -178,11 +187,19 @@ for spec in specs:
 
             globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
 
+# log file to tell user what cases there are in the yaml files in this level
 with open("log/collected_case.log", 'w') as case_log:
     for case in collected_case_list:
         case_log.write(case)
         case_log.write('\n')
-   
+
+# log file to use in the runner.py to know the cases number it will run
+with open("log/all_case.log",'w') as all_log:
+    for case in all_case_list:
+        all_log.write(case)
+        all_log.write('\n')
+
+# call the test_function in the test class to run the test
 def run_test( case ):
     stdout = sys.stdout
     stderr = sys.stderr
@@ -210,10 +227,12 @@ def run_test( case ):
     tic = eval( f'{test_instruction_class}()' )
     tic.test_function( test_type, test_case )
 
-
     sys.stdout = stdout
     sys.stderr = stderr
+
     return output
+    
+    
 
 template = '''
 #include "riscv_test.h"
@@ -240,6 +259,7 @@ RVTEST_DATA_END
 $footer
 '''
 
+# translate the numpy array into the data section in the assembly code
 def array_data(prefix, k, vv):
     lines = []
     lines.append(f"    .balign {vv.itemsize}")
@@ -264,6 +284,7 @@ def array_data(prefix, k, vv):
             lines.append(f"    .dword  0x{hex_val} // {x}")
     return '\n'.join(lines) + '\n'
 
+# generate the fields to replace in the template
 def generate( tpl, case, inst, case_num, **kw ):
     data = ''
     kw_extra = {}
@@ -294,6 +315,7 @@ def generate( tpl, case, inst, case_num, **kw ):
 
     return content
 
+# compile the test.S
 def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
     cc = f'{args.clang} --target=riscv{args.xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{args.xlen}gv0p10 -menable-experimental-extensions'
     defines = f'-DXLEN={args.xlen} -DVLEN={args.vlen}'
@@ -366,7 +388,7 @@ def simulate( test_inst, args, test_type, test_case ):
                             if test_info["args"].count(value.strip()) > 0:
                                 default_str += f'{default_arg}=param[{test_info["args"].index(value.strip())}],'
                             else:
-                                print("can't find " + value + " for " + default_arg)                     
+                                default_str += default + ','                     
 
                     #print(f'test_inst.inst({_kw}, {default_str})')                        
                     inst = eval(f'test_inst.inst({_kw}, {default_str})')
@@ -405,7 +427,9 @@ def simulate( test_inst, args, test_type, test_case ):
             with result_condition:          
                 result_dict[test_inst.name] = "compile failed."
                 result_detail_dict[test_inst.name] = f'{source} compiled unsuccessfully, please check the compile log file {compile_log}'
-                result_condition.notify()
+            
+            with fails.get_lock():
+                fails.value += len(case_list)
         
         else:
             np.save(check_golden, case_list)
@@ -413,7 +437,10 @@ def simulate( test_inst, args, test_type, test_case ):
             with result_condition:          
                 result_dict[test_inst.name] = "ok"
                 result_detail_dict[test_inst.name] = ""
-                result_condition.notify()
+
+        with tests.get_lock():
+            tests.value += len(case_list)
+
 
     elif test_case == '':
         # merge the tests of each test type together 
@@ -470,7 +497,7 @@ def simulate( test_inst, args, test_type, test_case ):
                         if test_info["args"].count(value.strip()) > 0:
                             default_str += f'{default_arg}=param[{test_info["args"].index(value.strip())}],'
                         else:
-                            print("can't find " + value + " for " + default_arg)
+                            default_str += default + ','
 
                 inst = eval(f'test_inst.inst({_kw}, {default_str})')
                 golden = inst.golden()
@@ -504,11 +531,13 @@ def simulate( test_inst, args, test_type, test_case ):
         # compile the test code 
         ret = compile(args, binary, mapfile, dumpfile, source, compile_log)
         if ret != 0:
-            # if failed, set the result as compile filed
+            # if failed, set the result as compile failed
             with result_condition:    
                 result_dict[f'{test_inst.name}/{test_type}'] = "compile failed."
                 result_detail_dict[f'{test_inst.name}/{test_type}'] = f'{source} compiled unsuccessfully, please check the compile log file {compile_log}'
-                result_condition.notify()
+
+            with fails.get_lock():
+                fails.value += len(case_list)
         
         else:
             np.save(check_golden, case_list)
@@ -516,7 +545,10 @@ def simulate( test_inst, args, test_type, test_case ):
             with result_condition:    
                 result_dict[f'{test_inst.name}/{test_type}'] = "ok"
                 result_detail_dict[f'{test_inst.name}/{test_type}'] = ''
-                result_condition.notify()
+
+        with tests.get_lock():
+            tests.value += len(case_list)
+    
 
     else:
         # don't merge test case
@@ -552,7 +584,7 @@ def simulate( test_inst, args, test_type, test_case ):
                 if test_info["args"].count(value.strip()) > 0:
                     default_str += f'{default_arg}=param[{test_info["args"].index(value.strip())}],'
                 else:
-                    print("can't find " + value + " for " + default_arg)        
+                    default_str += default + ','       
         inst = eval(f'test_inst.inst({_kw}, {default_str})')
         golden = inst.golden()
 
@@ -576,7 +608,9 @@ def simulate( test_inst, args, test_type, test_case ):
             with result_condition:
                 result_dict[f'{test_inst.name}/{test_type}/{test_case}'] = "compile failed."
                 result_detail_dict[f'{test_inst.name}/{test_type}/{test_case}'] = f'{source} compiled unsuccessfully, please check the compile log file {compile_log}'
-                result_condition.notify()
+
+            with fails.get_lock():
+                fails.value += 1
         
         else:
             np.save(check_golden, case_list)
@@ -584,7 +618,14 @@ def simulate( test_inst, args, test_type, test_case ):
             with result_condition:
                 result_dict[f'{test_inst.name}/{test_type}/{test_case}'] = "ok"
                 result_detail_dict[f'{test_inst.name}/{test_type}/{test_case}'] = ''
-                result_condition.notify()
+
+        with tests.get_lock():
+            tests.value += 1     
+
+def generator_error(case):
+    with result_condition:
+        result_dict[case] = "python run failed."
+        result_detail_dict[case] = ''
 
 if __name__ == "__main__":
 
@@ -593,6 +634,7 @@ if __name__ == "__main__":
     if args.collect:
         print("please look at the contents in the log/collected_case.log")
         sys.exit(0)
+      
     
     if args.retry:
         print("retry last failed cases...")
@@ -624,62 +666,97 @@ if __name__ == "__main__":
 
     with Pool(processes=args.nproc) as pool:
         ps = []   
-     
+
+        # find the sum of all cases generator will generate to display
+        testcase_num = 0
+        for testcase in all_case_list:
+            if cases and len(cases) > 0:
+                for case in cases:
+                    if not testcase.startswith(case):                        
+                        continue
+                    
+                    testcase_num += 1
+                    break                 
+            else:          
+                testcase_num += 1
+
+        # progress bar configuration
+        progress = Progress(
+            TextColumn("[bold blue]{task.fields[name]}"),
+            BarColumn(bar_width=None),
+            "[progress.percentage]{task.percentage:>3.1f}%",
+            "case_sum:",
+            TextColumn("[bold red]{task.total}"),
+            "elapsed:",
+            TimeElapsedColumn(),
+            "remaining:",
+            TimeRemainingColumn()
+        )
+
+        progress.start()
+        task_id = progress.add_task("generation", name = "generation", total=testcase_num, start=True)       
         
+        # run tests
         for collect_case in collected_case_list:
             if cases and len(cases) > 0:
                 for case in cases:
                     if not collect_case.startswith(case):                        
                         continue
                     
-                    res = pool.apply_async(run_test, [ collect_case ])
+                    res = pool.apply_async(run_test, [ collect_case ], 
+                    callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                    error_callback=lambda _: generator_error(collect_case)  )
+                    # res = run_test(collect_case)
                     ps.append((collect_case, res))   
                     break                 
             else:          
-                res = pool.apply_async(run_test, [ collect_case ])
+                res = pool.apply_async(run_test, [ collect_case ], 
+                callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                error_callback=lambda _: generator_error(collect_case)  )
+                # res = run_test(collect_case)
                 ps.append((collect_case, res))
 
         failed = 0
 
+        # write the test results into log/generator_report.log
         report = open(f'log/generator_report.log', 'w')
         runner_case = []  
         for case, p in ps:
             ok = True
 
-            while True:
-                if case in result_dict:
-                    # find case result in result_dict
-                    if result_dict[case] != "ok":
-                        reason = result_dict[case]
-                        ok = False    
-                    with open(f'build/{case}/generator.log', 'w') as f:
-                        print(result_dict[case], file=f) 
-                        print(result_detail_dict[case], file=f) 
+            p_value = p.get().getvalue()
+            # find case result in result_dict
+            if result_dict[case] != "ok":
+                reason = result_dict[case] + p_value
+                ok = False    
+            with open(f'build/{case}/generator.log', 'w') as f:
+                print(result_dict[case], file=f) 
+                print(result_detail_dict[case], file=f) 
+                print(p_value, file=f) 
 
-                    if not ok:
-                        failed += 1
-                        print(f'FAIL {case} - {reason}')
-                        print(f'FAIL {case} - {reason}', file=report)
-                    else:
-                        print(f'PASS {case}', file=report)
-                        runner_case.append(case)                                                        
+            if not ok:
+                failed += 1
+                print(f'FAIL {case} - {reason}')
+                print(f'FAIL {case} - {reason}', file=report)
+            else:
+                print(f'PASS {case}', file=report)
+                runner_case.append(case)                                                        
 
-                    break
-                else:  
-                    # can't find case in result_dict, wait runner to output more results            
-                    with result_condition:
-                        result_condition.wait()
+
 
         report.close()
 
+        # write the successfully case into the runner_case.log to let the runner to know which cases need to run
         with open("log/runner_case.log", 'w') as runner_log:
             for case in runner_case:
                 runner_log.write(case)
                 runner_log.write('\n')
 
+        progress.stop()
+
         if failed == 0:
-            print(f'{len(ps)} tests generation finish, all pass.')
+            print(f'{len(ps)} files generation finish, all pass.( {tests.value} tests )')
             sys.exit(0)
         else:
-            print(f'{len(ps)} tests generation finish, {failed} failed.')
+            print(f'{len(ps)} files generation finish, {failed} failed.( {tests.value} tests, {fails.value} failed )')
             sys.exit(-1)

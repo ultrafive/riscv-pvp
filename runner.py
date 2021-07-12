@@ -4,25 +4,21 @@ import os
 import textwrap
 import numpy as np
 import allure
-from multiprocessing import Pool, Manager, Condition
+from multiprocessing import Pool, Manager, Condition, Value
 import sys
+import io
 import argparse
+from rich.progress import (
+    Progress,
+    TextColumn,
+    BarColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn
+)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")
+# options to configure the test frame
 parser.add_argument('--retry', help='retry last failed cases', action="store_true")
-parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
-parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
-parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
-parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
-parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
-parser.add_argument('--spike', help='path of spike simulator', default='spike')
-parser.add_argument('--vcs', help='path of vcs simulator', default=None)
-parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
-parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
-parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
-parser.add_argument('--vcstimeout', help='Number of cycles after which VCS stops', default=1000000, type=int)
-parser.add_argument('--verilator', help='path of verilator simulator', default=None)
 parser.add_argument('--runner_process', help='runner process number for run cases', type=int, default=1)
 parser.add_argument('--cases', help=textwrap.dedent('''\
                                     test case list string or file, for example:
@@ -30,13 +26,35 @@ parser.add_argument('--cases', help=textwrap.dedent('''\
                                     - cases.list
                                     default = log/runner_case.log'''), default='log/runner_case.log')
 
+# options to configure the test CPU
+parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
+parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
+parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
+parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
+parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
+
+# options to configure the simulator
+parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")                                    
+parser.add_argument('--spike', help='path of spike simulator', default='spike')
+parser.add_argument('--vcs', help='path of vcs simulator', default=None)
+parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
+parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
+parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
+parser.add_argument('--vcstimeout', help='Number of cycles after which VCS stops', default=1000000, type=int)
+parser.add_argument('--verilator', help='path of verilator simulator', default=None)
+
 args, unknown_args = parser.parse_known_args()
 
+
+# to synchronize the runner processes with the main process
 manager = Manager()
 result_dict = manager.dict()
 result_condition = Condition()
 result_detail_dict = manager.dict()
+tests = Value('L', 0)
+fails = Value('L', 0)
 
+# run test.elf in spike
 def spike_run(args, memfile, binary, logfile, res_file, **kw):
     sim = f'{args.spike} --isa=rv{args.xlen}gcv_zfh --varch=vlen:{args.vlen},elen:{args.elen},slen:{args.slen}'
 
@@ -149,6 +167,7 @@ def diff_to_txt(a, b, filename):
             else:
                 print(f'%3d: %{w+4}{t}(%0{w}x), %{w+4}{t}(%0{w}x), mismatch' % (i, a[i], ah[i], b[i], bh[i]), file=file)
 
+# run test.elf in more simulator: gem5 vcs ...
 def sims_run( args, workdir, binary ):
     lsf_cmd = 'bsub -n 1 -J simv -Ip'    
     sims = { 'vcs': args.vcs, 'verilator': args.verilator, 'gem5': args.gem5 }
@@ -211,7 +230,13 @@ def sims_run( args, workdir, binary ):
 
     return result
 
+# the main entrance of the runner process, including run in simulators and check the data
 def runner(test):
+    stdout = sys.stdout
+    stderr = sys.stderr
+    output = io.StringIO()
+    sys.stdout = output
+    sys.stderr = output
 
     # file information
     binary = f'build/{test}/test.elf'
@@ -220,6 +245,9 @@ def runner(test):
     res_file = f'build/{test}/spike.sig' 
     check_golden = f'build/{test}/check_golden.npy'                   
 
+    # get the golden
+    case_list = np.load( check_golden, allow_pickle=True )
+
     #run the elf compiled
     ret = spike_run(args, run_mem, binary, run_log, res_file)
     if ret != 0:
@@ -227,18 +255,23 @@ def runner(test):
         with result_condition:           
             result_dict[test] = "spike-run"
             result_detail_dict[test] = f'\nspike-run failed!!!\nPlease check the spike log in {run_log} '
-            result_condition.notify()
-        return
+            fails.value += len(case_list)
+            tests.value += len(case_list)
+
+            sys.stdout = stdout
+            sys.stderr = stderr
+
+        return output            
 
     # check the golden result computed by python with the spike result
     spike_result = {}
     spike_start = 0
-    # get the golden
-    case_list = np.load( check_golden, allow_pickle=True )
+
     
     test_result = ''
     test_detail = ''
 
+    failed_case_list = []
     for test_case in case_list:
         if test_case["check_str"] != '':
             # when test["check_str"] == 0, no need to check
@@ -252,7 +285,7 @@ def runner(test):
                 # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition
                 test_result += test_case["name"]+"_check failed-"
                 test_detail += f'The python golden data and spike results of test case {test_case["no"]} in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/check.data\n'
-                
+                failed_case_list.append(test_case["name"])
 
             spike_result[test_case["name"]] = result
 
@@ -268,6 +301,7 @@ def runner(test):
             # because the elf maybe can be run in more sims, so don't use result_dict and notify result_condition                                                            
             test_result += sim + "_failed-"
             test_detail += f'{binary} runned unsuccessfully in {sim}, please check build/{test}/{sim}.log\n'
+            failed_case_list = case_list
 
         else:
             # sim run successfully, so we compare the sim results with spike results
@@ -285,18 +319,30 @@ def runner(test):
                         # maybe check failed or other sim failed either so we have this judge  
                         test_result += test_case["name"] + '_' + sim + "_diff failed-"
                         test_detail_dict = f'The results of spike and {sim} of test case {test_case["no"]}in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/diff-{k}.data\n'                                    
+                        if test_case["name"] not in failed_case_list:
+                            failed_case_list.append(test_case["name"])
 
     with result_condition:
         if test_result == '':            
             result_dict[test] = "ok"
             result_detail_dict[test] = ''
+            tests.value += len(case_list)
         else:
             result_dict[test] = test_result
             result_detail_dict[test] = test_detail
+            fails.value += len(failed_case_list)
+            tests.value += len(case_list)
+  
 
-        result_condition.notify()  
+    sys.stdout = stdout
+    sys.stderr = stderr
+
+    return output   
               
-
+def runner_error(case):
+    with result_condition:
+        result_dict[case] = "python run failed."
+        result_detail_dict[case] = ''
 
 if __name__ == "__main__":
 
@@ -332,45 +378,77 @@ if __name__ == "__main__":
     with Pool(processes=args.runner_process) as pool:
         ps = []   
 
+        # read the all_case.log file and find the cases about the args.case option, so we know the amount of test cases we will run
+        testcase_num = 0
+        with open("log/all_case.log") as fp:
+            s = lambda l: l.strip()
+            f = lambda l: l != '' and not l.startswith('#')
+            testcase_list = list(filter(f, map(s, fp.read().splitlines())))
+
+        for testcase in testcase_list:
+            for case in cases:
+                if not testcase.startswith(case):                        
+                    continue
+
+                testcase_num += 1
+                break
+
+        # progress bar configurations
+        progress = Progress(
+            TextColumn("[bold blue]{task.fields[name]}"),
+            BarColumn(bar_width=None),
+            "[progress.percentage]{task.percentage:>3.1f}%",
+            "case_sum:",
+            TextColumn("[bold red]{task.total}"),
+            "elapsed:",
+            TimeElapsedColumn(),
+            "remaining:",
+            TimeRemainingColumn()
+        )
+
+        progress.start()
+        task_id = progress.add_task("runner", name = "runner", total=testcase_num, start=True)                                           
+        
+
         for case in cases:
-            res = pool.apply_async(runner, [ case ])
+            res = pool.apply_async(runner, [ case ], 
+            callback=lambda _: progress.update( task_id, completed = tests.value ), 
+            error_callback=lambda _: runner_error(case)  )
             ps.append((case, res))   
 
 
         failed = 0
-
+        # save the runner result into the log file
         report = open(f'log/runner_report.log', 'w')
         for case, p in ps:
             ok = True
 
-            while True:
-                if case in result_dict:
-                    # find case result in result_dict
-                    if result_dict[case] != "ok":
-                        reason = result_dict[case]
-                        ok = False    
-                    with open(f'build/{case}/runner.log', 'w') as f:
-                        print(result_dict[case], file=f) 
-                        print(result_detail_dict[case], file=f) 
+            p_str = p.get().getvalue()
+            # find case result in result_dict
+            if result_dict[case] != "ok":
+                reason = result_dict[case] + p_str
+                ok = False    
+            with open(f'build/{case}/runner.log', 'w') as f:
+                print(result_dict[case], file=f) 
+                print(result_detail_dict[case], file=f) 
+                print(p_str, file=f)                         
 
-                    if not ok:
-                        failed += 1
-                        print(f'FAIL {case} - {reason}')
-                        print(f'FAIL {case} - {reason}', file=report)
-                    else:
-                        print(f'PASS {case}', file=report)                                                      
+            if not ok:
+                failed += 1
+                print(f'FAIL {case} - {reason}')
+                print(f'FAIL {case} - {reason}', file=report)
+            else:
+                print(f'PASS {case}', file=report)                                                      
 
-                    break
-                else:  
-                    # can't find case in result_dict, wait runner to output more results            
-                    with result_condition:
-                        result_condition.wait()
+
 
         report.close()
 
+        progress.stop() 
+
         if failed == 0:
-            print(f'{len(ps)} tests running finish, all pass.')
+            print(f'{len(ps)} files running finish, all pass.( {tests.value} tests )')
             sys.exit(0)
         else:
-            print(f'{len(ps)} tests running finish, {failed} failed.')
+            print(f'{len(ps)} files running finish, {failed} failed.( {tests.value} tests, {fails.value} failed )')
             sys.exit(-1)
