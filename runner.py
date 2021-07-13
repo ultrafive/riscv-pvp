@@ -315,12 +315,12 @@ def runner(test):
                     [ result, sim_start ] = from_txt( f'build/{test}/{sim}.sig', golden,  sim_start )
                     # save the spike result and sim result into diff-sim.data
                     os.makedirs(f'build/{test_case["name"]}', exist_ok=True)  
-                    diff_to_txt( spike_result[test_case["name"]], result, f'build/{test_case["name"]}/diff-{k}.data' )
+                    diff_to_txt( spike_result[test_case["name"]], result, f'build/{test_case["name"]}/diff-{sim}.data' )
                     if not np.array_equal( spike_result[test_case["name"]], result, equal_nan=True):
                         # if spike result don't equal with sim result, diff failed, write sim_diff to test_result
                         # maybe check failed or other sim failed either so we have this judge  
                         test_result += test_case["name"] + '_' + sim + "_diff failed-"
-                        test_detail_dict = f'The results of spike and {sim} of test case {test_case["no"]}in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/diff-{k}.data\n'                                    
+                        test_detail_dict = f'The results of spike and {sim} of test case {test_case["no"]}in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/diff-{sim}.data\n'
                         if test_case["name"] not in failed_case_list:
                             failed_case_list.append(test_case["name"])
 
