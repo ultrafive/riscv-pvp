@@ -44,7 +44,9 @@ parser.add_argument('--vcstimeout', help='Number of cycles after which VCS stops
 parser.add_argument('--verilator', help='path of verilator simulator', default=None)
 
 args, unknown_args = parser.parse_known_args()
-
+if unknown_args:
+    print("Please check your arguments")
+    sys.exit(-1)
 
 # to synchronize the runner processes with the main process
 manager = Manager()
