@@ -187,6 +187,8 @@ for spec in specs:
 
             globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
 
+os.makedirs("log")
+
 # log file to tell user what cases there are in the yaml files in this level
 with open("log/collected_case.log", 'w') as case_log:
     for case in collected_case_list:
