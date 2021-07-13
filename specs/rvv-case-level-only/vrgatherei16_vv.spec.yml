@@ -4,7 +4,7 @@ _: &default
     #include "exception.h"
     #include "test_macros_v.h"
 
-  _templates: &_templates
+  templates:
     test_base_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -21,6 +21,7 @@ _: &default
         la a4, test_{num}_data;
         vse{sew}.v v24, (a4);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
@@ -43,16 +44,10 @@ _: &default
         la a3, test_{num}_data;
         vse{sew}.v v24, (a3);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection  
-  
-  templates:
-    <<: *_templates
-    test_base_without_mask @ ori, vs1, vs2, sew, vl, lmul, emul: |
-      {inherit}
-    test_base_with_mask    @ ori, vs1, vs2, sew, vl, lmul, emul, mask: |
-      {inherit} 
               
   check:
     test_base_without_mask: np.array_equal(result, golden)
@@ -61,7 +56,7 @@ _: &default
 vrgatherei16_vv:
   <<: *default
   cases:
-    test_base_without_mask:
+    test_base_without_mask @ ori, vs1, vs2, sew, vl, lmul, emul:
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint16), np.array([0x10],dtype=np.uint8 ), 8, 1, 1, 2]'
       - '[np.array([7],dtype=np.uint8 ), np.array([2],dtype=np.uint16), np.array([0x21],dtype=np.uint8 ), 8, 1, 1, 2]'
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint16), np.array([0xff],dtype=np.uint8 ), 8, 1, 1, 2]'
@@ -79,7 +74,7 @@ vrgatherei16_vv:
       - '[np.linspace(0x40,0x80,64,dtype=np.uint64), np.linspace(1,0x80,64,dtype=np.uint16), np.linspace(0x20,0x0000ff00,64,dtype=np.uint64), 64, 64,   4, 1]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint64), np.linspace(1,0x80,64,dtype=np.uint16), np.linspace(0x20,0xffffff00,64,dtype=np.uint64), 64, 64,   4, 1]'
     
-    test_base_with_mask:
+    test_base_with_mask    @ ori, vs1, vs2, sew, vl, lmul, emul, mask:
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint16), np.array([0x10],dtype=np.uint8 ), 8, 1, 1, 2, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), np.array([2],dtype=np.uint16), np.array([0x21],dtype=np.uint8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint16), np.array([0xff],dtype=np.uint8 ), 8, 1, 1, 2, np.array([0x5],dtype=np.uint64)]'

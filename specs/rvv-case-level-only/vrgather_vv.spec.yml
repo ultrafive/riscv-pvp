@@ -101,6 +101,3 @@ __: &u_default
       - "[np.random.randint(0, 16, 32, dtype=np.uint16), np.random.randint(25, 1052, 32, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 32, 1]"
       - "[np.random.randint(0, 20, 16, dtype=np.uint16), np.random.randint(25, 1052, 16, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 16, 'f2']"
       - "[np.random.randint(2, 12, 12, dtype=np.uint16), np.random.randint(25, 1052, 12, dtype=np.uint32), np.linspace(0, 255, 4, dtype=np.uint8), 12, 'f2']"
-
-vrgatherei16_vv:
-  <<: *u_default

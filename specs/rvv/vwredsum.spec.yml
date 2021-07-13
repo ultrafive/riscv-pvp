@@ -4,7 +4,7 @@ _: &default
     #include "exception.h"
     #include "test_macros_v.h"
 
-  _templates: &_templates
+  templates:
     test_base_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -20,6 +20,7 @@ _: &default
         la a4, test_{num}_data;
         vse{sew2}.v v24, (a4);
         .pushsection .data, 1;
+        .balign ({sew2}/8)
       test_{num}_data:
         .fill ({vl}), ({sew2}/8), 0;
         .popsection
@@ -41,17 +42,11 @@ _: &default
         la a3, test_{num}_data;
         vse{sew2}.v v24, (a3);
         .pushsection .data, 1;
+        .balign ({sew2}/8)
       test_{num}_data:
         .fill ({vl}), ({sew2}/8), 0;
         .popsection  
-  
-  templates:
-    <<: *_templates
-    test_base_without_mask @ ori, vs1, vs2, sew, sew2, vl, lmul : |
-      {inherit}
-    test_base_with_mask    @ ori, vs1, vs2, sew, sew2, vl, lmul, mask: |
-      {inherit} 
-              
+                
   check:
     test_base_without_mask: np.array_equal(result, golden)
     test_base_with_mask   : np.array_equal(result, golden)
@@ -59,7 +54,7 @@ _: &default
 vwredsumu_vs:
   <<: *default
   cases:
-    test_base_without_mask:
+    test_base_without_mask @ ori, vs1, vs2, sew, sew2, vl, lmul:
       - '[np.array([7],dtype=np.uint16), np.array([1],dtype=np.uint16), np.array([0x10],dtype=np.uint8 ), 8, 16, 1, 1]'
       - '[np.array([7],dtype=np.uint16), np.array([1],dtype=np.uint16), np.array([0x21],dtype=np.uint8 ), 8, 16, 1, 1]'
       - '[np.array([7],dtype=np.uint16), np.array([1],dtype=np.uint16), np.array([0xff],dtype=np.uint8 ), 8, 16, 1, 1]'
@@ -74,7 +69,7 @@ vwredsumu_vs:
       - '[np.linspace(0x40,0x80,64,dtype=np.uint32), np.linspace(1,0x40,64,dtype=np.uint32), np.linspace(0x20,0x00ff,64,dtype=np.uint16), 16, 32, 64, 2]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint64), np.linspace(1,0x40,64,dtype=np.uint64), np.linspace(0x20,0xff00,64,dtype=np.uint32), 32, 64, 64, 4]'
  
-    test_base_with_mask:
+    test_base_with_mask    @ ori, vs1, vs2, sew, sew2, vl, lmul, mask:
       - '[np.array([7],dtype=np.uint16), np.array([1],dtype=np.uint16), np.array([10],dtype=np.uint8 ), 8, 16, 1, 1, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint16), np.array([1],dtype=np.uint16), np.array([21],dtype=np.uint8 ), 8, 16, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint16), np.array([1],dtype=np.uint16), np.array([41],dtype=np.uint8 ), 8, 16, 1, 1, np.array([0xa],dtype=np.uint64)]'
@@ -96,7 +91,7 @@ vwredsumu_vs:
 vwredsum_vs:
   <<: *default
   cases:
-    test_base_without_mask:
+    test_base_without_mask @ ori, vs1, vs2, sew, sew2, vl, lmul:
       - '[np.array([7],dtype=np.int16), np.array([1],dtype=np.int16), np.array([10],dtype=np.int8 ), 8, 16, 1, 1]'
       - '[np.array([7],dtype=np.int16), np.array([1],dtype=np.int16), np.array([21],dtype=np.int8 ), 8, 16, 1, 1]'
       - '[np.array([7],dtype=np.int16), np.array([1],dtype=np.int16), np.array([41],dtype=np.int8 ), 8, 16, 1, 1]'
@@ -111,7 +106,7 @@ vwredsum_vs:
       - '[np.linspace(0x40,0x80,64,dtype=np.int32), np.linspace(1,0x40,64,dtype=np.int32), np.linspace(0x20,0x00ff,64,dtype=np.int16), 16, 32, 64, 2]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int64), np.linspace(1,0x40,64,dtype=np.int64), np.linspace(0x20,0xff00,64,dtype=np.int32), 32, 64, 64, 4]'
  
-    test_base_with_mask:
+    test_base_with_mask    @ ori, vs1, vs2, sew, sew2, vl, lmul, mask:
       - '[np.array([7],dtype=np.int16), np.array([1],dtype=np.int16), np.array([0x10],dtype=np.int8 ), 8, 16, 1, 1, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.int16), np.array([1],dtype=np.int16), np.array([0x21],dtype=np.int8 ), 8, 16, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.int16), np.array([1],dtype=np.int16), np.array([0xff],dtype=np.int8 ), 8, 16, 1, 1, np.array([0xa],dtype=np.uint64)]'

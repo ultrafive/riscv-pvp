@@ -1,4 +1,4 @@
-_: &default
+_: &default 
   env: RVTEST_RV64UV
   head: |
     #include "exception.h"

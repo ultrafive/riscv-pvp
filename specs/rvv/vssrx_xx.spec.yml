@@ -4,7 +4,7 @@ _: &default
     #include "exception.h"
     #include "test_macros_v.h"
 
-  _templates: &_templates
+  templates:
     test_vv_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -22,6 +22,7 @@ _: &default
         la a4, test_{num}_data;
         vse{sew}.v v24, (a4);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
@@ -45,6 +46,7 @@ _: &default
         la a3, test_{num}_data;
         vse{sew}.v v24, (a3);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
@@ -65,6 +67,7 @@ _: &default
         la a4, test_{num}_data;
         vse{sew}.v v24, (a4);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
@@ -87,6 +90,7 @@ _: &default
         la a3, test_{num}_data;
         vse{sew}.v v24, (a3);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
@@ -106,6 +110,7 @@ _: &default
         la a4, test_{num}_data;
         vse{sew}.v v24, (a4);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
@@ -127,24 +132,11 @@ _: &default
         la a3, test_{num}_data;
         vse{sew}.v v24, (a3);
         .pushsection .data, 1;
+        .balign ({sew}/8)
       test_{num}_data:
         .fill ({vl}), ({sew}/8), 0;
         .popsection
   
-  templates:
-    <<: *_templates
-    test_vv_without_mask @ ori, vs1, vs2, sew, vl, lmul, vxrm : |
-      {inherit}
-    test_vv_with_mask    @ ori, vs1, vs2, sew, vl, lmul, vxrm, mask: |
-      {inherit} 
-    test_vx_without_mask @ ori, rs1, vs2, sew, vl, lmul, vxrm : |
-      {inherit}
-    test_vx_with_mask    @ ori, rs1, vs2, sew, vl, lmul, vxrm, mask: |
-      {inherit}
-    test_vi_without_mask @ ori,uimm, vs2, sew, vl, lmul, vxrm : |
-      {inherit}
-    test_vi_with_mask    @ ori,uimm, vs2, sew, vl, lmul, vxrm, mask: |
-      {inherit}
            
   check:
     test_vv_without_mask: np.array_equal(result, golden)
@@ -157,7 +149,7 @@ _: &default
 vssrl_vv:
   <<: *default
   cases:
-    test_vv_without_mask:
+    test_vv_without_mask @ ori, vs1, vs2, sew, vl, lmul, vxrm:
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint8 ), np.array([17],dtype=np.uint8 ), 8, 1, 1, 0]'
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint8 ), np.array([21],dtype=np.uint8 ), 8, 1, 1, 1]'
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint8 ), np.array([31],dtype=np.uint8 ), 8, 1, 1, 2]'
@@ -179,7 +171,7 @@ vssrl_vv:
       - '[np.linspace(0x40,0x80,64,dtype=np.uint8 ), np.linspace(0,0x40,64,dtype=np.uint8 ), np.linspace(0x20,0x60,64,dtype=np.uint8 ),  8, 64,1, 3]'    
       - '[np.linspace(0x40,0x80,64,dtype=np.uint32), np.linspace(0,0x40,64,dtype=np.uint32), np.linspace(0x20,0x60,64,dtype=np.uint32), 32, 64,2, 0]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint32), np.linspace(0,0x40,64,dtype=np.uint32), np.linspace(0x20,0x60,64,dtype=np.uint32), 32, 64,2, 1]'
-    test_vv_with_mask:
+    test_vv_with_mask    @ ori, vs1, vs2, sew, vl, lmul, vxrm, mask:
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint8 ), np.array([17],dtype=np.uint8 ), 8, 1, 1, 0, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint8 ), np.array([21],dtype=np.uint8 ), 8, 1, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), np.array([1],dtype=np.uint8 ), np.array([31],dtype=np.uint8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'
@@ -198,7 +190,7 @@ vssrl_vv:
 vssrl_vx:
   <<: *default
   cases:
-    test_vx_without_mask:
+    test_vx_without_mask @ ori, rs1, vs2, sew, vl, lmul, vxrm:
       - '[np.array([7],dtype=np.uint8 ), 1, np.array([21],dtype=np.uint8 ), 8, 1, 1, 0]'
       - '[np.array([7],dtype=np.uint8 ), 2, np.array([31],dtype=np.uint8 ), 8, 1, 1, 1]'
       - '[np.array([7],dtype=np.uint8 ), 3, np.array([41],dtype=np.uint8 ), 8, 1, 1, 2]'
@@ -215,7 +207,7 @@ vssrl_vx:
       - '[np.linspace(0x40,0x80,64,dtype=np.uint8 ), 7, np.linspace(0x20, 0x60,64,dtype=np.uint8 ),  8, 64,1, 3]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint16), 5, np.linspace(0x20, 0x60,64,dtype=np.uint16), 16, 64,1, 2]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint32), 7, np.linspace(0x20, 0x60,64,dtype=np.uint32), 32, 64,2, 3]'
-    test_vx_with_mask:
+    test_vx_with_mask    @ ori, rs1, vs2, sew, vl, lmul, vxrm, mask:
       - '[np.array([7],dtype=np.uint8 ), 0, np.array([21],dtype=np.uint8 ), 8, 1, 1, 0, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), 1, np.array([31],dtype=np.uint8 ), 8, 1, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), 2, np.array([41],dtype=np.uint8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'
@@ -233,7 +225,7 @@ vssrl_vx:
 vssrl_vi:
   <<: *default
   cases:
-    test_vi_without_mask:
+    test_vi_without_mask @ ori,uimm, vs2, sew, vl, lmul, vxrm:
       - '[np.array([7],dtype=np.uint8 ), 1, np.array([101],dtype=np.uint8 ), 8, 1, 1, 0]'
       - '[np.array([7],dtype=np.uint8 ), 2, np.array([201],dtype=np.uint8 ), 8, 1, 1, 1]'
       - '[np.array([7],dtype=np.uint8 ), 3, np.array([251],dtype=np.uint8 ), 8, 1, 1, 2]'
@@ -246,7 +238,7 @@ vssrl_vi:
       - '[np.linspace(0x40,0x80,64,dtype=np.uint8 ), 3, np.linspace(0x20,0x60,64,dtype=np.uint8 ), 8, 64, 1, 1]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint8 ), 5, np.linspace(0x20,0x60,64,dtype=np.uint8 ), 8, 64, 1, 2]'
       - '[np.linspace(0x40,0x80,64,dtype=np.uint8 ), 7, np.linspace(0x20,0x60,64,dtype=np.uint8 ), 8, 64, 1, 3]'
-    test_vi_with_mask:
+    test_vi_with_mask    @ ori,uimm, vs2, sew, vl, lmul, vxrm, mask:
       - '[np.array([7],dtype=np.uint8 ), 0, np.array([201],dtype=np.uint8 ), 8, 1, 1, 0, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), 1, np.array([211],dtype=np.uint8 ), 8, 1, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.uint8 ), 2, np.array([231],dtype=np.uint8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'
@@ -265,7 +257,7 @@ vssrl_vi:
 vssra_vv:
   <<: *default
   cases:
-    test_vv_without_mask:
+    test_vv_without_mask @ ori, vs1, vs2, sew, vl, lmul, vxrm:
       - '[np.array([7],dtype=np.int8 ), np.array([1],dtype=np.int8 ), np.array([-5],dtype=np.int8 ), 8, 1, 1, 0]'
       - '[np.array([7],dtype=np.int8 ), np.array([1],dtype=np.int8 ), np.array([55],dtype=np.int8 ), 8, 1, 1, 1]'
       - '[np.array([7],dtype=np.int8 ), np.array([2],dtype=np.int8 ), np.array([-5],dtype=np.int8 ), 8, 1, 1, 2]'
@@ -286,7 +278,7 @@ vssra_vv:
       - '[np.linspace(0x40,0x80,64,dtype=np.int32), np.linspace(0,0x40,64,dtype=np.int32), np.linspace(0x20,0x60,64,dtype=np.int32), 32, 64, 2, 3]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int64), np.linspace(0,0x40,64,dtype=np.int64), np.linspace(0x20,0x60,64,dtype=np.int64), 64, 64, 4, 1]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int64), np.linspace(0,0x40,64,dtype=np.int64), np.linspace(0x20,0x60,64,dtype=np.int64), 64, 64, 4, 3]'
-    test_vv_with_mask:
+    test_vv_with_mask    @ ori, vs1, vs2, sew, vl, lmul, vxrm, mask:
       - '[np.array([7],dtype=np.int8 ), np.array([1],dtype=np.int8 ), np.array([5],dtype=np.int8 ), 8, 1, 1, 0, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.int8 ), np.array([1],dtype=np.int8 ), np.array([1],dtype=np.int8 ), 8, 1, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.int8 ), np.array([1],dtype=np.int8 ), np.array([7],dtype=np.int8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'
@@ -305,7 +297,7 @@ vssra_vv:
 vssra_vx:
   <<: *default
   cases:
-    test_vx_without_mask:
+    test_vx_without_mask @ ori, rs1, vs2, sew, vl, lmul, vxrm:
       - '[np.array([7],dtype=np.int8 ), 1, np.array([-65],dtype=np.int8 ), 8, 1, 1, 0]'
       - '[np.array([7],dtype=np.int8 ), 2, np.array([127],dtype=np.int8 ), 8, 1, 1, 1]'
       - '[np.array([7],dtype=np.int8 ), 3, np.array([111],dtype=np.int8 ), 8, 1, 1, 2]'
@@ -320,7 +312,7 @@ vssra_vx:
       - '[np.linspace(0x40,0x80,64,dtype=np.int8 ), 7, np.linspace(0x20,0x60,64,dtype=np.int8 ),  8, 64, 1, 3]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int32), 1, np.linspace(0x20,0x60,64,dtype=np.int32), 32, 64, 2, 0]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int64), 3, np.linspace(0x20,0x60,64,dtype=np.int64), 64, 64, 4, 1]'
-    test_vx_with_mask:
+    test_vx_with_mask    @ ori, rs1, vs2, sew, vl, lmul, vxrm, mask:
       - '[np.array([7], dtype=np.int8 ), 0, np.array([1],dtype=np.int8 ), 8, 1, 1, 0, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7], dtype=np.int8 ), 1, np.array([1],dtype=np.int8 ), 8, 1, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7], dtype=np.int8 ), 2, np.array([1],dtype=np.int8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'
@@ -339,7 +331,7 @@ vssra_vx:
 vssra_vi:
   <<: *default
   cases:
-    test_vi_without_mask:
+    test_vi_without_mask @ ori,uimm, vs2, sew, vl, lmul, vxrm:
       - '[np.array([7],dtype=np.int8 ), 1, np.array([31],dtype=np.int8 ), 8, 1, 1, 0]'
       - '[np.array([7],dtype=np.int8 ), 2, np.array([41],dtype=np.int8 ), 8, 1, 1, 1]'
       - '[np.array([7],dtype=np.int8 ), 3, np.array([21],dtype=np.int8 ), 8, 1, 1, 2]'
@@ -356,7 +348,7 @@ vssra_vi:
       - '[np.linspace(0x40,0x80,64,dtype=np.int16), 1, np.linspace(0x20,0x60,64,dtype=np.int16), 16, 64, 1, 0]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int32), 1, np.linspace(0x20,0x60,64,dtype=np.int32), 32, 64, 2, 0]'
       - '[np.linspace(0x40,0x80,64,dtype=np.int64), 1, np.linspace(0x20,0x60,64,dtype=np.int64), 64, 64, 4, 0]'
-    test_vi_with_mask:
+    test_vi_with_mask    @ ori,uimm, vs2, sew, vl, lmul, vxrm, mask:
       - '[np.array([7],dtype=np.int8 ), 0, np.array([1],dtype=np.int8 ), 8, 1, 1, 0, np.array([0xf],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.int8 ), 1, np.array([1],dtype=np.int8 ), 8, 1, 1, 1, np.array([0x5],dtype=np.uint64)]'
       - '[np.array([7],dtype=np.int8 ), 2, np.array([1],dtype=np.int8 ), 8, 1, 1, 2, np.array([0xa],dtype=np.uint64)]'

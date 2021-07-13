@@ -90,6 +90,7 @@ _: &default
       test_{num}_data:
         .fill {vl}, ({sew}/8), 0;     // {vl} sets of ({sew}/8) bytes 0
         .popsection 
+
   check:
     test_basic_without_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True )
     test_basic_with_mask: np.allclose( result, golden, rtol=0, atol=0, equal_nan=True ) 

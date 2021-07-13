@@ -39,10 +39,11 @@ class Inst(dict):
         return res
 
 
-    def rounding(self, result, xrm, shift):
+    def rounding_xrm(self, result, xrm, shift):
         # Suppose the pre-rounding result is v, and d bits of that result areto be rounded off. 
         # Then the rounded result is (v >> d) + r, where r depends on the rounding mode 
         # (result >> shift) + r
+        # uint64 dont't support
         lsb = 1 << (shift)
         lsb_half = lsb >> 1
 

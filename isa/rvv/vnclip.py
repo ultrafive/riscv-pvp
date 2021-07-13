@@ -12,7 +12,7 @@ class Vnclipu_wv(Inst):
         for ii in range(self['vl']):
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
                 shift = self['vs1'][ii]&(2*self['sew']-1)
-                temp  = self.rounding(self['vs2'][ii], self['vxrm'], shift)
+                temp  = self.rounding_xrm(self['vs2'][ii], self['vxrm'], shift)
                 self['ori'][ii] = np.right_shift(temp, shift)
                 if self['ori'][ii] & sign_mask:
                     self['ori'][ii] = uint_max
@@ -30,7 +30,7 @@ class Vnclipu_wx(Inst):
         shift = self['rs1']&(2*self['sew']-1)
         for ii in range(self['vl']):
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                temp  = self.rounding(self['vs2'][ii], self['vxrm'], shift)
+                temp  = self.rounding_xrm(self['vs2'][ii], self['vxrm'], shift)
                 self['ori'][ii] = np.right_shift(temp, shift)
                 if self['ori'][ii] & sign_mask:
                     self['ori'][ii] = uint_max
@@ -49,7 +49,7 @@ class Vnclipu_wi(Inst):
         shift = self['uimm']&(2*self['sew']-1)
         for ii in range(self['vl']):
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                temp  = self.rounding(self['vs2'][ii], self['vxrm'], shift)
+                temp  = self.rounding_xrm(self['vs2'][ii], self['vxrm'], shift)
                 self['ori'][ii] = np.right_shift(temp, shift)
                 if self['ori'][ii] & sign_mask:
                     self['ori'][ii] = uint_max
@@ -70,7 +70,7 @@ class Vnclip_wv(Inst):
         for ii in range(self['vl']):
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
                 shift = self['vs1'][ii]&(2*self['sew']-1)
-                temp  = self.rounding(self['vs2'][ii], self['vxrm'], shift)
+                temp  = self.rounding_xrm(self['vs2'][ii], self['vxrm'], shift)
                 self['ori'][ii] = np.right_shift(temp, shift)
                 if self['ori'][ii] > int_max:
                     self['ori'][ii] = int_max
@@ -94,7 +94,7 @@ class Vnclip_wx(Inst):
 
         for ii in range(self['vl']):
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):               
-                temp  = self.rounding(self['vs2'][ii], self['vxrm'], shift)
+                temp  = self.rounding_xrm(self['vs2'][ii], self['vxrm'], shift)
                 self['ori'][ii] = np.right_shift(temp, shift)
                 if self['ori'][ii] > int_max:
                     self['ori'][ii] = int_max
@@ -117,7 +117,7 @@ class Vnclip_wi(Inst):
 
         for ii in range(self['vl']):
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):               
-                temp  = self.rounding(self['vs2'][ii], self['vxrm'], shift)
+                temp  = self.rounding_xrm(self['vs2'][ii], self['vxrm'], shift)
                 self['ori'][ii] = np.right_shift(temp, shift)
                 if self['ori'][ii] > int_max:
                     self['ori'][ii] = int_max

@@ -36,11 +36,7 @@ parser.add_argument('--retry', help='retry last failed cases', action="store_tru
 parser.add_argument('--level', help='''put which level of cases together to compile and run:
                                                 - inst for one instruction case, 
                                                 - type for one test_type cases of one instruction, 
-<<<<<<< HEAD
-                                                - case for one case in one file''', default="inst")
-=======
                                                 - case for one case in one file''', default="case")
->>>>>>> 39720b59786f2685e43fcc7554da85c25c5aaf49
 parser.add_argument('--collect', help='just collect the test case to know what cases we can test', action="store_true")
 parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true") 
 parser.add_argument('--clang', help='path of clang compiler', default='clang')                                               
@@ -191,7 +187,7 @@ for spec in specs:
 
             globals()[f'Test_{inst}'] = type(f'Test_{inst}', (object,), attrs)
 
-os.makedirs("log")
+os.makedirs("log", exist_ok=True)
 
 # log file to tell user what cases there are in the yaml files in this level
 with open("log/collected_case.log", 'w') as case_log:
