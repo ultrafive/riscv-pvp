@@ -1,13 +1,17 @@
 from isa.inst import *
 import numpy as np
 
-##return the value 0 when the index is greater than VLMAX in the source vector register group
-def indexIsGreaterThanVLMAX(ebits, vs2len, result):
+
+def getVLMAX(sew, lmul):
     vlendefault = 1024
-    VLMAX = (vlendefault//ebits)
-    print(str(VLMAX)+' VLMAX '+str(type(VLMAX)))
-    if vs2len >= VLMAX:
-        for ii in range(VLMAX, vs2len, 1):
+    lmulKey = {'1': 1, '2': 2, '4': 4, '8': 8, 'f2': 1/2, 'f4': 1/4, 'f8': 1/8}
+    return int(lmulKey[str(lmul)] * vlendefault / sew)
+
+##return the value 0 when the index is greater than VLMAX in the source vector register group
+def indexIsGreaterThanVLMAX(sew, lmul, vl, result):
+    VLMAX = getVLMAX(sew, lmul)
+    if vl >= VLMAX:
+        for ii in range(VLMAX, vl, 1):
             result[ii] = 0x0
 
 
@@ -19,24 +23,20 @@ class Vslide1up_vx(Inst):
             vl <= i < VLMAX             Follow tail policy
     '''
     def golden(self):
-        result = self['ori'].tolist()
-        vs2    = self['vs2'].tolist()
         vstart = self['vstart'] if 'vstart' in self else 0 
-        vl   = self['vl']   if 'vl'   in self else 0 
         maskflag = 1 if 'mask' in self else 0       
         if vstart == 0:
             if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**0)) ):
-                result[0] = self['rs1']
+                self['ori'][0] = self['rs1']
       
         idx = max(vstart, 1)   
-        if idx < vl:
-            print(' polar '+ str(idx)+ '  '+str(vl)+ '  '+str(len(vs2)))
-            for ii in range(idx, vl, 1):
-                if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                    result[ii] = vs2[ii-1]   
+        if idx < self['vl']:
+            for ii in range(idx, self['vl'], 1):
+                if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii))):
+                    self['ori'][ii] = self['vs2'][ii-1]   
 
-        indexIsGreaterThanVLMAX(self['sew'], len(vs2), result)
-        return np.array(result, dtype=self['vs2'].dtype )
+        indexIsGreaterThanVLMAX(self['sew'], self['lmul'], self['vl'], self['ori'])
+        return self['ori']
 
 
 class Vslideup_vx(Inst):
@@ -46,20 +46,16 @@ class Vslideup_vx(Inst):
                 vl <= i < VLMAX                 Follow tail policy
     '''
     def golden(self):      
-        result = self['ori'].tolist()
-        vs2    = self['vs2'].tolist()
         vstart = self['vstart'] if 'vstart' in self else 0 
-        vl   = self['vl']   if 'vl'   in self else 0 
-        maskflag = 1 if 'mask' in self else 0
-        
+        maskflag = 1 if 'mask' in self else 0     
         idx = max(vstart, self['rs1']) 
-        if idx < len(vs2):
-            for ii in range(idx, len(vs2), 1):
+        if idx < self['vl']:
+            for ii in range(idx, self['vl'], 1):
                 if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                    result[ii] = vs2[ii-self['rs1']]   
+                    self['ori'][ii] = self['vs2'][ii-int(self['rs1'])]   
 
-        indexIsGreaterThanVLMAX(self['sew'], len(vs2), result)
-        return np.array(result, dtype=self['vs2'].dtype )
+        indexIsGreaterThanVLMAX(self['sew'], self['lmul'], self['vl'] , self['ori'])
+        return self['ori']
 
 
 class Vslide1down_vx(Inst):
@@ -70,25 +66,20 @@ class Vslide1down_vx(Inst):
             vl <= i < VLMAX         Follow tail policy
     '''
     def golden(self):
-        result = self['ori'].tolist()
-        vs2    = self['vs2'].tolist()
         vstart = self['vstart'] if 'vstart' in self else 0 
-        vl   = self['vl']   if 'vl'   in self else 0 
-        maskflag = 1 if 'mask' in self else 0
-       
-        if vstart < vl-1:
-            for ii in range(vstart, vl-1, 1):
+        maskflag = 1 if 'mask' in self else 0     
+        if vstart < self['vl']-1:
+            for ii in range(vstart, self['vl']-1, 1):
                 if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                    result[ii] = vs2[ii+1] 
+                    self['ori'][ii] = self['vs2'][ii+1] 
 
-        vlendefault = 1024
-        VLMAX = (vlendefault//self['sew'])
-        vlValid = min(VLMAX, vl)      
+        VLMAX = getVLMAX(self['sew'], self['lmul'])
+        vlValid = min(VLMAX, self['vl'])      
         if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**(vlValid-1))) ):      
-            result[vlValid-1] = self['rs1'] 
+            self['ori'][vlValid-1] = self['rs1'] 
 
-        indexIsGreaterThanVLMAX(self['sew'], len(vs2), result)
-        return np.array(result, dtype=self['vs2'].dtype )
+        indexIsGreaterThanVLMAX(self['sew'], self['lmul'], self['vl'], self['ori'])
+        return self['ori']
 
 
 class Vslidedown_vx(Inst):
@@ -98,20 +89,16 @@ class Vslidedown_vx(Inst):
               vl <= i < VLMAX     Follow tail policy
     '''
     def golden(self):
-        result = self['ori'].tolist()
-        vs2    = self['vs2'].tolist()
         vstart = self['vstart'] if 'vstart' in self else 0 
-        vl   = self['vl']   if 'vl'   in self else 0 
-        maskflag = 1 if 'mask' in self else 0
-          
-        if vstart < vl:
-            for ii in range(vstart, vl, 1):
-                if (ii+self['rs1']) >= vl :
+        maskflag = 1 if 'mask' in self else 0        
+        if vstart < self['vl']:
+            for ii in range(vstart, self['vl'], 1):
+                if (ii+self['rs1']) >= self['vl'] :
                     if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                        result[ii] = 0x0
+                        self['ori'][ii] = 0x0
                 else:
                     if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                        result[ii] = vs2[ii+self['rs1']] 
+                        self['ori'][ii] = self['vs2'][ii+int(self['rs1'])] 
 
-        indexIsGreaterThanVLMAX(self['sew'], len(vs2), result)
-        return np.array(result, dtype=self['vs2'].dtype )
+        indexIsGreaterThanVLMAX(self['sew'], self['lmul'], self['vl'], self['ori'])
+        return self['ori']
