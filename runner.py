@@ -37,6 +37,7 @@ parser.add_argument('--slen', help='bits of vector striping distance', default=1
 parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")                                    
 parser.add_argument('--spike', help='path of spike simulator', default='spike')
 parser.add_argument('--vcs', help='path of vcs simulator', default=None)
+#parser.add_argument('--gem5', help='path of gem5 simulator', default="/home/chao.yang/npu_v2/simulator/gem5/build/RISCV/gem5.opt")
 parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
 parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
 parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
@@ -214,7 +215,7 @@ def sims_run( args, workdir, binary ):
                         --l1d_assoc=8 \
                         --l2cache \
                         --l2_size=512kB \
-                        --signature={workdir}{k}.sig'
+                        --signature={workdir}/{k}.sig'
 
         # set the cmd to run the sim and save the cmd
         if k == 'gem5':
@@ -309,7 +310,7 @@ def runner(test):
             # sim run successfully, so we compare the sim results with spike results
             sim_start = 0                 
             for test_case in case_list:
-                if test_case["check_str"] != '0':
+                if test_case["check_str"] != '':
                     golden = test_case["golden"]
                     # get sim result, because many cases in one signature file, so we need the start to know where to find the result
                     [ result, sim_start ] = from_txt( f'build/{test}/{sim}.sig', golden,  sim_start )
@@ -447,6 +448,9 @@ if __name__ == "__main__":
         report.close()
 
         progress.stop() 
+
+        os.system("stty echo")
+
 
         if failed == 0:
             print(f'{len(ps)} files running finish, all pass.( {tests.value} tests )')
