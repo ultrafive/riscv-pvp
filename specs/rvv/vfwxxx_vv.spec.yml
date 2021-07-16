@@ -2,7 +2,7 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  _templates: &_templates
+  templates:
     test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
@@ -17,6 +17,7 @@ _: &default
         la a3, test_{num}_data;
         {stins} v4, (a3);
         .pushsection .data, 1;
+        .balign ({ebits}*2/8)
       test_{num}_data:
         .fill {vs2_shape[0]}, ({ebits}*2/8), 0;
         .popsection
@@ -34,6 +35,7 @@ _: &default
         la a3, test_{num}_data;
         {stins} v4, (a3);
         .pushsection .data, 1;
+        .balign ({ebits}*2/8)
       test_{num}_data:
         .fill {vs2_shape[0]}, ({ebits}*2/8), 0;
         .popsection
@@ -49,6 +51,7 @@ _: &default
           la a3, test_{num}_data; 
           {stins} v4, (a3); 
           .pushsection .data, 1; 
+          .balign ({ebits}*2/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}*2/8), 0; 
           .popsection
@@ -72,36 +75,25 @@ _: &default
           la a3, test_{num}_data ; 
           {stins} v4, (a3); 
           .pushsection .data, 1; 
+          .balign ({ebits}*2/8)
       test_{num}_data: 
           .fill {vs2_shape[0]}, ({ebits}*2/8), 0; 
           .popsection
 
-
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ vs1, vs2 @ ebits=32, ebits_vd=64, ldins='vle32.v', stins='vse64.v': |
-      {inherit} 
-    test_special_without_mask @ vs1, vs2 @ ebits=32, ebits_vd=64, ldins='vle32.v', stins='vse64.v': |
-      {inherit}
-    test_vs1_eq_vs2_without_mask @ vs1 @ vs2=vs1, ebits=32, ebits_vd=64, ldins='vle32.v', stins='vse64.v': |
-      {inherit}
-    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ebits_vd=64, ldins='vle32.v', ldins_vd = 'vle64.v', stins='vse64.v': |
-      {inherit}
-
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @ vs1, vs2 @ ebits=32, ebits_vd=64, ldins='vle32.v', stins='vse64.v':
       - linspace_rvv_vv(np.float32, 1)
       - linspace_rvv_vv(np.float32, 4)
       - linspace_rvv_vv(np.float32, 10)
       - linspace_rvv_vv(np.float32, 32)
-    test_special_without_mask:
+    test_special_without_mask @ vs1, vs2 @ ebits=32, ebits_vd=64, ldins='vle32.v', stins='vse64.v':
       - "[ linspace_rvv_v_special(np.float32, 0, 32), linspace_rvv_v_special(np.float32, 1, 32) ]" 
-    test_vs1_eq_vs2_without_mask:
+    test_vs1_eq_vs2_without_mask @ vs1 @ vs2=vs1, ebits=32, ebits_vd=64, ldins='vle32.v', stins='vse64.v':
       - "[np.linspace(-127, 0xffff, 1, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 4, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 10, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 32, dtype=np.float32)]"   
-    test_basic_with_mask:
+    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ebits_vd=64, ldins='vle32.v', ldins_vd = 'vle64.v', stins='vse64.v':
       - linspace_rvv_vv_w_with_mask(np.float32, 1)
       - linspace_rvv_vv_w_with_mask(np.float32, 4)
       - linspace_rvv_vv_w_with_mask(np.float32, 10)

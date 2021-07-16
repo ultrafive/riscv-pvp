@@ -6,40 +6,169 @@ class Vfadd_vv(Inst):
     name = 'vfadd.vv'
 
     def golden(self):
-        return self.masked( self['vs1'] + self['vs2'], self['orig'] if 'orig' in self else 0 )
+        if 'vs1' in self:
+            if 'orig' in self:
+                result = self['orig'].copy()
+                if 'mask' in self or 'vstart' in self:
+                    result = result[0:self['vlen']]
+            else:
+                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
 
+            if 'vstart' in self:
+                if self['vstart'] >= self['vlen']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] + self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
+        
 class Vfsub_vv(Inst):
     name = 'vfsub.vv'
 
     def golden(self):
-        return self.masked( self['vs2'] - self['vs1'], self['orig'] if 'orig' in self else 0 )
+        if 'vs1' in self:
+            if 'orig' in self:
+                result = self['orig'].copy()
+                if 'mask' in self or 'vstart' in self:
+                    result = result[0:self['vlen']]
+            else:
+                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vlen']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] - self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
 
 class Vfmul_vv(Inst):
     name = 'vfmul.vv'
 
     def golden(self):
-        return self.masked( self['vs1'] * self['vs2'], self['orig'] if 'orig' in self else 0 )
+        if 'vs1' in self:
+            if 'orig' in self:
+                result = self['orig'].copy()
+                if 'mask' in self or 'vstart' in self:
+                    result = result[0:self['vlen']]
+            else:
+                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vlen']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] * self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+
+            if 'frm' in self and self['frm'] == 1:
+                for i in range(len(result)):
+                    if np.isposinf( result[i] ):
+                        result[i] = 65504
+                    elif np.isneginf( result[i] ):
+                        result[i] = -65504
+
+            return result
+
+        else:
+            return 0
 
 
 class Vfdiv_vv(Inst):
     name = 'vfdiv.vv'
 
     def golden(self):
-        return self.masked( self['vs2'] / self['vs1'], self['orig'] if 'orig' in self else 0 )
+        if 'vs1' in self:
+            if 'orig' in self:
+                result = self['orig'].copy()
+                if 'mask' in self or 'vstart' in self:
+                    result = result[0:self['vlen']]
+            else:
+                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vlen']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] / self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
 
 
 class Vfmax_vv(Inst):
     name = 'vfmax.vv'
 
     def golden(self):
-        return self.masked( np.maximum(self['vs1'], self['vs2']), self['orig'] if 'orig' in self else 0 )
+        if 'vs1' in self:
+            if 'orig' in self:
+                result = self['orig'].copy()
+                if 'mask' in self or 'vstart' in self:
+                    result = result[0:self['vlen']]
+            else:
+                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vlen']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vlen']] = self.masked( np.maximum(self['vs2'][vstart:self['vlen']], self['vs1'][vstart:self['vlen']]), self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0        
     
 
 class Vfmin_vv(Inst):
     name = 'vfmin.vv'
 
     def golden(self):
-        return self.masked(np.minimum(self['vs1'], self['vs2']), self['orig'] if 'orig' in self else 0 )
+        if 'vs1' in self:
+            if 'orig' in self:
+                result = self['orig'].copy()
+                if 'mask' in self or 'vstart' in self:
+                    result = result[0:self['vlen']]
+            else:
+                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vlen']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vlen']] = self.masked( np.minimum(self['vs2'][vstart:self['vlen']], self['vs1'][vstart:self['vlen']]), self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
+
 
 
 class Vfsgnj_vv(Inst):

@@ -1,0 +1,49 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_basic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew}, m{mul}, tu, ma;
+        la a2, {vs2_data};
+        la a3, {ori_data};
+        la a0, {mask_data};  
+        vle{sew}.v  v0, (a0);
+        vle{sew}.v  v8, (a2); 
+        vle{sew}.v v16, (a3);
+        {name} v16, v8, v0;
+        la a3, test_{num}_data;
+        vse{sew}.v v16, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection  
+
+  check:
+    test_basic_with_mask: np.array_equal(result, golden)
+ 
+vcompress_vm:
+  <<: *default
+  cases:
+    test_basic_with_mask @vs2, ori, mask, sew, mul, vl:
+      - '[np.array([0,1,2,3,4,5,6,7,8],dtype=np.uint64), np.array([9,8,7,6,5,4,3,2,1],dtype=np.uint64), np.array([0x01a5],dtype=np.uint64), 64, 1, 9]'
+      - '[np.linspace(0x01,0x21, 8,dtype=np.uint16), np.linspace(0x20,0x30, 8,dtype=np.uint16), np.array([0xfffff00f],dtype=np.uint64), 16, "f4", 8]'
+      - '[np.linspace(0x01,0x21, 8,dtype=np.uint16), np.linspace(0x20,0x30, 8,dtype=np.uint16), np.array([0xfffff00f],dtype=np.uint64), 16, "f2", 8]'
+      - '[np.linspace(0x01,0x21, 8,dtype=np.uint16), np.linspace(0x20,0x30, 8,dtype=np.uint16), np.array([0xfffff00f],dtype=np.uint64), 16,   1,  8]'
+      - '[np.linspace(0x01,0x21, 8,dtype=np.uint32), np.linspace(0x20,0x30, 8,dtype=np.uint32), np.array([0xfffff00f],dtype=np.uint64), 32, "f2", 8]'
+      - '[np.linspace(0x01,0x21, 8,dtype=np.uint32), np.linspace(0x20,0x30, 8,dtype=np.uint32), np.array([0xfffff00f],dtype=np.uint64), 32,   1,  8]'
+      - '[np.linspace(0x01,0x21, 8,dtype=np.uint64), np.linspace(0x20,0x30, 8,dtype=np.uint64), np.array([0xfffff00f],dtype=np.uint64), 64, 1,  8]'
+      - '[np.linspace(0x01,0x21,32,dtype=np.uint32), np.linspace(0x20,0x30,32,dtype=np.uint32), np.array([0xfffff00f],dtype=np.uint64), 32, 1, 32]'
+      - '[np.linspace(0x01,0x21,32,dtype=np.uint32), np.linspace(0x20,0x30,32,dtype=np.uint32), np.array([0xa55aa55a],dtype=np.uint64), 32, 1, 32]'
+      - '[np.linspace(0x01,0x11,16,dtype=np.uint64), np.linspace(0x20,0x30,16,dtype=np.uint64), np.array([0x0000f00f],dtype=np.uint64), 64, 1, 16]'
+      - '[np.linspace(0x01,0x11,16,dtype=np.uint64), np.linspace(0x20,0x30,16,dtype=np.uint64), np.array([0x0000a55a],dtype=np.uint64), 64, 1, 16]'
+      - '[np.linspace(0x01,0x21,32,dtype=np.uint64), np.linspace(0x20,0x50,32,dtype=np.uint64), np.array([0xa55af00f],dtype=np.uint64), 64, 2, 32]'
+      - '[np.linspace(0x01,0x21,32,dtype=np.uint64), np.linspace(0x20,0x50,32,dtype=np.uint64), np.array([0xa55aa55a],dtype=np.uint64), 64, 2, 32]'
+
+

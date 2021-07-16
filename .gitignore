@@ -2,6 +2,7 @@
 __pycache__
 output/
 build/
+log/
 report/
 *.fsdb
 *.fsdb.*

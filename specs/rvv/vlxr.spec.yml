@@ -2,7 +2,7 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  templates: &_templates
+  templates:
     test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num}
@@ -16,6 +16,7 @@ _: &default
         vse8.v v8, (a1);
 
         .pushsection .data, 1;
+        .balign 1
       test_{num}_data:
         .fill (VLEN/8*{nf}), 1, 0;
         .popsection
@@ -23,12 +24,8 @@ _: &default
 
 vlxre8_v:
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, nf       @ ebits = 8: |
-      {inherit}
   cases:
-    test_basic_without_mask :
+    test_basic_without_mask @ rs1, nf       @ ebits = 8 :
       - "[ np.linspace(0, 255, 1024*1, dtype=np.uint8), 1]"
       - "[ np.linspace(0, 255, 1024*2, dtype=np.uint8), 2]"
       - "[ np.linspace(0, 255, 1024*4, dtype=np.uint8), 4]"
@@ -36,12 +33,8 @@ vlxre8_v:
     
 vlxre16_v:
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, nf       @ ebits = 16: |
-      {inherit}
   cases:
-    test_basic_without_mask :
+    test_basic_without_mask @ rs1, nf       @ ebits = 16 :
       - "[ np.linspace(0, 255, 512*1, dtype=np.uint16), 1]"
       - "[ np.linspace(0, 255, 512*2, dtype=np.uint16), 2]"
       - "[ np.linspace(0, 255, 512*4, dtype=np.uint16), 4]"
@@ -49,12 +42,8 @@ vlxre16_v:
 
 vlxre32_v:
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, nf       @ ebits = 32: |
-      {inherit}
   cases:
-    test_basic_without_mask :
+    test_basic_without_mask @ rs1, nf       @ ebits = 32 :
       - "[ np.linspace(0, 255, 256*1, dtype=np.uint32), 1]"
       - "[ np.linspace(0, 255, 256*2, dtype=np.uint32), 2]"
       - "[ np.linspace(0, 255, 256*4, dtype=np.uint32), 4]"
@@ -62,12 +51,8 @@ vlxre32_v:
 
 vlxre64_v:
   <<: *default
-  templates:
-    <<: *_templates
-    test_basic_without_mask @ rs1, nf       @ ebits = 64: |
-      {inherit}
   cases:
-    test_basic_without_mask :
+    test_basic_without_mask @ rs1, nf       @ ebits = 64 :
       - "[ np.linspace(0, 255, 128*1, dtype=np.uint64), 1]"
       - "[ np.linspace(0, 255, 128*2, dtype=np.uint64), 2]"
       - "[ np.linspace(0, 255, 128*4, dtype=np.uint64), 4]"

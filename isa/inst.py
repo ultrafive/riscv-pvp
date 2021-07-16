@@ -8,12 +8,13 @@ class Inst(dict):
     def golden(self):
         raise NotImplementedError()
 
-    def masked(self, value, old = 0):
+    def masked(self, value, old = 0, vstart = 0):
         if 'mask' not in self:
             return value
         else:
-            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']]
+            mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vlen']]
             return np.where( mask == 1, value, old)
+
 
     def as_mask(self, value):
         return np.packbits(np.unpackbits(value, bitorder='little')[0: self['vlen']], bitorder='little')
@@ -37,3 +38,26 @@ class Inst(dict):
 
         return res
 
+
+    def rounding_xrm(self, result, xrm, shift):
+        # Suppose the pre-rounding result is v, and d bits of that result areto be rounded off. 
+        # Then the rounded result is (v >> d) + r, where r depends on the rounding mode 
+        # (result >> shift) + r
+        # uint64 dont't support
+        lsb = 1 << (shift)
+        lsb_half = lsb >> 1
+
+        if xrm == 0:    #RNU:
+            result += lsb_half
+        elif xrm == 1:  #RNE:
+            if (result & lsb_half) and ((result & (lsb_half-1)) or (result & lsb)) :
+                result += lsb
+        elif xrm == 2:  #RDN:
+            pass
+        elif xrm == 3:  #ROD:
+            if result & (lsb - 1):
+                result |= lsb
+        else:
+            print("error vrm para!")
+
+        return result

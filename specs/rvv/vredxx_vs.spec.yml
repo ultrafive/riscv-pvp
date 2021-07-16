@@ -2,7 +2,7 @@ _: &default
   head: |
     #include "exception.h"
   env: RVTEST_RV64UV
-  _templates: &_templates
+  templates:
     test_basic_without_mask: |
       test_{num}:
           li TESTNUM, {num};
@@ -20,6 +20,7 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v3, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
@@ -40,6 +41,7 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v3, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
@@ -56,6 +58,7 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v3, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
@@ -70,6 +73,7 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v2, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
@@ -86,6 +90,7 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v1, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
@@ -104,6 +109,7 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v2, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
@@ -126,53 +132,38 @@ _: &default
           la a4, test_{num}_data ;
           {stins} v3, (a4);
           .pushsection .data, 1;
+          .balign ({ebits}/8)
       test_{num}_data:
           .fill {vs2_shape[0]}, ({ebits}/8), 0;
           .popsection
 
-  templates:
-    <<: *_templates
-    test_basic_without_mask @orig, vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_special_without_mask @orig, vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_vs1_eq_vs2_without_mask @orig, vs1 @ vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_dest_eq_vs1vs2_without_mask @ vs1 @ orig=vs1, vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_dest_eq_vs1_without_mask @ vs1, vs2 @ orig=vs1, ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_dest_eq_vs2_without_mask @ vs1, vs2 @ orig=vs2, ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
-    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v': |
-      {inherit}
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @orig, vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vvv(np.int32, 1)
       - linspace_rvv_vvv(np.int32, 4)
       - linspace_rvv_vvv(np.int32, 10)
       - linspace_rvv_vvv(np.int32, 32)
-    test_vs1_eq_vs2_without_mask:
+    test_vs1_eq_vs2_without_mask @orig, vs1 @ vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv(np.int32, 1)
       - linspace_rvv_vv(np.int32, 4)
       - linspace_rvv_vv(np.int32, 10)
       - linspace_rvv_vv(np.int32, 32)
-    test_dest_eq_vs1vs2_without_mask:
+    test_dest_eq_vs1vs2_without_mask @ vs1 @ orig=vs1, vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace(-127, 0xffff, 1, dtype=np.int32)]"
       - "[np.linspace(-127, 0xffff, 4, dtype=np.int32)]"
       - "[np.linspace(-127, 0xffff, 10, dtype=np.int32)]"
       - "[np.linspace(-127, 0xffff, 32, dtype=np.int32)]"
-    test_dest_eq_vs1_without_mask:
+    test_dest_eq_vs1_without_mask @ vs1, vs2 @ orig=vs1, ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv(np.int32, 1)
       - linspace_rvv_vv(np.int32, 4)
       - linspace_rvv_vv(np.int32, 10)
       - linspace_rvv_vv(np.int32, 32)
-    test_dest_eq_vs2_without_mask:
+    test_dest_eq_vs2_without_mask @ vs1, vs2 @ orig=vs2, ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv(np.int32, 1)
       - linspace_rvv_vv(np.int32, 4)
       - linspace_rvv_vv(np.int32, 10)
       - linspace_rvv_vv(np.int32, 32)
-    test_basic_with_mask:
+    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv_with_mask(np.int32, 1)
       - linspace_rvv_vv_with_mask(np.int32, 4)
       - linspace_rvv_vv_with_mask(np.int32, 10)
@@ -207,32 +198,32 @@ vredxor_vs:
 __: &u_default
   <<: *default
   cases:
-    test_basic_without_mask:
+    test_basic_without_mask @orig, vs1, vs2 @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vvv(np.uint32, 1)
       - linspace_rvv_vvv(np.uint32, 4)
       - linspace_rvv_vvv(np.uint32, 10)
       - linspace_rvv_vvv(np.uint32, 32)
-    test_vs1_eq_vs2_without_mask:
+    test_vs1_eq_vs2_without_mask @orig, vs1 @ vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv(np.uint32, 1)
       - linspace_rvv_vv(np.uint32, 4)
       - linspace_rvv_vv(np.uint32, 10)
       - linspace_rvv_vv(np.uint32, 32)
-    test_dest_eq_vs1vs2_without_mask:
+    test_dest_eq_vs1vs2_without_mask @ vs1 @ orig=vs1, vs2=vs1, ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace(-127, 0xffff, 1, dtype=np.uint32)]"
       - "[np.linspace(-127, 0xffff, 4, dtype=np.uint32)]"
       - "[np.linspace(-127, 0xffff, 10, dtype=np.uint32)]"
       - "[np.linspace(-127, 0xffff, 32, dtype=np.uint32)]"
-    test_dest_eq_vs1_without_mask:
+    test_dest_eq_vs1_without_mask @ vs1, vs2 @ orig=vs1, ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv(np.uint32, 1)
       - linspace_rvv_vv(np.uint32, 4)
       - linspace_rvv_vv(np.uint32, 10)
       - linspace_rvv_vv(np.uint32, 32)
-    test_dest_eq_vs2_without_mask:
+    test_dest_eq_vs2_without_mask @ vs1, vs2 @ orig=vs2, ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv(np.uint32, 1)
       - linspace_rvv_vv(np.uint32, 4)
       - linspace_rvv_vv(np.uint32, 10)
       - linspace_rvv_vv(np.uint32, 32)
-    test_basic_with_mask:
+    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv_with_mask(np.uint32, 1)
       - linspace_rvv_vv_with_mask(np.uint32, 4)
       - linspace_rvv_vv_with_mask(np.uint32, 10)
