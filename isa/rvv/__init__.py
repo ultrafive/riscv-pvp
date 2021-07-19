@@ -120,3 +120,5 @@ from .vnclip import *
 from .vwredsum import *
 from .vsmul import *
 
+from .vlsegxexff_v import *
+
