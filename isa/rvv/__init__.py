@@ -118,3 +118,5 @@ from .vcompress_vm import *
 from .vssrx import * 
 from .vnclip import * 
 from .vwredsum import *
+from .vsmul import *
+
