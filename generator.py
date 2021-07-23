@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from utils.params import *
 from isa import *
 import re
@@ -13,6 +12,9 @@ import sys, inspect
 from multiprocessing import Pool, Manager, Condition, Value
 from string import Template
 import shutil
+import types
+import inspect
+import time
 from rich.progress import (
     Progress,
     TextColumn,
@@ -39,7 +41,8 @@ parser.add_argument('--level', help='''put which level of cases together to comp
                                                 - case for one case in one file''', default="case")
 parser.add_argument('--collect', help='just collect the test case to know what cases we can test', action="store_true")
 parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true") 
-parser.add_argument('--clang', help='path of clang compiler', default='clang')                                               
+parser.add_argument('--clang', help='path of clang compiler', default='clang') 
+parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/generator_report.log.", action="store_true")                                              
 
 #options to configure the test CPU
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
@@ -62,6 +65,45 @@ result_detail_dict = manager.dict()
 tests = Value('L', 0)
 fails = Value('L', 0) 
 
+# find the params for matrix cases
+def search(arg_names, vals, no, params, **kwargs):
+    if no == len(vals):#when all arguments in kwargs
+        params.append(kwargs)
+        return
+
+    # define the arguments in kwargs to help compute next param
+    for key, val in kwargs.items():
+        if isinstance(val,str):
+            exec(f'{key}="{val}"')
+        elif isinstance(val, np.ndarray):
+            val_str = ''
+            for el in val:
+                val_str += str(el) + ','
+            exec(f'{key}=np.array([{val_str}], dtype=np.{val.dtype})')
+        else:
+            exec(f'{key}={val}')
+
+    # just to unify the handle process
+    if not isinstance(vals[no], list):
+        vals[no] = [vals[no]]
+    for val in vals[no]:
+        try:
+            vals_next = eval(val) if isinstance(val,str) else val
+        except NameError:# when the string is jsut a string and can't be run
+            vals_next = val
+        
+        # in case of the string is same as built-in function and type
+        if isinstance(vals_next,types.BuiltinFunctionType) or inspect.isclass(vals_next):
+            vals_next = val
+        
+        # just to unify the handle process
+        if not isinstance(vals_next, list):
+            vals_next=[vals_next]
+        
+        for val_el in vals_next:
+            # take this argument into kwargs and continue to search next argument 
+            kwargs[arg_names[no]] = val_el
+            search(arg_names, vals, no+1, params, **kwargs)
 
 if not args.specs or len(args.specs.split()) == 0:
     # default find the case from specs folder
@@ -105,6 +147,9 @@ for spec in specs:
             # collect the test configurations
             attrs['test'] = dict()
             for key, params in cfg['cases'].items():
+                # the default input mode for cases argument is common, test_case @ a, b ,c:
+                param_mode = 'common'
+
                 # get the test_type and arguments from cases option
                 [ test_type, *others ] = re.split(r'\s*@\s*', key)
                 if len(others) == 2:
@@ -114,31 +159,99 @@ for spec in specs:
                     _args = others[0]
                     _defaults = ''
                 else:
-                     _args = ''
-                     _defaults = ''
+                    _args = ''
+                    _defaults = ''
+
+                    # the matrix mode in cases
+                    if isinstance(params, dict) and 'matrix' in params:
+                        param_mode = 'matrix'
 
                 if not test_type in cfg['templates']:
                     # if no template of this test_type, it's not a test case
                     print(f"can't find the template code for {test_type} of {inst}, Please check!")
                     continue
 
-
-                # separate the arguments into a list
-                if _args:
-                    argnames = re.split(r'\s*,\s*', _args)
-                    for i in range(len(argnames)):
-                        argnames[i] = argnames[i].strip()
-                else:
-                    argnames = []
-
                 test_info = dict()
                 test_info["template"] = cfg['templates'][test_type]
-                test_info["args"] = argnames
-                if args.basic_only:
-                    l = len(params)
-                    if l > 4:
-                        params = [ c for i, c in enumerate(params) if i in [int(l/4), int(l*2/4), int(l*3/4), l-1]]                
-                test_info["params"] = params
+
+                if param_mode == 'common':
+                    # test_type @ xx,xx,xx@ xx=xx
+                    if 'matrix' in params:
+                        print(f"@ argument list can't be used with matrix in params.-{test_type} of {inst} in {filename}")
+                        continue
+
+                    # separate the arguments into a list
+                    if _args:
+                        argnames = re.split(r'\s*,\s*', _args)
+                        for i in range(len(argnames)):
+                            argnames[i] = argnames[i].strip()
+                    else:
+                        argnames = []
+
+                    test_info["args"] = argnames
+
+                    if isinstance(params, dict) and 'setup' in params:
+                        # use argument list and params_yml in setup to get the params
+                        if _args == '':
+                            print(f"setup needs to be used with argument list, please check.-{test_type} of {inst} in {filename}")
+                            continue
+
+                        if 'params_yml' in globals():
+                            del globals()['param_yml']
+                        exec(params["setup"])
+                        if not 'params_yml' in globals():
+                            print(f"no param_yml in setup, please check.-{test_type} of {inst} in {filename}")
+                            continue
+                        else:
+                            if args.basic_only:
+                                l = len(params_yml)                   
+                                if l > 4:
+                                    params_yml = [ c for i, c in enumerate(params_yml) if i in [int(l/4), int(l*2/4), int(l*3/4), l-1] ]
+                            test_info["params"] = params_yml
+                    
+                    else:                    
+                        if args.basic_only:
+                            l = len(params)
+                            if l > 4:
+                                params = [ c for i, c in enumerate(params) if i in [int(l/4), int(l*2/4), int(l*3/4), l-1]]                
+                        test_info["params"] = params
+
+                elif param_mode == 'matrix':
+                    # setup string is the preparatory work for matrix
+                    if 'setup' in params:
+                        exec(params['setup'])
+                    
+                    params_dict_yml = []
+                    argnames = []
+                    vals = []
+                    # get argument names and params
+                    for arg_name, val in params['matrix'].items():
+                        argnames.append(arg_name)
+                        vals.append(val)
+
+                    test_info["args"] = argnames
+                    
+                    # compute the params values 
+                    search(argnames, vals, 0, params_dict_yml)
+
+                    # get the params list from dictionary
+                    params_yml = []
+                    for param_dict_yml in params_dict_yml:
+                        pdy_vals = []
+                        for arg in argnames:
+                            pdy_vals.append(param_dict_yml[arg])
+                        
+                        params_yml.append(pdy_vals)
+                    if args.basic_only:
+                        l = len(params_yml)                   
+                        if l > 4:
+                            params_yml = [ c for i, c in enumerate(params_yml) if i in [int(l/4), int(l*2/4), int(l*3/4), l-1] ]
+                    test_info["params"] = params_yml 
+
+                else:
+                    continue
+
+
                 test_info['default'] = _defaults
 
                 if 'check' in cfg.keys() and test_type in cfg['check']:
@@ -159,25 +272,26 @@ for spec in specs:
                     # collect the instruction and test_type
                     collected_case_list.append(inst+'/'+test_type)                    
                 test_info = attrs['test'][test_type]
-                attrs['test'][test_type]["case_param"] = dict()
+                if args.level == "case":
+                    attrs['test'][test_type]["case_param"] = dict()
                 if test_info["params"]:
                     num = 0
+                    raw_case_name = ''
+                    for i in range(len(test_info["args"])):
+                        if i != 0:
+                            raw_case_name += '-'
+                        raw_case_name += test_info["args"][i]                    
                     for param in test_info["params"]:
-                        case_name = ''
-                        for i in range(len(test_info["args"])):
-                            if i != 0:
-                                case_name += '-'
-                            case_name += test_info["args"][i]
-                        case_name += '_' + str(num)                            
-                        attrs['test'][test_type]["case_param"][case_name] = param
-                        all_case_list.append(inst+'/'+test_type+'/'+case_name)
+                        case_name = raw_case_name + '_' + str(num)
+                        all_case_list.append(inst+'/'+test_type+'/'+case_name)                                                                    
                         if args.level == "case":
+                            attrs['test'][test_type]["case_param"][case_name] = param
                             collected_case_list.append(inst+'/'+test_type+'/'+case_name)
                         num += 1
                 else:
                     all_case_list.append(inst+'/'+test_type)
                     if args.level == "case":
-                        # if npo param, just one case
+                        # if no param, just one case
                         collected_case_list.append(inst+'/'+test_type)
 
             # define the test function to run tests later
@@ -203,36 +317,42 @@ with open("log/all_case.log",'w') as all_log:
 
 # call the test_function in the test class to run the test
 def run_test( case ):
-    stdout = sys.stdout
-    stderr = sys.stderr
-    output = io.StringIO()
-    sys.stdout = output
-    sys.stderr = output
+    # the work process need to handle the KeyboardInterrupt before the main process
+    try:
+        stdout = sys.stdout
+        stderr = sys.stderr
+        output = io.StringIO()
+        sys.stdout = output
+        sys.stderr = output
 
-    # get the test_instruction、 test_type and test_param by /
-    test = case.split('/')
-    if len(test) == 1:
-        test_instruction = test[0]
-        test_type = ''
-        test_case = ''
-    elif len(test) == 2:
-        test_instruction = test[0]
-        test_type = test[1]
-        test_case = ''  
-    else:
-        test_instruction = test[0]
-        test_type = test[1]
-        test_case = test[2]               
+        # get the test_instruction、 test_type and test_param by /
+        test = case.split('/')
+        if len(test) == 1:
+            test_instruction = test[0]
+            test_type = ''
+            test_case = ''
+        elif len(test) == 2:
+            test_instruction = test[0]
+            test_type = test[1]
+            test_case = ''  
+        else:
+            test_instruction = test[0]
+            test_type = test[1]
+            test_case = test[2]               
 
-    # use the test_function in Test class to run the test
-    test_instruction_class = "Test_" + test_instruction
-    tic = eval( f'{test_instruction_class}()' )
-    tic.test_function( test_type, test_case )
+        # use the test_function in Test class to run the test
+        test_instruction_class = "Test_" + test_instruction
+        tic = eval( f'{test_instruction_class}()' )
+        tic.test_function( test_type, test_case )
 
-    sys.stdout = stdout
-    sys.stderr = stderr
+        sys.stdout = stdout
+        sys.stderr = stderr
 
-    return output
+        return output
+    
+    except KeyboardInterrupt:
+        output = io.StringIO()
+        return output
     
     
 
@@ -328,8 +448,11 @@ def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
     cmd = f'{cc} {defines} {cflags} {incs} {linkflags} -Wl,-Map,{mapfile} {source} -o {binary} >> {logfile} 2>&1'
     print(f'# {cmd}\n', file=open(logfile, 'w'))
     ret = os.system(cmd)
+    if ret != 0:
+        return ret
 
-    cmd = f'riscv64-unknown-elf-objdump -S -D {binary} > {dumpfile}'
+    cmd = f'riscv64-unknown-elf-objdump -S -D {binary} 1>{dumpfile} 2>>{logfile}'
+    print(f'# {cmd}\n', file=open(logfile, 'a'))    
     ret = os.system(cmd)
     return ret
 
@@ -341,8 +464,12 @@ def simulate( test_inst, args, test_type, test_case ):
         # file path
         workdir = f'build/{test_inst.name}'
         if os.path.exists(workdir):
-            shutil.rmtree(workdir)
-        os.makedirs(workdir)        
+            try:
+                shutil.rmtree(workdir)
+            except OSError:
+                pass
+        os.makedirs(workdir, exist_ok=True)       
+
         source = f'{workdir}/test.S'
         binary = f'{workdir}/test.elf'
         mapfile = f'{workdir}/test.map'
@@ -453,8 +580,11 @@ def simulate( test_inst, args, test_type, test_case ):
         # file path
         workdir = f'build/{test_inst.name}/{test_type}'
         if os.path.exists(workdir):
-            shutil.rmtree(workdir)
-        os.makedirs(workdir)        
+            try:
+                shutil.rmtree(workdir)
+            except OSError:
+                pass
+        os.makedirs(workdir, exist_ok=True)       
         source = f'{workdir}/test.S'
         binary = f'{workdir}/test.elf'
         mapfile = f'{workdir}/test.map'
@@ -567,8 +697,11 @@ def simulate( test_inst, args, test_type, test_case ):
         # file path
         workdir = f'build/{test_inst.name}/{test_type}/{test_case}' 
         if os.path.exists(workdir):
-            shutil.rmtree(workdir)          
-        os.makedirs(workdir)
+            try:
+                shutil.rmtree(workdir)
+            except OSError:
+                pass
+        os.makedirs(workdir, exist_ok=True)
         source = f'{workdir}/test.S'
         binary = f'{workdir}/test.elf'
         mapfile = f'{workdir}/test.map'
@@ -666,99 +799,116 @@ if __name__ == "__main__":
         else:
             cases = []
 
-    with Pool(processes=args.nproc) as pool:
-        ps = []   
+    try:
+        with Pool(processes=args.nproc) as pool:
 
-        # find the sum of all cases generator will generate to display
-        testcase_num = 0
-        for testcase in all_case_list:
-            if cases and len(cases) > 0:
-                for case in cases:
-                    if not testcase.startswith(case):                        
-                        continue
-                    
+            ps = []   
+
+            # find the sum of all cases generator will generate to display
+            testcase_num = 0
+            for testcase in all_case_list:
+                if cases and len(cases) > 0:
+                    for case in cases:
+                        if not testcase.startswith(case):                        
+                            continue
+                        
+                        testcase_num += 1
+                        break                 
+                else:          
                     testcase_num += 1
-                    break                 
-            else:          
-                testcase_num += 1
 
-        # progress bar configuration
-        progress = Progress(
-            TextColumn("[bold blue]{task.fields[name]}"),
-            BarColumn(bar_width=None),
-            "[progress.percentage]{task.percentage:>3.1f}%",
-            "case_sum:",
-            TextColumn("[bold red]{task.total}"),
-            "elapsed:",
-            TimeElapsedColumn(),
-            "remaining:",
-            TimeRemainingColumn()
-        )
+            # progress bar configuration
+            progress = Progress(
+                TextColumn("[bold blue]{task.fields[name]}"),
+                BarColumn(bar_width=None),
+                "[progress.percentage]{task.percentage:>3.1f}%",
+                "case_sum:",
+                TextColumn("[bold red]{task.total}"),
+                "elapsed:",
+                TimeElapsedColumn(),
+                "remaining:",
+                TimeRemainingColumn()
+            )
 
-        progress.start()
-        task_id = progress.add_task("generation", name = "generation", total=testcase_num, start=True)       
-        
-        # run tests
-        for collect_case in collected_case_list:
-            if cases and len(cases) > 0:
-                for case in cases:
-                    if not collect_case.startswith(case):                        
-                        continue
-                    
+            progress.start()
+            task_id = progress.add_task("generation", name = "generation", total=testcase_num, start=True)       
+            
+            # run tests
+            for collect_case in collected_case_list:
+                if cases and len(cases) > 0:
+                    for case in cases:
+                        if not collect_case.startswith(case):                        
+                            continue
+                        
+                        res = pool.apply_async(run_test, [ collect_case ], 
+                        callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                        error_callback=lambda _: generator_error(collect_case)  )
+                        # res = run_test(collect_case)
+                        ps.append((collect_case, res))   
+                        break                 
+                else:          
                     res = pool.apply_async(run_test, [ collect_case ], 
                     callback=lambda _: progress.update( task_id, completed = tests.value ), 
                     error_callback=lambda _: generator_error(collect_case)  )
                     # res = run_test(collect_case)
-                    ps.append((collect_case, res))   
-                    break                 
-            else:          
-                res = pool.apply_async(run_test, [ collect_case ], 
-                callback=lambda _: progress.update( task_id, completed = tests.value ), 
-                error_callback=lambda _: generator_error(collect_case)  )
-                # res = run_test(collect_case)
-                ps.append((collect_case, res))
+                    ps.append((collect_case, res))
 
-        failed = 0
+            failed = 0
 
-        # write the test results into log/generator_report.log
-        report = open(f'log/generator_report.log', 'w')
-        runner_case = []  
-        for case, p in ps:
-            ok = True
+            # write the test results into log/generator_report.log
+            report = open(f'log/generator_report.log', 'w')
+            runner_case = []  
+            for case, p in ps:
+                ok = True
 
-            p_value = p.get().getvalue()
-            # find case result in result_dict
-            if result_dict[case] != "ok":
-                reason = result_dict[case] + p_value
-                ok = False    
-            with open(f'build/{case}/generator.log', 'w') as f:
-                print(result_dict[case], file=f) 
-                print(result_detail_dict[case], file=f) 
-                print(p_value, file=f) 
+                p_value = p.get().getvalue()
+                # find case result in result_dict
+                if result_dict[case] != "ok":
+                    reason = result_dict[case] + p_value
+                    ok = False    
+                with open(f'build/{case}/generator.log', 'w') as f:
+                    print(result_dict[case], file=f) 
+                    print(result_detail_dict[case], file=f) 
+                    print(p_value, file=f) 
 
-            if not ok:
-                failed += 1
-                print(f'FAIL {case} - {reason}')
-                print(f'FAIL {case} - {reason}', file=report)
+                if not ok:
+                    failed += 1
+                    if not args.no_failing_info:
+                        # use the sleep to make that the main process can get the KeyboardInterrupt from ctrl C
+                        time.sleep(0.5)
+                        print(f'FAIL {case} - {reason}')
+                    print(f'FAIL {case} - {reason}', file=report)
+                else:
+                    print(f'PASS {case}', file=report)
+                    runner_case.append(case)                                                        
+
+
+
+            report.close()
+
+            # write the successfully case into the runner_case.log to let the runner to know which cases need to run
+            with open("log/runner_case.log", 'w') as runner_log:
+                for case in runner_case:
+                    runner_log.write(case)
+                    runner_log.write('\n')
+
+            progress.stop()
+
+            if failed == 0:
+                print(f'{len(ps)} files generation finish, all pass.( {tests.value} tests )')
+                sys.exit(0)
             else:
-                print(f'PASS {case}', file=report)
-                runner_case.append(case)                                                        
+                if args.no_failing_info:
+                    print(f'{len(ps)} files generation finish, {failed} failed.( {tests.value} tests, {fails.value} failed, please look at the log/generator_report.log for the failing information. )')
+                else:
+                    print(f'{len(ps)} files generation finish, {failed} failed.( {tests.value} tests, {fails.value} failed.)')
 
+                sys.exit(-1)
 
-
-        report.close()
-
-        # write the successfully case into the runner_case.log to let the runner to know which cases need to run
-        with open("log/runner_case.log", 'w') as runner_log:
-            for case in runner_case:
-                runner_log.write(case)
-                runner_log.write('\n')
-
-        progress.stop()
-
-        if failed == 0:
-            print(f'{len(ps)} files generation finish, all pass.( {tests.value} tests )')
-            sys.exit(0)
-        else:
-            print(f'{len(ps)} files generation finish, {failed} failed.( {tests.value} tests, {fails.value} failed )')
-            sys.exit(-1)
+    except KeyboardInterrupt:
+        # handle the keyboardInterrupt, stop the progress bar and wait all of the processes in process pool to stop, then exit
+        progress.stop()             
+        pool.close()
+        pool.join()  
+        print("Catch KeyboardInterrupt!")
+        sys.exit(-1)

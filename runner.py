@@ -8,6 +8,7 @@ from multiprocessing import Pool, Manager, Condition, Value
 import sys
 import io
 import argparse
+import time
 from rich.progress import (
     Progress,
     TextColumn,
@@ -25,6 +26,8 @@ parser.add_argument('--cases', help=textwrap.dedent('''\
                                     - vsub_vv,addi/test_imm_op/
                                     - cases.list
                                     default = log/runner_case.log'''), default='log/runner_case.log')
+parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/generator_report.log.", action="store_true")                                     
+
 
 # options to configure the test CPU
 parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
@@ -235,112 +238,116 @@ def sims_run( args, workdir, binary ):
 
 # the main entrance of the runner process, including run in simulators and check the data
 def runner(test):
-    stdout = sys.stdout
-    stderr = sys.stderr
-    output = io.StringIO()
-    sys.stdout = output
-    sys.stderr = output
+    try:
+        stdout = sys.stdout
+        stderr = sys.stderr
+        output = io.StringIO()
+        sys.stdout = output
+        sys.stderr = output
 
-    # file information
-    binary = f'build/{test}/test.elf'
-    run_mem = f'build/{test}/run.mem'
-    run_log = f'build/{test}/spike.log'
-    res_file = f'build/{test}/spike.sig' 
-    check_golden = f'build/{test}/check_golden.npy'                   
+        # file information
+        binary = f'build/{test}/test.elf'
+        run_mem = f'build/{test}/run.mem'
+        run_log = f'build/{test}/spike.log'
+        res_file = f'build/{test}/spike.sig' 
+        check_golden = f'build/{test}/check_golden.npy'                   
 
-    # get the golden
-    case_list = np.load( check_golden, allow_pickle=True )
+        # get the golden
+        case_list = np.load( check_golden, allow_pickle=True )
 
-    #run the elf compiled
-    ret = spike_run(args, run_mem, binary, run_log, res_file)
-    if ret != 0:
-        # if failed, set the result of every case as spike-run, means failed when run in spike
-        with result_condition:           
-            result_dict[test] = "spike-run"
-            result_detail_dict[test] = f'\nspike-run failed!!!\nPlease check the spike log in {run_log} '
-            fails.value += len(case_list)
-            tests.value += len(case_list)
+        #run the elf compiled
+        ret = spike_run(args, run_mem, binary, run_log, res_file)
+        if ret != 0:
+            # if failed, set the result of every case as spike-run, means failed when run in spike
+            with result_condition:           
+                result_dict[test] = "spike-run"
+                result_detail_dict[test] = f'\nspike-run failed!!!\nPlease check the spike log in {run_log} '
+                fails.value += len(case_list)
+                tests.value += len(case_list)
 
-            sys.stdout = stdout
-            sys.stderr = stderr
+                sys.stdout = stdout
+                sys.stderr = stderr
 
-        return output            
+            return output            
 
-    # check the golden result computed by python with the spike result
-    spike_result = {}
-    spike_start = 0
+        # check the golden result computed by python with the spike result
+        spike_result = {}
+        spike_start = 0
 
+        
+        test_result = ''
+        test_detail = ''
+
+        failed_case_list = []
+        for test_case in case_list:
+            if test_case["check_str"] != '':
+                # when test["check_str"] == 0, no need to check
+                golden = test_case["golden"]
+                #because many cases in one signature file, so we need the spike_start to know where to find the result
+                [ result, spike_start ] = from_txt( res_file, golden,  spike_start )
+                #save the python golden result and spike result into check.data file of each case         
+                os.makedirs(f'build/{test_case["name"]}', exist_ok=True)            
+                diff_to_txt( golden, result, f'build/{test_case["name"]}/check.data' )
+                if not eval(test_case["check_str"]):
+                    # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition
+                    test_result += test_case["name"]+"_check failed-"
+                    test_detail += f'The python golden data and spike results of test case {test_case["no"]} in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/check.data\n'
+                    failed_case_list.append(test_case["name"])
+
+                spike_result[test_case["name"]] = result
+
+
+        sims_result = sims_run( args, f'build/{test}', binary )
+        for sim in [ "vcs", "verilator", "gem5" ]:
+            if eval("args."+sim) == None:
+                # don't set the path of sim, so dont't run it and needn't judge the result
+                continue
+
+            if sims_result[sim] != 0:
+                # sim run failed                       
+                # because the elf maybe can be run in more sims, so don't use result_dict and notify result_condition                                                            
+                test_result += sim + "_failed-"
+                test_detail += f'{binary} runned unsuccessfully in {sim}, please check build/{test}/{sim}.log\n'
+                failed_case_list = case_list
+
+            else:
+                # sim run successfully, so we compare the sim results with spike results
+                sim_start = 0                 
+                for test_case in case_list:
+                    if test_case["check_str"] != '':
+                        golden = test_case["golden"]
+                        # get sim result, because many cases in one signature file, so we need the start to know where to find the result
+                        [ result, sim_start ] = from_txt( f'build/{test}/{sim}.sig', golden,  sim_start )
+                        # save the spike result and sim result into diff-sim.data
+                        os.makedirs(f'build/{test_case["name"]}', exist_ok=True)  
+                        diff_to_txt( spike_result[test_case["name"]], result, f'build/{test_case["name"]}/diff-{sim}.data' )
+                        if not np.array_equal( spike_result[test_case["name"]], result, equal_nan=True):
+                            # if spike result don't equal with sim result, diff failed, write sim_diff to test_result
+                            # maybe check failed or other sim failed either so we have this judge  
+                            test_result += test_case["name"] + '_' + sim + "_diff failed-"
+                            test_detail_dict = f'The results of spike and {sim} of test case {test_case["no"]}in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/diff-{sim}.data\n'
+                            if test_case["name"] not in failed_case_list:
+                                failed_case_list.append(test_case["name"])
+
+        with result_condition:
+            if test_result == '':            
+                result_dict[test] = "ok"
+                result_detail_dict[test] = ''
+                tests.value += len(case_list)
+            else:
+                result_dict[test] = test_result
+                result_detail_dict[test] = test_detail
+                fails.value += len(failed_case_list)
+                tests.value += len(case_list)
     
-    test_result = ''
-    test_detail = ''
 
-    failed_case_list = []
-    for test_case in case_list:
-        if test_case["check_str"] != '':
-            # when test["check_str"] == 0, no need to check
-            golden = test_case["golden"]
-            #because many cases in one signature file, so we need the spike_start to know where to find the result
-            [ result, spike_start ] = from_txt( res_file, golden,  spike_start )
-            #save the python golden result and spike result into check.data file of each case         
-            os.makedirs(f'build/{test_case["name"]}', exist_ok=True)            
-            diff_to_txt( golden, result, f'build/{test_case["name"]}/check.data' )
-            if not eval(test_case["check_str"]):
-                # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition
-                test_result += test_case["name"]+"_check failed-"
-                test_detail += f'The python golden data and spike results of test case {test_case["no"]} in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/check.data\n'
-                failed_case_list.append(test_case["name"])
+        sys.stdout = stdout
+        sys.stderr = stderr
 
-            spike_result[test_case["name"]] = result
-
-
-    sims_result = sims_run( args, f'build/{test}', binary )
-    for sim in [ "vcs", "verilator", "gem5" ]:
-        if eval("args."+sim) == None:
-            # don't set the path of sim, so dont't run it and needn't judge the result
-            continue
-
-        if sims_result[sim] != 0:
-            # sim run failed                       
-            # because the elf maybe can be run in more sims, so don't use result_dict and notify result_condition                                                            
-            test_result += sim + "_failed-"
-            test_detail += f'{binary} runned unsuccessfully in {sim}, please check build/{test}/{sim}.log\n'
-            failed_case_list = case_list
-
-        else:
-            # sim run successfully, so we compare the sim results with spike results
-            sim_start = 0                 
-            for test_case in case_list:
-                if test_case["check_str"] != '':
-                    golden = test_case["golden"]
-                    # get sim result, because many cases in one signature file, so we need the start to know where to find the result
-                    [ result, sim_start ] = from_txt( f'build/{test}/{sim}.sig', golden,  sim_start )
-                    # save the spike result and sim result into diff-sim.data
-                    os.makedirs(f'build/{test_case["name"]}', exist_ok=True)  
-                    diff_to_txt( spike_result[test_case["name"]], result, f'build/{test_case["name"]}/diff-{sim}.data' )
-                    if not np.array_equal( spike_result[test_case["name"]], result, equal_nan=True):
-                        # if spike result don't equal with sim result, diff failed, write sim_diff to test_result
-                        # maybe check failed or other sim failed either so we have this judge  
-                        test_result += test_case["name"] + '_' + sim + "_diff failed-"
-                        test_detail_dict = f'The results of spike and {sim} of test case {test_case["no"]}in build/{test}/test.S check failed. You can find the data in build/{test_case["name"]}/diff-{sim}.data\n'
-                        if test_case["name"] not in failed_case_list:
-                            failed_case_list.append(test_case["name"])
-
-    with result_condition:
-        if test_result == '':            
-            result_dict[test] = "ok"
-            result_detail_dict[test] = ''
-            tests.value += len(case_list)
-        else:
-            result_dict[test] = test_result
-            result_detail_dict[test] = test_detail
-            fails.value += len(failed_case_list)
-            tests.value += len(case_list)
-  
-
-    sys.stdout = stdout
-    sys.stderr = stderr
-
-    return output   
+        return output  
+    except  KeyboardInterrupt:
+        output = io.StringIO()
+        return output
               
 def runner_error(case):
     with result_condition:
@@ -378,83 +385,98 @@ if __name__ == "__main__":
             print('could not find case to run, please check.')
             sys.exit(-1)
 
-    with Pool(processes=args.runner_process) as pool:
-        ps = []   
-
-        # read the all_case.log file and find the cases about the args.case option, so we know the amount of test cases we will run
-        testcase_num = 0
-        with open("log/all_case.log") as fp:
-            s = lambda l: l.strip()
-            f = lambda l: l != '' and not l.startswith('#')
-            testcase_list = list(filter(f, map(s, fp.read().splitlines())))
-
-        for testcase in testcase_list:
-            for case in cases:
-                if not testcase.startswith(case):                        
-                    continue
-
-                testcase_num += 1
-                break
-
-        # progress bar configurations
-        progress = Progress(
-            TextColumn("[bold blue]{task.fields[name]}"),
-            BarColumn(bar_width=None),
-            "[progress.percentage]{task.percentage:>3.1f}%",
-            "case_sum:",
-            TextColumn("[bold red]{task.total}"),
-            "elapsed:",
-            TimeElapsedColumn(),
-            "remaining:",
-            TimeRemainingColumn()
-        )
-
-        progress.start()
-        task_id = progress.add_task("runner", name = "runner", total=testcase_num, start=True)                                           
+    try:
+        with Pool(processes=args.runner_process) as pool:
         
+            ps = []   
 
-        for case in cases:
-            res = pool.apply_async(runner, [ case ], 
-            callback=lambda _: progress.update( task_id, completed = tests.value ), 
-            error_callback=lambda _: runner_error(case)  )
-            ps.append((case, res))   
+            # read the all_case.log file and find the cases about the args.case option, so we know the amount of test cases we will run
+            testcase_num = 0
+            with open("log/all_case.log") as fp:
+                s = lambda l: l.strip()
+                f = lambda l: l != '' and not l.startswith('#')
+                testcase_list = list(filter(f, map(s, fp.read().splitlines())))
+
+            for testcase in testcase_list:
+                for case in cases:
+                    if not testcase.startswith(case):                        
+                        continue
+
+                    testcase_num += 1
+                    break
+
+            # progress bar configurations
+            progress = Progress(
+                TextColumn("[bold blue]{task.fields[name]}"),
+                BarColumn(bar_width=None),
+                "[progress.percentage]{task.percentage:>3.1f}%",
+                "case_sum:",
+                TextColumn("[bold red]{task.total}"),
+                "elapsed:",
+                TimeElapsedColumn(),
+                "remaining:",
+                TimeRemainingColumn()
+            )
+
+            progress.start()
+            task_id = progress.add_task("runner", name = "runner", total=testcase_num, start=True)                                           
+            
+
+            for case in cases:
+                res = pool.apply_async(runner, [ case ], 
+                callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                error_callback=lambda _: runner_error(case)  )
+                ps.append((case, res))   
 
 
-        failed = 0
-        # save the runner result into the log file
-        report = open(f'log/runner_report.log', 'w')
-        for case, p in ps:
-            ok = True
+            failed = 0
+            # save the runner result into the log file
+            report = open(f'log/runner_report.log', 'w')
+            for case, p in ps:
+                ok = True
 
-            p_str = p.get().getvalue()
-            # find case result in result_dict
-            if result_dict[case] != "ok":
-                reason = result_dict[case] + p_str
-                ok = False    
-            with open(f'build/{case}/runner.log', 'w') as f:
-                print(result_dict[case], file=f) 
-                print(result_detail_dict[case], file=f) 
-                print(p_str, file=f)                         
+                p_str = p.get().getvalue()
+                # find case result in result_dict
+                if result_dict[case] != "ok":
+                    reason = result_dict[case] + p_str
+                    ok = False    
+                with open(f'build/{case}/runner.log', 'w') as f:
+                    print(result_dict[case], file=f) 
+                    print(result_detail_dict[case], file=f) 
+                    print(p_str, file=f)                         
 
-            if not ok:
-                failed += 1
-                print(f'FAIL {case} - {reason}')
-                print(f'FAIL {case} - {reason}', file=report)
+                if not ok:
+                    failed += 1
+                    if not args.no_failing_info:                    
+                        time.sleep(0.5)
+                        print(f'FAIL {case} - {reason}')                    
+                    print(f'FAIL {case} - {reason}', file=report)
+                else:
+                    print(f'PASS {case}', file=report)                                                      
+
+
+
+            report.close()
+
+            progress.stop() 
+
+            os.system("stty echo")
+
+
+            if failed == 0:
+                print(f'{len(ps)} files running finish, all pass.( {tests.value} tests )')
+                sys.exit(0)
             else:
-                print(f'PASS {case}', file=report)                                                      
-
-
-
-        report.close()
-
-        progress.stop() 
-
-        os.system("stty echo")
-
-
-        if failed == 0:
-            print(f'{len(ps)} files running finish, all pass.( {tests.value} tests )')
-            sys.exit(0)
-        else:
-            print(f'{len(ps)} files running finish, {failed} failed.( {tests.value} tests, {fails.value} failed )')
-            sys.exit(-1)
+                if args.no_failing_info:
+                    print(f'{len(ps)} files running finish, {failed} failed.( {tests.value} tests, {fails.value} failed, please look at the log/runner_report.log for the failing information. )')
+                else:
+                    print(f'{len(ps)} files running finish, {failed} failed.( {tests.value} tests, {fails.value} failed.)')                
+                sys.exit(-1)
+    except KeyboardInterrupt:
+        pool.close()
+        pool.join()
+        progress.stop()
+        time.sleep(0.5)
+        print("Catch KeyboardInterrupt!")
+        os.system("stty echo")            
+        sys.exit(-1)            

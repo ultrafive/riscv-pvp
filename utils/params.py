@@ -1133,3 +1133,69 @@ def special_vv_fp64():
     fpt_data.dtype = np.float64
 
     return [ fpt_data[0], fpt_data[1] ] 
+
+factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+
+def get_vl(lmul, ebits, vlen):
+    sum = int( vlen * factor_lmul[lmul] / ebits )
+    if 1 < sum:
+        if 1 < sum-1:
+            if 2 < sum-1:
+                mid = np.random.randint(2,sum-1)
+                return [1, mid, sum-1, sum]
+            else:
+                return [1, sum-1, sum]
+        else:
+            return [1, sum]
+    else:
+        return [1]    
+
+def vlsenn_get_stride(vl, align):
+    align = int(align)
+
+    if vl/align < 1:
+        return [ 0, align ]
+    if vl/align < 2:
+        return [ 0, align, 2*align]
+    if vl/align < 3:
+        return [ 0, align, 2*align, 3*align]
+
+    vl_factor = int(np.floor(vl/align))
+    mid = int(np.random.randint(2, vl_factor))
+    return [ 0, align, mid*align, vl_factor*align, (vl_factor+1)*align] 
+
+def get_lmul(sew):
+    if 8 == sew:
+        return [1,2,4,8,'f2','f4','f8']
+    if 16 == sew:
+        return [1,2,4,8,'f2','f4']
+    if 32 == sew:
+        return [1,2,4,8,'f2']
+    if 64 == sew:
+        return [1,2,4,8]
+
+def get_lmul_seg(sew):
+    if 8 == sew:
+        return [1,2,4,'f2','f4','f8']
+    if 16 == sew:
+        return [1,2,4,'f2','f4']
+    if 32 == sew:
+        return [1,2,4,'f2']
+    if 64 == sew:
+        return [1,2,4]    
+
+def get_nfields(lmul):
+    if lmul == 1:
+        return [ 2, 3, 4, 5, 6, 7, 8]
+    if lmul == 2:
+        return [ 2, 3, 4 ]
+    if lmul == 4:
+        return [ 2 ]
+    if lmul == 8:
+        return None
+    else:
+        return [ 2, 3, 4, 5, 6, 7, 8]
+
+def get_intdtype(sew):
+    int_dtype_dict = { 8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64 }
+    return int_dtype_dict[sew]
