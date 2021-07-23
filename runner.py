@@ -26,7 +26,7 @@ parser.add_argument('--cases', help=textwrap.dedent('''\
                                     - vsub_vv,addi/test_imm_op/
                                     - cases.list
                                     default = log/runner_case.log'''), default='log/runner_case.log')
-parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/generator_report.log.", action="store_true")                                     
+parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/runner_report.log.", action="store_true")                                     
 
 
 # options to configure the test CPU
