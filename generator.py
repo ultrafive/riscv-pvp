@@ -41,6 +41,8 @@ parser.add_argument('--level', help='''put which level of cases together to comp
                                                 - case for one case in one file''', default="case")
 parser.add_argument('--collect', help='just collect the test case to know what cases we can test', action="store_true")
 parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true") 
+parser.add_argument('--basic', help='run basic tests of basic_cases test data in yml for regression.', action='store_true')
+parser.add_argument('--random', help='run random tests of random_cases test data in yml', action='store_true')
 parser.add_argument('--clang', help='path of clang compiler', default='clang') 
 parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/generator_report.log.", action="store_true")                                              
 
@@ -78,6 +80,10 @@ def search(arg_names, vals, no, params, **kwargs):
         elif isinstance(val, np.ndarray):
             val_str = ''
             for el in val:
+                if np.isnan(el):
+                    el = "np.nan"
+                elif np.isinf(el):
+                    el = "np.inf"
                 val_str += str(el) + ','
             exec(f'{key}=np.array([{val_str}], dtype=np.{val.dtype})')
         else:
@@ -112,7 +118,7 @@ else:
     # otherwise find the case from args.specs
     specs = args.specs.split()
 
-
+print("collecting the tests...")
 collected_case_list = [] # for --collect and generator use this list to generate files
 all_case_list = [] # take all cases in specs, used to compute the sum of cases which will be generated
 # analyze yml file to find the test cases
@@ -146,7 +152,26 @@ for spec in specs:
 
             # collect the test configurations
             attrs['test'] = dict()
-            for key, params in cfg['cases'].items():
+            if True == args.basic:
+                if 'basic_cases' in cfg:
+                    cases_dict = cfg['basic_cases']
+                    check_name = 'basic_check'
+                else:
+                    continue
+            elif True == args.random:
+                if 'random_cases' in cfg:
+                    cases_dict = cfg['random_cases']
+                    check_name = 'random_check'
+                else:
+                    continue
+            else:
+                if 'cases' in cfg:
+                    cases_dict = cfg['cases']
+                    check_name = 'check'
+                else:
+                    continue
+
+            for key, params in cases_dict.items():
                 # the default input mode for cases argument is common, test_case @ a, b ,c:
                 param_mode = 'common'
 
@@ -254,8 +279,8 @@ for spec in specs:
 
                 test_info['default'] = _defaults
 
-                if 'check' in cfg.keys() and test_type in cfg['check']:
-                    test_info['check'] = cfg['check'][test_type]
+                if check_name in cfg.keys() and test_type in cfg[check_name]:
+                    test_info['check'] = cfg[check_name][test_type]
                 else:
                     test_info['check'] = ''
 
@@ -762,6 +787,12 @@ def generator_error(case):
         result_dict[case] = "python run failed."
         result_detail_dict[case] = ''
 
+def generator_callback(progress, task_id, completed, total):
+    progress.update( task_id, completed = completed )
+    if completed == total:
+        progress.stop()
+        print("analyzing the results...")
+
 if __name__ == "__main__":
 
     os.makedirs('build', exist_ok=True)
@@ -841,14 +872,14 @@ if __name__ == "__main__":
                             continue
                         
                         res = pool.apply_async(run_test, [ collect_case ], 
-                        callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                        callback=lambda _: generator_callback( progress, task_id, tests.value, testcase_num), 
                         error_callback=lambda _: generator_error(collect_case)  )
                         # res = run_test(collect_case)
                         ps.append((collect_case, res))   
                         break                 
                 else:          
                     res = pool.apply_async(run_test, [ collect_case ], 
-                    callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                    callback=lambda _: generator_callback( progress, task_id, tests.value, testcase_num), 
                     error_callback=lambda _: generator_error(collect_case)  )
                     # res = run_test(collect_case)
                     ps.append((collect_case, res))
@@ -891,8 +922,6 @@ if __name__ == "__main__":
                 for case in runner_case:
                     runner_log.write(case)
                     runner_log.write('\n')
-
-            progress.stop()
 
             if failed == 0:
                 print(f'{len(ps)} files generation finish, all pass.( {tests.value} tests )')

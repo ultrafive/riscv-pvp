@@ -1137,18 +1137,22 @@ def special_vv_fp64():
 factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
 
 def get_vl(lmul, ebits, vlen):
-    sum = int( vlen * factor_lmul[lmul] / ebits )
-    if 1 < sum:
-        if 1 < sum-1:
-            if 2 < sum-1:
-                mid = np.random.randint(2,sum-1)
-                return [1, mid, sum-1, sum]
+    max = int( vlen * factor_lmul[lmul] / ebits )
+    if 1 < max:
+        if 1 < max-1:
+            if 2 < max-1:
+                mid = np.random.randint(2,max-1)
+                return [1, mid, max-1, max]
             else:
-                return [1, sum-1, sum]
+                return [1, max-1, max]
         else:
-            return [1, sum]
+            return [1, max]
     else:
         return [1]    
+
+def get_vlmax(lmul, ebits, vlen):
+    max = int( vlen * factor_lmul[lmul] / ebits )
+    return max
 
 def vlsenn_get_stride(vl, align):
     align = int(align)
@@ -1199,3 +1203,55 @@ def get_nfields(lmul):
 def get_intdtype(sew):
     int_dtype_dict = { 8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64 }
     return int_dtype_dict[sew]
+
+def get_floatdtype(sew):
+    float_dtype_dict = { 16: np.float16, 32: np.float32, 64: np.float64 }
+    return float_dtype_dict[sew]
+
+def get_float_pos_min(sew):
+
+    if sew == 16:
+        num = np.array( [0x1], dtype=np.uint16 )
+        num.dtype = np.float16
+    elif sew == 32:
+        num = np.array( [0x1], dtype=np.uint32)
+        num.dtype = np.float32
+    elif sew == 64:
+        num = np.array( [0x1], dtype=np.uint64)
+        num.dtype = np.float64
+    else:
+        raise ValueError(f"{sew} is not a good option for sew")
+
+    return num
+ 
+
+def get_float_max(sew):
+
+    if sew == 16:
+        num = np.array( [0x7BFF], dtype=np.uint16 )
+        num.dtype = np.float16
+    elif sew == 32:
+        num = np.array( [0x7F7FFFFF], dtype=np.uint32)
+        num.dtype = np.float32
+    elif sew == 64:
+        num = np.array( [0x7FEFFFFFFFFFFFFF], dtype=np.uint64)
+        num.dtype = np.float64
+    else:
+        raise ValueError(f"{sew} is not a good option for sew.")        
+
+    return num
+
+def random_float(sew, vl):
+    if sew == 16:
+        num = np.random.randint( 0, 0x10000, size=vl, dtype=np.uint16 )
+        num.dtype = np.float16
+    elif sew == 32:
+        num = np.random.randint( 0, 0x100000000, size=vl, dtype=np.uint32 )
+        num.dtype = np.float32
+    elif sew == 64:
+        num = np.random.randint( 0, 1 << 64, size=vl, dtype=np.uint64 )
+        num.dtype = np.float64        
+    else:
+        raise ValueError(f'{sew} is not a good option for sew.')
+
+    return num

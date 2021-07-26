@@ -376,6 +376,23 @@ _: &default
     #     j fail;
     #   test_{num}_end:
 
+  basic_cases:
+    test_basic_without_mask @ vs1,vs2,ebits,lmul,vlen,ldins,stins:
+      - "[np.random.uniform(-40000, 40000, 64).astype(np.float16), np.random.uniform(-40000, 40000, 64).astype(np.float16), 16, 1, np.random.randint(1,65), 'vle16.v', 'vse16.v' ]" 
+      - "[np.random.uniform(-40000, 40000, 128).astype(np.float16), np.random.uniform(-40000, 40000, 128).astype(np.float16), 16, 2, np.random.randint(1,129), 'vle16.v', 'vse16.v' ]"
+      - "[np.random.uniform(-40000, 40000, 256).astype(np.float16), np.random.uniform(-40000, 40000, 256).astype(np.float16), 16, 4, np.random.randint(1,257), 'vle16.v', 'vse16.v' ]" 
+      - "[np.random.uniform(-40000, 40000, 512).astype(np.float16), np.random.uniform(-40000, 40000, 512).astype(np.float16), 16, 8, np.random.randint(1,513), 'vle16.v', 'vse16.v' ]"      
+      - "[np.random.uniform(-40000, 40000, 32).astype(np.float16), np.random.uniform(-40000, 40000, 32).astype(np.float16), 16, 'f2', np.random.randint(1,33), 'vle16.v', 'vse16.v' ]"
+      - "[np.random.uniform(-40000, 40000, 16).astype(np.float16), np.random.uniform(-40000, 40000, 16).astype(np.float16), 16, 'f4', np.random.randint(1,17), 'vle16.v', 'vse16.v' ]" 
+      - "[np.random.uniform(-50000, 50000, 32).astype(np.float32), np.random.uniform(-50000, 50000, 32).astype(np.float32), 32, 1, np.random.randint(1,33), 'vle32.v', 'vse32.v' ]"
+      - "[np.random.uniform(-50000, 50000, 64).astype(np.float32), np.random.uniform(-50000, 50000, 64).astype(np.float32), 32, 2, np.random.randint(1,65), 'vle32.v', 'vse32.v' ]"
+      - "[np.random.uniform(-50000, 50000, 128).astype(np.float32), np.random.uniform(-50000, 50000, 128).astype(np.float32), 32, 4, np.random.randint(1,129), 'vle32.v', 'vse32.v' ]"
+      - "[np.random.uniform(-50000, 50000, 256).astype(np.float32), np.random.uniform(-50000, 50000, 256).astype(np.float32), 32, 8, np.random.randint(1,257), 'vle32.v', 'vse32.v' ]" 
+      - "[np.random.uniform(-50000, 50000, 16).astype(np.float32), np.random.uniform(-50000, 50000, 16).astype(np.float32), 32, 'f2', np.random.randint(1,17), 'vle32.v', 'vse32.v' ]" 
+      - "[np.random.uniform(-500000, 500000, 16).astype(np.float64), np.random.uniform(-500000, 500000, 16).astype(np.float64), 64, 1, np.random.randint(1,17), 'vle64.v', 'vse64.v']"
+      - "[np.random.uniform(-500000, 500000, 32).astype(np.float64), np.random.uniform(-500000, 500000, 32).astype(np.float64), 64, 2, np.random.randint(1,33), 'vle64.v', 'vse64.v' ]"
+      - "[np.random.uniform(-500000, 500000, 64).astype(np.float64), np.random.uniform(-500000, 500000, 64).astype(np.float64), 64, 4, np.random.randint(1,65), 'vle64.v', 'vse64.v' ]"
+      - "[np.random.uniform(-500000, 500000, 128).astype(np.float64), np.random.uniform(-500000, 500000, 128).astype(np.float64), 64, 8, np.random.randint(1,129), 'vle64.v', 'vse64.v' ]"   
 
   cases:
     test_basic_without_mask  @ vs1,vs2,ebits,lmul,vlen,ldins,stins:
@@ -439,22 +456,6 @@ _: &default
       - "[np.random.uniform(-500000, 500000, 45).astype(np.float64), np.random.uniform(-500000, 500000, 45).astype(np.float64), 64, 8, 45, 'vle64.v', 'vse64.v' ]"
       - "[np.random.uniform(-500000, 500000, 127).astype(np.float64), np.random.uniform(-500000, 500000, 127).astype(np.float64), 64, 8, 127, 'vle64.v', 'vse64.v' ]"
       - "[np.random.uniform(-500000, 500000, 128).astype(np.float64), np.random.uniform(-500000, 500000, 128).astype(np.float64), 64, 8, 128, 'vle64.v', 'vse64.v' ]" 
-    test_basic_without_mask_regression @ vs1,vs2,ebits,lmul,vlen,ldins,stins:
-      - "[np.random.uniform(-40000, 40000, 64).astype(np.float16), np.random.uniform(-40000, 40000, 64).astype(np.float16), 16, 1, np.random.randint(1,65), 'vle16.v', 'vse16.v' ]" 
-      - "[np.random.uniform(-40000, 40000, 128).astype(np.float16), np.random.uniform(-40000, 40000, 128).astype(np.float16), 16, 2, np.random.randint(1,129), 'vle16.v', 'vse16.v' ]"
-      - "[np.random.uniform(-40000, 40000, 256).astype(np.float16), np.random.uniform(-40000, 40000, 256).astype(np.float16), 16, 4, np.random.randint(1,257), 'vle16.v', 'vse16.v' ]" 
-      - "[np.random.uniform(-40000, 40000, 512).astype(np.float16), np.random.uniform(-40000, 40000, 512).astype(np.float16), 16, 8, np.random.randint(1,513), 'vle16.v', 'vse16.v' ]"      
-      - "[np.random.uniform(-40000, 40000, 32).astype(np.float16), np.random.uniform(-40000, 40000, 32).astype(np.float16), 16, 'f2', np.random.randint(1,33), 'vle16.v', 'vse16.v' ]"
-      - "[np.random.uniform(-40000, 40000, 16).astype(np.float16), np.random.uniform(-40000, 40000, 16).astype(np.float16), 16, 'f4', np.random.randint(1,17), 'vle16.v', 'vse16.v' ]" 
-      - "[np.random.uniform(-50000, 50000, 32).astype(np.float32), np.random.uniform(-50000, 50000, 32).astype(np.float32), 32, 1, np.random.randint(1,33), 'vle32.v', 'vse32.v' ]"
-      - "[np.random.uniform(-50000, 50000, 64).astype(np.float32), np.random.uniform(-50000, 50000, 64).astype(np.float32), 32, 2, np.random.randint(1,65), 'vle32.v', 'vse32.v' ]"
-      - "[np.random.uniform(-50000, 50000, 128).astype(np.float32), np.random.uniform(-50000, 50000, 128).astype(np.float32), 32, 4, np.random.randint(1,129), 'vle32.v', 'vse32.v' ]"
-      - "[np.random.uniform(-50000, 50000, 256).astype(np.float32), np.random.uniform(-50000, 50000, 256).astype(np.float32), 32, 8, np.random.randint(1,257), 'vle32.v', 'vse32.v' ]" 
-      - "[np.random.uniform(-50000, 50000, 16).astype(np.float32), np.random.uniform(-50000, 50000, 16).astype(np.float32), 32, 'f2', np.random.randint(1,17), 'vle32.v', 'vse32.v' ]" 
-      - "[np.random.uniform(-500000, 500000, 16).astype(np.float64), np.random.uniform(-500000, 500000, 16).astype(np.float64), 64, 1, np.random.randint(1,17), 'vle64.v', 'vse64.v']"
-      - "[np.random.uniform(-500000, 500000, 32).astype(np.float64), np.random.uniform(-500000, 500000, 32).astype(np.float64), 64, 2, np.random.randint(1,33), 'vle64.v', 'vse64.v' ]"
-      - "[np.random.uniform(-500000, 500000, 64).astype(np.float64), np.random.uniform(-500000, 500000, 64).astype(np.float64), 64, 4, np.random.randint(1,65), 'vle64.v', 'vse64.v' ]"
-      - "[np.random.uniform(-500000, 500000, 128).astype(np.float64), np.random.uniform(-500000, 500000, 128).astype(np.float64), 64, 8, np.random.randint(1,129), 'vle64.v', 'vse64.v' ]"   
     test_special_without_mask @ vs1,vs2,ebits,lmul,vlen,ldins,stins:
       - "special_vv_fp16() + [ 16, 1, 32, 'vle16.v', 'vse16.v']"
       - "special_vv_fp32() + [ 32, 1, 32, 'vle32.v', 'vse32.v']"
@@ -653,9 +654,23 @@ _: &default
     #   - [ 64, "f2", 3 ]
     #   - [ 64, 1, 11 ]
 
+  random_cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: get_lmul(ebits)
+        vlen: np.random.randint(1, get_vlmax(lmul, ebits, args.vlen) + 1)
+        ldins: f'vle{ebits}.v'
+        stins: f'vse{ebits}.v'
+        vs1: random_float(ebits, vlen)
+        vs2: random_float(ebits, vlen)
+   
+
+  basic_check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+
   check:
-    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
-    test_basic_without_mask_regression: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)     
     test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
     test_vta_eq_tu_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
     test_rounding_mode_without_mask: np.allclose( result, golden, rtol=1e-2, atol=0, equal_nan=True)
@@ -667,6 +682,9 @@ _: &default
     test_basic_with_mask_mu: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
     test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
     test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+  
+  random_check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
 
 
 vfadd_vv:

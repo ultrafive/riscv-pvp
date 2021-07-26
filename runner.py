@@ -4,7 +4,7 @@ import os
 import textwrap
 import numpy as np
 import allure
-from multiprocessing import Pool, Manager, Condition, Value
+from multiprocessing import Pool, Manager, Condition, Value, Process
 import sys
 import io
 import argparse
@@ -354,8 +354,15 @@ def runner_error(case):
         result_dict[case] = "python run failed."
         result_detail_dict[case] = ''
 
-if __name__ == "__main__":
+def runner_callback(progress, task_id, completed, total):
+    progress.update( task_id, completed = completed )
+    if completed == total:
+        progress.stop()
+        print("analyzing the results...")
 
+
+if __name__ == "__main__":
+    print("looking for the cases...")
     if args.retry:
         print("retry last failed cases...")
         if os.access('log/runner_report.log', os.R_OK):
@@ -419,12 +426,13 @@ if __name__ == "__main__":
             )
 
             progress.start()
-            task_id = progress.add_task("runner", name = "runner", total=testcase_num, start=True)                                           
+            task_id = progress.add_task("runner", name = "runner", total=testcase_num, start=True)     
+
             
 
             for case in cases:
                 res = pool.apply_async(runner, [ case ], 
-                callback=lambda _: progress.update( task_id, completed = tests.value ), 
+                callback=lambda _: runner_callback( progress, task_id, tests.value, testcase_num ), 
                 error_callback=lambda _: runner_error(case)  )
                 ps.append((case, res))   
 
@@ -457,8 +465,6 @@ if __name__ == "__main__":
 
 
             report.close()
-
-            progress.stop() 
 
             os.system("stty echo")
 
