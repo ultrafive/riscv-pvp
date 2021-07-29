@@ -222,7 +222,7 @@ for spec in specs:
                             continue
 
                         if 'params_yml' in globals():
-                            del globals()['param_yml']
+                            del globals()['params_yml']
                         exec(params["setup"])
                         if not 'params_yml' in globals():
                             print(f"no param_yml in setup, please check.-{test_type} of {inst} in {filename}")
@@ -433,7 +433,7 @@ def array_data(prefix, k, vv):
 
 # generate the fields to replace in the template
 def generate( tpl, case, inst, case_num, **kw ):
-    data = ''
+    data = ''RISC-V Architectural Testing Framework
     kw_extra = {}
 
     for k in kw:
