@@ -433,7 +433,7 @@ def array_data(prefix, k, vv):
 
 # generate the fields to replace in the template
 def generate( tpl, case, inst, case_num, **kw ):
-    data = ''RISC-V Architectural Testing Framework
+    data = ''
     kw_extra = {}
 
     for k in kw:
