@@ -62,7 +62,7 @@ tests = Value('L', 0)
 fails = Value('L', 0) 
 
 # analyse the env.yaml to get compile info
-with open("env/env.yaml", 'r' ) as f_env:
+with open("config/env.yaml", 'r' ) as f_env:
     env = yaml.load(f_env, Loader=yaml.SafeLoader)
     xlen = env["processor"]['xlen']
     flen = env["processor"]['flen']
