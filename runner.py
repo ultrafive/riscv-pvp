@@ -20,6 +20,7 @@ from rich.progress import (
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 # options to configure the test frame
+parser.add_argument('--config', help='config yaml file', default='config/prod.yml')
 parser.add_argument('--retry', help='retry last failed cases', action="store_true")
 parser.add_argument('--runner_process', help='runner process number for run cases', type=int, default=1)
 parser.add_argument('--cases', help=textwrap.dedent('''\
@@ -62,7 +63,7 @@ tests = Value('L', 0)
 fails = Value('L', 0)
 
 # analyse the env.yaml to get compile info
-with open("config/env.yaml", 'r' ) as f_env:
+with open(args.config, 'r' ) as f_env:
     env = yaml.load(f_env, Loader=yaml.SafeLoader)
     xlen = env["processor"]['xlen']
     flen = env["processor"]['flen']
