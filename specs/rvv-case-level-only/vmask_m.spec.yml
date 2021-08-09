@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         la a2, {vs2_data};
 
         addi t1, a0, 7;
@@ -33,7 +33,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {mask_data};
         la a2, {vs2_data};
 
@@ -58,7 +58,7 @@ _: &default
     
 
   cases:
-    test_vmask_m_without_mask @ vs2, vlen, lmul, ebits @ ldins='vle8.v', stins='vse8.v':
+    test_vmask_m_without_mask @ vs2, vl, lmul, ebits @ ldins='vle8.v', stins='vse8.v':
       - '[np.array([0x00], dtype=np.uint8),                    1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                    4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                    7,    1, 8 ]'
@@ -141,7 +141,7 @@ _: &default
       - '[np.linspace(-127, 127, 9, dtype=np.uint8),           65,   8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          127,  8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          128,  8, 64]'
-    test_vmask_m_with_mask @ vs2, mask, vlen, lmul, ebits @ ldins='vle8.v', stins='vse8.v':
+    test_vmask_m_with_mask @ vs2, mask, vl, lmul, ebits @ ldins='vle8.v', stins='vse8.v':
       - '[np.array([0x00], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 8 ]'

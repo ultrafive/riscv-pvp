@@ -8,7 +8,7 @@ _: &default
     test_vlsx_v_without_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {vs1_data}; 
         li a2, {rs2};
         la a3, test_{num}_data;
@@ -21,26 +21,26 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
     test_vlsx_v_with_mask: |
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {vs1_data};
         li a2, {rs2};
         la a4, {mask_data};
 
-        li t0, {vlen};
+        li t0, {vl};
         li t1, 8;
         remu t2, t0, t1;
         bnez t2, 1f;
-        li t3,  {vlen} / 8;
+        li t3,  {vl} / 8;
         j 2f;
       1:
-        li t3,  {vlen} / 8 + 1;
+        li t3,  {vl} / 8 + 1;
       2:
         vsetvli t0, t3, e8,m1,tu,mu;
         vle8.v v0, (a4);
@@ -53,7 +53,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
   check:
     test_vlsx_v_without_mask: np.array_equal(result, golden)
@@ -70,9 +70,9 @@ vlse8_v:
         ebits: 8
         stins: vse8.v
         lmul: lmul_list
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        vs1: np.linspace(0, 255, int(ebits/8+(vlen-1)*rs2), dtype=np.uint8)
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        vs1: np.linspace(0, 255, int(ebits/8+(vl-1)*rs2), dtype=np.uint8)
       setup: |
         lmul_list = [1, 2, 4, 8, 'f2', 'f4', 'f8' ]
 
@@ -82,10 +82,10 @@ vlse8_v:
         ebits: 8
         stins: 'vse8.v'
         lmul: lmul_list
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        mask: random_mask(vlen)
-        vs1: np.linspace(0, 255, int(ebits/8+(vlen-1)*rs2), dtype=np.uint8)
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        mask: random_mask(vl)
+        vs1: np.linspace(0, 255, int(ebits/8+(vl-1)*rs2), dtype=np.uint8)
       setup: |
         lmul_list = [1, 2, 4, 8, 'f2', 'f4', 'f8' ]      
 
@@ -99,9 +99,9 @@ vlse16_v:
         ebits: 16
         stins: vse16.v
         lmul: [1, 2, 4, 8, 'f2', 'f4']
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        vs1: np.linspace(0, 0xFFFF, int(np.ceil((ebits/8+(vlen-1)*rs2)/(ebits/8))), dtype=np.uint16)
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        vs1: np.linspace(0, 0xFFFF, int(np.ceil((ebits/8+(vl-1)*rs2)/(ebits/8))), dtype=np.uint16)
 
 
     
@@ -110,10 +110,10 @@ vlse16_v:
         ebits: 16
         stins: 'vse16.v'
         lmul: [1, 2, 4, 8, 'f2', 'f4']
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        mask: random_mask(vlen)
-        vs1: np.linspace(0, 0xFFFF, int(np.ceil((ebits/8+(vlen-1)*rs2)/(ebits/8))), dtype=np.uint16)
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        mask: random_mask(vl)
+        vs1: np.linspace(0, 0xFFFF, int(np.ceil((ebits/8+(vl-1)*rs2)/(ebits/8))), dtype=np.uint16)
 
 
                                                                                  
@@ -127,19 +127,19 @@ vlse32_v:
         ebits: 32
         stins: vse32.v
         lmul: [1, 2, 4, 8, 'f2']
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        vs1: np.linspace(0, 0xFFFFFFFF, int(np.ceil((ebits/8+(vlen-1)*rs2)/(ebits/8))), dtype=np.uint32)  
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        vs1: np.linspace(0, 0xFFFFFFFF, int(np.ceil((ebits/8+(vl-1)*rs2)/(ebits/8))), dtype=np.uint32)  
 
     test_vlsx_v_with_mask:
       matrix:
         ebits: 32
         stins: vse32.v
         lmul: [1, 2, 4, 8, 'f2']
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        mask: random_mask(vlen)
-        vs1: np.linspace(0, 0xFFFFFFFF, int(np.ceil((ebits/8+(vlen-1)*rs2)/(ebits/8))), dtype=np.uint32)        
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        mask: random_mask(vl)
+        vs1: np.linspace(0, 0xFFFFFFFF, int(np.ceil((ebits/8+(vl-1)*rs2)/(ebits/8))), dtype=np.uint32)        
 
 
 vlse64_v:
@@ -152,17 +152,17 @@ vlse64_v:
         ebits: 64
         stins: vse64.v
         lmul: [1, 2, 4, 8]
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        vs1: np.linspace(0, 0xFFFFFFFFFFFFFFFF, int(np.ceil((ebits/8+(vlen-1)*rs2)/(ebits/8))), dtype=np.uint64)  
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        vs1: np.linspace(0, 0xFFFFFFFFFFFFFFFF, int(np.ceil((ebits/8+(vl-1)*rs2)/(ebits/8))), dtype=np.uint64)  
 
     test_vlsx_v_with_mask:
       matrix:
         ebits: 64
         stins: vse64.v
         lmul: [1, 2, 4, 8]
-        vlen: get_vl(lmul, ebits, args.vlen)
-        rs2: vlsenn_get_stride(vlen, ebits/8)
-        mask: random_mask(vlen)
-        vs1: np.linspace(0, 0xFFFFFFFFFFFFFFFF, int(np.ceil((ebits/8+(vlen-1)*rs2)/(ebits/8))), dtype=np.uint64)  
+        vl: get_vl(lmul, ebits, vlen)
+        rs2: vlsenn_get_stride(vl, ebits/8)
+        mask: random_mask(vl)
+        vs1: np.linspace(0, 0xFFFFFFFFFFFFFFFF, int(np.ceil((ebits/8+(vl-1)*rs2)/(ebits/8))), dtype=np.uint64)  
 

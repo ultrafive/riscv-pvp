@@ -2,9 +2,9 @@ from isa.inst import *
 import numpy as np
 
 def getVLMAX(sew, lmul):
-    vlendefault = 1024
+    vldefault = 1024
     lmulKey = {'1': 1, '2': 2, '4': 4, '8': 8, 'f2': 1/2, 'f4': 1/4, 'f8': 1/8}
-    return int(lmulKey[str(lmul)] * vlendefault / sew)
+    return int(lmulKey[str(lmul)] * vldefault / sew)
 
 ##return the value 0 when the index is greater than VLMAX in the source vector register group
 def indexIsGreaterThanVLMAX(sew, lmul, vl, result):

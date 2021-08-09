@@ -43,11 +43,11 @@ _: &default
         .popsection 
      
   cases:
-    test_basic @ rs1, vs2, mask, vlen @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
+    test_basic @ rs1, vs2, mask, vl @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
       - "[ np.array([random.random()], dtype=np.float32), np.linspace( -1000, 1000, 1, dtype=np.float32 ), random_mask(1), 1 ]"
       - "[ np.array([random.random()], dtype=np.float32), np.linspace( -1000, 1000, 10, dtype=np.float32 ), random_mask(10), 10 ]"
       - "[ np.array([random.random()], dtype=np.float32), np.linspace( -1000, 1000, 32, dtype=np.float32 ), random_mask(32), 32 ]"
-    test_dest_eq_vs2 @ rs1, vs2, mask, vlen @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
+    test_dest_eq_vs2 @ rs1, vs2, mask, vl @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
       - "[ np.array([random.random()], dtype=np.float32), np.linspace( -1000, 1000, 1, dtype=np.float32 ), random_mask(1), 1 ]"
       - "[ np.array([random.random()], dtype=np.float32), np.linspace( -1000, 1000, 10, dtype=np.float32 ), random_mask(10), 10 ]"
       - "[ np.array([random.random()], dtype=np.float32), np.linspace( -1000, 1000, 32, dtype=np.float32 ), random_mask(32), 32 ]"    

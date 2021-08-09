@@ -7,8 +7,8 @@ class Vsssegxex_v(Inst):
 
     def golden(self):
 
-        vl = self['vlen']
-        vd_size = (self['vlen'] - 1) * self['rs2'] + self['nfields']
+        vl = self['vl']
+        vd_size = (self['vl'] - 1) * self['rs2'] + self['nfields']
         stride = self['rs2']/self['vs3'].itemsize
         vd = np.zeros( int(vd_size), dtype=self['vs3'].dtype )
         for no in range( 0, int(vl)):

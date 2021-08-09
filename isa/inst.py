@@ -12,19 +12,19 @@ class Inst(dict):
         if 'mask' not in self:
             return value
         else:
-            mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vlen']]
+            mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vl']]
             return np.where( mask == 1, value, old)
 
 
     def as_mask(self, value):
-        return np.packbits(np.unpackbits(value, bitorder='little')[0: self['vlen']], bitorder='little')
+        return np.packbits(np.unpackbits(value, bitorder='little')[0: self['vl']], bitorder='little')
 
 
     def where(self):
         if 'mask' not in self:
             return True
         else:
-            return np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']] == 1
+            return np.unpackbits(self['mask'], bitorder='little')[0: self['vl']] == 1
     
     def rounding(self, value):
         if self['mode'] == 0:

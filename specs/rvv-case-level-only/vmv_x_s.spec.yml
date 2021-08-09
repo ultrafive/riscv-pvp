@@ -8,7 +8,7 @@ _: &default
     test_vmv_x_s: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {vs2_data}; 
         la a2, test_{num}_data;
 
@@ -20,7 +20,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
   check:
@@ -31,7 +31,7 @@ vmv_x_s:
   <<: *default
 
   cases:
-    test_vmv_x_s @ vs2, vlen @ ebits=8, ldins='vle8.v', stins='sb':
+    test_vmv_x_s @ vs2, vl @ ebits=8, ldins='vle8.v', stins='sb':
       - '[np.array([1],               dtype=np.int8), 1]'
       - '[np.array([1, 1, -1],        dtype=np.int8), 3]'
       - '[np.linspace(0, 0xff, 16,    dtype=np.int8), 16]'
@@ -51,7 +51,7 @@ vmv_x_s_16:
   <<: *default
 
   cases:
-    test_vmv_x_s @ vs2, vlen @ ebits=16, ldins='vle16.v', stins='sh':
+    test_vmv_x_s @ vs2, vl @ ebits=16, ldins='vle16.v', stins='sh':
       - '[np.array([1],               dtype=np.int16), 1]'
       - '[np.array([1, 1, -1],        dtype=np.int16), 3]'
       - '[np.linspace(0x1000, 0xffff, 16,  dtype=np.int16), 16]'
@@ -71,7 +71,7 @@ vmv_x_s_32:
   <<: *default
 
   cases:
-    test_vmv_x_s @ vs2, vlen @ ebits=32, ldins='vle32.v', stins='sw':
+    test_vmv_x_s @ vs2, vl @ ebits=32, ldins='vle32.v', stins='sw':
       - '[np.array([1],               dtype=np.int32), 1]'
       - '[np.array([1, 1, -1],        dtype=np.int32), 3]'
       - '[np.linspace(0x10000000, 0xffffffff, 16,  dtype=np.int32), 16]'
@@ -89,7 +89,7 @@ vmv_x_s_64:
   <<: *default
 
   cases:
-    test_vmv_x_s @ vs2, vlen @ ebits=64, ldins='vle64.v', stins='sd':
+    test_vmv_x_s @ vs2, vl @ ebits=64, ldins='vle64.v', stins='sd':
       - '[np.array([1],               dtype=np.int64), 1]'
       - '[np.array([1, 1, -1],        dtype=np.int64), 3]'
       - '[np.linspace(0x1000000000000000, 0xffffffffffffffff, 16,  dtype=np.int64), 16]'

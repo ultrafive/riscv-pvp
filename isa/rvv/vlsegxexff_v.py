@@ -15,7 +15,7 @@ class Vlsegxexff_v(Inst):
             res.dtype = np.uint64
             
         if 'nvl' not in self:
-            res = res[0:self['vlen']*self['nf']]
+            res = res[0:self['vl']*self['nf']]
             return self.masked(res)
         else:
             return res[0-self['nvl']*self['nf']-1:-1]

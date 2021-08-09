@@ -34,7 +34,7 @@ _: &default
         addi a0, a0, -1;
         bnez a0, 12b;
 
-        li a0, {vlen};
+        li a0, {vl};
         
         vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
         vlseg{nf}e{ebits}ff.v v8, (a3);
@@ -45,12 +45,12 @@ _: &default
         .pushsection .data,1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_vlsegff_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
     test_exception_misaligned_base: |
       test_{num}:
@@ -61,7 +61,7 @@ _: &default
         la t1, _restore_addr;
         sd t0, 0(t1);
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         vsetvli t0, a0, e{ebits},m1,tu,mu;
         la a1, {rs1_data};
         addi a1, a1, {offset};
@@ -70,7 +70,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_vlsegff_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
       test_{num}_end:
     test_exception_Fault_First: |
@@ -82,7 +82,7 @@ _: &default
         la t1, _restore_addr;
         sd t0, 0(t1);
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, test_vlsegff_data;
         addi a1, a1, 0x500;
         addi a1, a1, 0x400;
@@ -92,7 +92,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_vlsegff_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
       test_{num}_end:
     test_exception_Fault_Not_First: |  
@@ -106,7 +106,7 @@ _: &default
 
         li TESTNUM, {num};
 
-        li a1, {vlen};
+        li a1, {vl};
         la a5, test_vlsegff_data;
         li a6, 0xfffffffC;
         and a5, a5, a6;
@@ -124,12 +124,12 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_vlsegff_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
       test_{num}_end:
 
@@ -137,7 +137,7 @@ _: &default
 vlsegxexff_v:
   <<: *default
   cases:
-    test_basic_without_mask @ vlen, lmul, nf, ebits:
+    test_basic_without_mask @ vl, lmul, nf, ebits:
       - "[   1, 1, 2,  8]"
       - "[  10, 1, 2,  8]"
       - "[ 128, 1, 2,  8]"      
@@ -258,11 +258,11 @@ vlsegxexff_v:
       - "[   1, 1, 8, 64]"
       - "[  10, 1, 8, 64]"
       - "[  16, 1, 8, 64]"
-    test_exception_Fault_First @ vlen, lmul, nf, ebits:
+    test_exception_Fault_First @ vl, lmul, nf, ebits:
       - "[   1, 1, 2, 8]"
       - "[  10, 1, 2, 8]"
       - "[ 128, 1, 2, 8]"        
-    test_exception_Fault_Not_First @ vlen, lmul, nf, ebits, nvl:
+    test_exception_Fault_Not_First @ vl, lmul, nf, ebits, nvl:
       - "[   1, 1, 2,  8,    1]"
       - "[  10, 1, 2,  8,    9]"
       - "[  10, 1, 2,  8,   10]"

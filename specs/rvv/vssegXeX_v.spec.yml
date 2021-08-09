@@ -6,7 +6,7 @@ _: &default
     test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {vs3_data};
         la a2, test_{num}_data;  
 
@@ -18,17 +18,17 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill ({vlen}*{nfields}), ({ebits}/8), 0;
+        .fill ({vl}*{nfields}), ({ebits}/8), 0;
         .popsection
     test_basic_with_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {vs3_data};
         la a2, test_{num}_data;
         la a4, {mask_data};
         
-        li a5, ({vlen} + 7)/8;
+        li a5, ({vl} + 7)/8;
         vsetvli t0, a5, e8,m1,tu,mu;
         vle8.v v0, (a4);
 
@@ -40,7 +40,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill ({vlen}*{nfields}), ({ebits}/8), 0;
+        .fill ({vl}*{nfields}), ({ebits}/8), 0;
         .popsection
 
   check:
@@ -50,7 +50,7 @@ _: &default
 vssegxex_v:
   <<: *default
   cases:
-    test_basic_without_mask @ ebits, lmul, nfields, ldins, inst_name, vlen, vs3:
+    test_basic_without_mask @ ebits, lmul, nfields, ldins, inst_name, vl, vs3:
       setup: |
         params_yml = []
         for ebits in [ 8, 16, 32, 64 ]:
@@ -58,9 +58,9 @@ vssegxex_v:
                 for nfields in get_nfields(lmul):
                     ldins = f'vlseg{nfields}e{ebits}.v'
                     inst_name = f'vsseg{nfields}e{ebits}.v'
-                    for vlen in get_vl(lmul, ebits, args.vlen):
-                        vs3 = np.linspace( -1000, 1000, vlen*nfields, dtype=get_intdtype(ebits))
-                        params_yml.append([ebits, lmul, nfields, ldins, inst_name, vlen, vs3])
+                    for vl in get_vl(lmul, ebits, vlen):
+                        vs3 = np.linspace( -1000, 1000, vl*nfields, dtype=get_intdtype(ebits))
+                        params_yml.append([ebits, lmul, nfields, ldins, inst_name, vl, vs3])
 
     test_basic_with_mask:
       matrix:
@@ -69,10 +69,10 @@ vssegxex_v:
         nfields: get_nfields(lmul)
         ldins: f'vlseg{nfields}e{ebits}.v'
         inst_name: f'vsseg{nfields}e{ebits}.v'
-        vlen: get_vl(lmul, ebits, args.vlen)
-        vs3: np.linspace( -1000, 1000, vlen*nfields, dtype=get_intdtype(ebits))
-        mask: random_mask(vlen)
-        orig: np.zeros(vlen*nfields, dtype=get_intdtype(ebits))
+        vl: get_vl(lmul, ebits, vl)
+        vs3: np.linspace( -1000, 1000, vl*nfields, dtype=get_intdtype(ebits))
+        mask: random_mask(vl)
+        orig: np.zeros(vl*nfields, dtype=get_intdtype(ebits))
 
 
                                                                                                                                               

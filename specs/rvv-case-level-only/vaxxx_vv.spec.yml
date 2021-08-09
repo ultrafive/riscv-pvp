@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen}; 
+        li a0, {vl}; 
         la a1, {vs1_data};
         la a2, {vs2_data}; 
         la a3, test_{num}_data;
@@ -27,14 +27,14 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits} / 8)
       test_{num}_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
 
     test_vv_with_mask: |
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen}; 
+        li a0, {vl}; 
         la a1, {vs1_data};
         la a2, {vs2_data}; 
         la a3, test_{num}_data;
@@ -43,7 +43,7 @@ _: &default
         csrw vxrm, a4;
         
         la a4, {mask_data};
-        li a5, ({vlen} + 7) /8;
+        li a5, ({vl} + 7) /8;
         vsetvli t0, a5, e8,m1,tu,mu;
         vle8.v v0, (a4);
 
@@ -58,14 +58,14 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits} / 8)        
       test_{num}_data:        
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
 
     test_vx_without_mask: |
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen}; 
+        li a0, {vl}; 
         li a1, {rs1};
         la a2, {vs2_data}; 
         la a3, test_{num}_data;
@@ -82,14 +82,14 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits} / 8)        
       test_{num}_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
 
     test_vx_with_mask: |
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen}; 
+        li a0, {vl}; 
         li a1, {rs1};
         la a2, {vs2_data}; 
         la a3, test_{num}_data;
@@ -98,7 +98,7 @@ _: &default
         csrw vxrm, a4;
         
         la a4, {mask_data};
-        li a5, ({vlen} + 7) /8;
+        li a5, ({vl} + 7) /8;
         vsetvli t0, a5, e8,m1,tu,mu;
         vle8.v v0, (a4);
 
@@ -112,7 +112,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits} / 8)        
       test_{num}_data:
-        .fill ({vlen}), ({ebits} / 8), 0;
+        .fill ({vl}), ({ebits} / 8), 0;
         .popsection
   check:
     test_vv_without_mask: np.array_equal(result, golden)
@@ -123,7 +123,7 @@ _: &default
 _vaxxx_vv: &vaxxx_vv
   <<: *default
   cases:
-    test_vv_without_mask @ vs1, vs2, ebits, vlen, lmul, mode :
+    test_vv_without_mask @ vs1, vs2, ebits, vl, lmul, mode :
       - '[np.array([1],                         dtype=np.int8 ), np.array([1],                              dtype=np.int8 ),  8,    1,    1, 0]'
       - '[np.array([1, 2, 3, 4],                dtype=np.int8 ), np.array([4, 4, 4, 4],                     dtype=np.int8 ),  8,    4,    1, 0]'
       - '[np.linspace(0, 0xff,             64,  dtype=np.int8 ), np.linspace(0x7f, 0xff,               64,  dtype=np.int8 ),  8,   64,    1, 0]'
@@ -304,7 +304,7 @@ _vaxxx_vv: &vaxxx_vv
       - '[np.linspace(0, 0xffffffffffff,   65,  dtype=np.int64), np.linspace(0xffff, 0xffffffffffff,   65,  dtype=np.int64), 64,   65,    8, 3]'
       - '[np.linspace(0, 0xffffffffffff,  128,  dtype=np.int64), np.linspace(0xffff, 0xffffffffffff,  128,  dtype=np.int64), 64,  128,    8, 3]'
     
-    test_vv_with_mask    @ vs1, vs2, ebits, vlen, lmul, mode, mask:
+    test_vv_with_mask    @ vs1, vs2, ebits, vl, lmul, mode, mask:
       - '[np.array([1],                         dtype=np.int8 ), np.array([1],                              dtype=np.int8 ),  8,    1,    1, 0, random_mask(   1)]'
       - '[np.array([1, 2, 3, 4],                dtype=np.int8 ), np.array([4, 4, 4, 4],                     dtype=np.int8 ),  8,    4,    1, 0, random_mask(   4)]'
       - '[np.linspace(0, 0xff,             64,  dtype=np.int8 ), np.linspace(0x7f, 0xff,               64,  dtype=np.int8 ),  8,   64,    1, 0, random_mask(  64)]'
@@ -487,7 +487,7 @@ _vaxxx_vv: &vaxxx_vv
 _vaxxx_vx: &vaxxx_vx
   <<: *default  
   cases:
-    test_vx_without_mask  @ rs1, vs2, ebits, vlen, lmul, mode :
+    test_vx_without_mask  @ rs1, vs2, ebits, vl, lmul, mode :
       - '[0x12                                                 , np.array([1],                              dtype=np.int8 ),  8,    1,    1, 0]'
       - '[0x12                                                 , np.array([4, 4, 4, 4],                     dtype=np.int8 ),  8,    4,    1, 0]'
       - '[0x12                                                 , np.linspace(0x7f, 0xff,               64,  dtype=np.int8 ),  8,   64,    1, 0]'
@@ -667,7 +667,7 @@ _vaxxx_vx: &vaxxx_vx
       - '[0x1234                                               , np.linspace(0xffff, 0xffffffffffff,   65,  dtype=np.int64), 64,   65,    8, 3]'
       - '[0x1234                                               , np.linspace(0xffff, 0xffffffffffff,  128,  dtype=np.int64), 64,  128,    8, 3]'
     
-    test_vx_with_mask    @ rs1, vs2, ebits, vlen, lmul, mode, mask:
+    test_vx_with_mask    @ rs1, vs2, ebits, vl, lmul, mode, mask:
       - '[0x12                                                 , np.array([1],                              dtype=np.int8 ),  8,    1,    1, 0, random_mask(   1)]'
       - '[0x12                                                 , np.array([4, 4, 4, 4],                     dtype=np.int8 ),  8,    4,    1, 0, random_mask(   4)]'
       - '[0x12                                                 , np.linspace(0x7f, 0xff,               64,  dtype=np.int8 ),  8,   64,    1, 0, random_mask(  64)]'
@@ -851,7 +851,7 @@ _vaxxx_vx: &vaxxx_vx
 _vaxxxu_vv: &vaxxxu_vv
   <<: *default
   cases:
-    test_vv_without_mask @ vs1, vs2, ebits, vlen, lmul, mode:
+    test_vv_without_mask @ vs1, vs2, ebits, vl, lmul, mode:
       - '[np.array([1],                         dtype=np.uint8 ), np.array([1],                              dtype=np.uint8 ),  8,    1,    1, 0]'
       - '[np.array([1, 2, 3, 4],                dtype=np.uint8 ), np.array([4, 4, 4, 4],                     dtype=np.uint8 ),  8,    4,    1, 0]'
       - '[np.linspace(0, 0xff,             64,  dtype=np.uint8 ), np.linspace(0x7f, 0xff,               64,  dtype=np.uint8 ),  8,   64,    1, 0]'
@@ -1032,7 +1032,7 @@ _vaxxxu_vv: &vaxxxu_vv
       - '[np.linspace(0, 0xffffffffffff,   65,  dtype=np.uint64), np.linspace(0xffff, 0xffffffffffff,   65,  dtype=np.uint64), 64,   65,    8, 3]'
       - '[np.linspace(0, 0xffffffffffff,  128,  dtype=np.uint64), np.linspace(0xffff, 0xffffffffffff,  128,  dtype=np.uint64), 64,  128,    8, 3]'
     
-    test_vv_with_mask    @ vs1, vs2, ebits, vlen, lmul, mode, mask:
+    test_vv_with_mask    @ vs1, vs2, ebits, vl, lmul, mode, mask:
       - '[np.array([1],                         dtype=np.uint8 ), np.array([1],                              dtype=np.uint8 ),  8,    1,    1, 0, random_mask(   1)]'
       - '[np.array([1, 2, 3, 4],                dtype=np.uint8 ), np.array([4, 4, 4, 4],                     dtype=np.uint8 ),  8,    4,    1, 0, random_mask(   4)]'
       - '[np.linspace(0, 0xff,             64,  dtype=np.uint8 ), np.linspace(0x7f, 0xff,               64,  dtype=np.uint8 ),  8,   64,    1, 0, random_mask(  64)]'
@@ -1215,7 +1215,7 @@ _vaxxxu_vv: &vaxxxu_vv
 _vaxxxu_vx: &vaxxxu_vx
   <<: *default  
   cases:
-    test_vx_without_mask @ rs1, vs2, ebits, vlen, lmul, mode :
+    test_vx_without_mask @ rs1, vs2, ebits, vl, lmul, mode :
       - '[0x12                                                 , np.array([1],                              dtype=np.uint8 ),  8,    1,    1, 0]'
       - '[0x12                                                 , np.array([4, 4, 4, 4],                     dtype=np.uint8 ),  8,    4,    1, 0]'
       - '[0x12                                                 , np.linspace(0x7f, 0xff,               64,  dtype=np.uint8 ),  8,   64,    1, 0]'
@@ -1395,7 +1395,7 @@ _vaxxxu_vx: &vaxxxu_vx
       - '[0x1234                                               , np.linspace(0xffff, 0xffffffffffff,   65,  dtype=np.uint64), 64,   65,    8, 3]'
       - '[0x1234                                               , np.linspace(0xffff, 0xffffffffffff,  128,  dtype=np.uint64), 64,  128,    8, 3]'
     
-    test_vx_with_mask    @ rs1, vs2, ebits, vlen, lmul, mode, mask:
+    test_vx_with_mask    @ rs1, vs2, ebits, vl, lmul, mode, mask:
       - '[0x12                                                 , np.array([1],                              dtype=np.uint8 ),  8,    1,    1, 0, random_mask(   1)]'
       - '[0x12                                                 , np.array([4, 4, 4, 4],                     dtype=np.uint8 ),  8,    4,    1, 0, random_mask(   4)]'
       - '[0x12                                                 , np.linspace(0x7f, 0xff,               64,  dtype=np.uint8 ),  8,   64,    1, 0, random_mask(  64)]'

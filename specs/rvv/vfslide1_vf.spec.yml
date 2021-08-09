@@ -70,7 +70,7 @@ vfslide1up_vf:
       - linspace_rvv_vf(np.float32, 1)
       - linspace_rvv_vf(np.float32, 10)
       - linspace_rvv_vf(np.float32, 32)     
-    test_basic_with_mask @ rs1, vs2, mask, orig, vlen @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ rs1, vs2, mask, orig, vl @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_slide1up_vf_with_mask(np.float32, 1, fmask=0)
       - linspace_rvv_slide1up_vf_with_mask(np.float32, 10, fmask=0)
       - linspace_rvv_slide1up_vf_with_mask(np.float32, 32, fmask=0)
@@ -89,7 +89,7 @@ vfslide1down_vf:
       - linspace_rvv_vf(np.float32, 1)
       - linspace_rvv_vf(np.float32, 10)
       - linspace_rvv_vf(np.float32, 32)           
-    test_basic_with_mask @ rs1, vs2, mask, orig, vlen @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ rs1, vs2, mask, orig, vl @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_slide1down_vf_with_mask(np.float32, 1, fmask=0)
       - linspace_rvv_slide1down_vf_with_mask(np.float32, 10, fmask=0)
       - linspace_rvv_slide1down_vf_with_mask(np.float32, 32, fmask=0)

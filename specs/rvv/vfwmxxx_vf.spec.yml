@@ -87,7 +87,7 @@ _: &default
       - "[ linspace_rvv_v_special(np.float64, 0, 32), np.array(np.float32('nan')), linspace_rvv_v_special(np.float32, 2, 32) ]" 
       - "[ linspace_rvv_v_special(np.float64, 0, 32), np.array(np.float32('inf')), linspace_rvv_v_special(np.float32, 2, 32) ]" 
       - "[ linspace_rvv_v_special(np.float64, 0, 32), np.array(np.float32('-inf')), linspace_rvv_v_special(np.float32, 2, 32) ]"       
-    test_basic_with_mask @ vd, rs1, vs2, mask, vlen @ ebits=32, ebits_vd=64, fldins='flw', ldins='vle32.v', ldins_vd = 'vle64.v', stins='vse64.v':
+    test_basic_with_mask @ vd, rs1, vs2, mask, vl @ ebits=32, ebits_vd=64, fldins='flw', ldins='vle32.v', ldins_vd = 'vle64.v', stins='vse64.v':
       - linspace_rvv_m_vf_w_with_mask(np.float32, 1)
       - linspace_rvv_m_vf_w_with_mask(np.float32, 4)
       - linspace_rvv_m_vf_w_with_mask(np.float32, 10)

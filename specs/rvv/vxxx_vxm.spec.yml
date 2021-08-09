@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         li a1, {rs1};
         la a2, {vs2_data};
         la a4, {v0_data};
@@ -24,11 +24,11 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
   cases:
-    test_vxxx_vxm @ vs2, rs1, v0, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_vxxx_vxm @ vs2, rs1, v0, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - '[np.array([4], dtype=np.uint32), 4, np.array([0x5a], dtype=np.uint8), 1]'
       - '[np.array([0xfffffff0], dtype=np.uint32), 0x100, np.array([0x3], dtype=np.uint8), 1]'
       - '[np.array([0xffff0000, 3], dtype=np.uint32), 0x10000, np.array([0x1], dtype=np.uint8), 2]'

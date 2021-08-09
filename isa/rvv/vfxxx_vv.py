@@ -10,19 +10,19 @@ class Vfadd_vv(Inst):
             if 'orig' in self:
                 result = self['orig'].copy()
                 if 'mask' in self or 'vstart' in self:
-                    result = result[0:self['vlen']]
+                    result = result[0:self['vl']]
             else:
-                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+                result = np.zeros( self['vl'], dtype = self['vs1'].dtype )
 
             if 'vstart' in self:
-                if self['vstart'] >= self['vlen']:
+                if self['vstart'] >= self['vl']:
                     return result
                 vstart = self['vstart']
             else:
                 vstart = 0
 
 
-            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] + self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+            result[vstart:self['vl']] = self.masked( self['vs2'][vstart:self['vl']] + self['vs1'][vstart:self['vl']], self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
             return result
         else:
@@ -36,19 +36,19 @@ class Vfsub_vv(Inst):
             if 'orig' in self:
                 result = self['orig'].copy()
                 if 'mask' in self or 'vstart' in self:
-                    result = result[0:self['vlen']]
+                    result = result[0:self['vl']]
             else:
-                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+                result = np.zeros( self['vl'], dtype = self['vs1'].dtype )
 
             if 'vstart' in self:
-                if self['vstart'] >= self['vlen']:
+                if self['vstart'] >= self['vl']:
                     return result
                 vstart = self['vstart']
             else:
                 vstart = 0
 
 
-            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] - self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+            result[vstart:self['vl']] = self.masked( self['vs2'][vstart:self['vl']] - self['vs1'][vstart:self['vl']], self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
             return result
         else:
@@ -62,19 +62,19 @@ class Vfmul_vv(Inst):
             if 'orig' in self:
                 result = self['orig'].copy()
                 if 'mask' in self or 'vstart' in self:
-                    result = result[0:self['vlen']]
+                    result = result[0:self['vl']]
             else:
-                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+                result = np.zeros( self['vl'], dtype = self['vs1'].dtype )
 
             if 'vstart' in self:
-                if self['vstart'] >= self['vlen']:
+                if self['vstart'] >= self['vl']:
                     return result
                 vstart = self['vstart']
             else:
                 vstart = 0
 
 
-            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] * self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+            result[vstart:self['vl']] = self.masked( self['vs2'][vstart:self['vl']] * self['vs1'][vstart:self['vl']], self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
             if 'frm' in self and self['frm'] == 1:
                 for i in range(len(result)):
@@ -97,19 +97,19 @@ class Vfdiv_vv(Inst):
             if 'orig' in self:
                 result = self['orig'].copy()
                 if 'mask' in self or 'vstart' in self:
-                    result = result[0:self['vlen']]
+                    result = result[0:self['vl']]
             else:
-                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+                result = np.zeros( self['vl'], dtype = self['vs1'].dtype )
 
             if 'vstart' in self:
-                if self['vstart'] >= self['vlen']:
+                if self['vstart'] >= self['vl']:
                     return result
                 vstart = self['vstart']
             else:
                 vstart = 0
 
 
-            result[vstart:self['vlen']] = self.masked( self['vs2'][vstart:self['vlen']] / self['vs1'][vstart:self['vlen']], self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+            result[vstart:self['vl']] = self.masked( self['vs2'][vstart:self['vl']] / self['vs1'][vstart:self['vl']], self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
             return result
         else:
@@ -124,19 +124,19 @@ class Vfmax_vv(Inst):
             if 'orig' in self:
                 result = self['orig'].copy()
                 if 'mask' in self or 'vstart' in self:
-                    result = result[0:self['vlen']]
+                    result = result[0:self['vl']]
             else:
-                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+                result = np.zeros( self['vl'], dtype = self['vs1'].dtype )
 
             if 'vstart' in self:
-                if self['vstart'] >= self['vlen']:
+                if self['vstart'] >= self['vl']:
                     return result
                 vstart = self['vstart']
             else:
                 vstart = 0
 
 
-            result[vstart:self['vlen']] = self.masked( np.maximum(self['vs2'][vstart:self['vlen']], self['vs1'][vstart:self['vlen']]), self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+            result[vstart:self['vl']] = self.masked( np.maximum(self['vs2'][vstart:self['vl']], self['vs1'][vstart:self['vl']]), self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
             return result
         else:
@@ -151,19 +151,19 @@ class Vfmin_vv(Inst):
             if 'orig' in self:
                 result = self['orig'].copy()
                 if 'mask' in self or 'vstart' in self:
-                    result = result[0:self['vlen']]
+                    result = result[0:self['vl']]
             else:
-                result = np.zeros( self['vlen'], dtype = self['vs1'].dtype )
+                result = np.zeros( self['vl'], dtype = self['vs1'].dtype )
 
             if 'vstart' in self:
-                if self['vstart'] >= self['vlen']:
+                if self['vstart'] >= self['vl']:
                     return result
                 vstart = self['vstart']
             else:
                 vstart = 0
 
 
-            result[vstart:self['vlen']] = self.masked( np.minimum(self['vs2'][vstart:self['vlen']], self['vs1'][vstart:self['vlen']]), self['orig'][vstart:self['vlen']] if 'orig' in self else 0, vstart )
+            result[vstart:self['vl']] = self.masked( np.minimum(self['vs2'][vstart:self['vl']], self['vs1'][vstart:self['vl']]), self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
             return result
         else:

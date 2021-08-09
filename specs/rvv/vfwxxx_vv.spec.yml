@@ -93,7 +93,7 @@ _: &default
       - "[np.linspace(-127, 0xffff, 4, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 10, dtype=np.float32)]"
       - "[np.linspace(-127, 0xffff, 32, dtype=np.float32)]"   
-    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ebits_vd=64, ldins='vle32.v', ldins_vd = 'vle64.v', stins='vse64.v':
+    test_basic_with_mask @ vs1, vs2, mask, orig, vl @ ebits=32, ebits_vd=64, ldins='vle32.v', ldins_vd = 'vle64.v', stins='vse64.v':
       - linspace_rvv_vv_w_with_mask(np.float32, 1)
       - linspace_rvv_vv_w_with_mask(np.float32, 4)
       - linspace_rvv_vv_w_with_mask(np.float32, 10)

@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         la a2, {vs2_data};
         la a4, {v0_data};
      
@@ -23,11 +23,11 @@ _: &default
         .pushsection .data, 1;
         .align ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
   cases:
-    test_vxxx_vim @ vs2, imm, v0, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_vxxx_vim @ vs2, imm, v0, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - '[np.array([4], dtype=np.int32), 0, np.array([0x5a], dtype=np.uint8), 1]'
       - '[np.array([0xfffffff0], dtype=np.int32), 1, np.array([0x3], dtype=np.uint8), 1]'
       - '[np.array([0xffff0000, 3], dtype=np.int32), 3, np.array([0x1], dtype=np.uint8), 2]'

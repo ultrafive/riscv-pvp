@@ -7,14 +7,14 @@ class _Vssenn_v(Inst):
     dtype = np.int8
 
     def golden(self):
-        zero_size = (self['vlen'] - 1) * self['rs2'] + 1
+        zero_size = (self['vl'] - 1) * self['rs2'] + 1
         res = np.zeros(zero_size, self.dtype)
 
         if 'mask' in self:
-            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']]
+            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
 
         for i, v in enumerate(self['vs3']):
-            if i >= self['vlen']:
+            if i >= self['vl']:
                 break
             if 'mask' in self and mask[i] == 0:
                 continue

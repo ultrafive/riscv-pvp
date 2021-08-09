@@ -7,9 +7,9 @@ class Vpopc_m(Inst):
 
     def golden(self):
         if 'mask' in self:
-            tmp = np.unpackbits(self['vs2'] & self['mask'], bitorder='little')[0: self['vlen']]
+            tmp = np.unpackbits(self['vs2'] & self['mask'], bitorder='little')[0: self['vl']]
         else:
-            tmp = np.unpackbits(self['vs2'], bitorder='little')[0: self['vlen']]
+            tmp = np.unpackbits(self['vs2'], bitorder='little')[0: self['vl']]
         return np.array([np.sum(tmp)])
 
 class Vfirst_m(Inst):
@@ -17,9 +17,9 @@ class Vfirst_m(Inst):
 
     def golden(self):
         if 'mask' in self:
-            tmp = np.unpackbits(self['vs2'] & self['mask'], bitorder='little')[0: self['vlen']]
+            tmp = np.unpackbits(self['vs2'] & self['mask'], bitorder='little')[0: self['vl']]
         else:
-            tmp = np.unpackbits(self['vs2'], bitorder='little')[0: self['vlen']]
+            tmp = np.unpackbits(self['vs2'], bitorder='little')[0: self['vl']]
         firstOne = np.where(tmp==1)
         if np.size(firstOne) > 0:
           return np.array(np.min(firstOne))

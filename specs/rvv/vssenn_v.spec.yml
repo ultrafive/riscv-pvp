@@ -8,7 +8,7 @@ _: &default
     test_vssx_v_without_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
 
         la a1, {vs3_data};
         li a2, {rs2}; 
@@ -21,13 +21,13 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-      .fill ({vlen} - 1) * {rs2} + 1, ({ebits}/8), 0;
+      .fill ({vl} - 1) * {rs2} + 1, ({ebits}/8), 0;
       .popsection
 
     test_vssx_v_with_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {vs3_data};
         li a2, {rs2};
         la a3, test_{num}_data;
@@ -36,10 +36,10 @@ _: &default
         li t1, 8;
         remu t2, a0, t1;
         bnez t2, 1f;
-        li t3,  {vlen} / 8;
+        li t3,  {vl} / 8;
         j 2f;
       1:
-        li t3,  {vlen} / 8 + 1;
+        li t3,  {vl} / 8 + 1;
       2:
         vsetvli t0, t3, e8,m1,tu,mu;
         vle8.v v0, (a4);
@@ -51,7 +51,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill ({vlen} - 1) * {rs2} + 1 , ({ebits}/8), 0;
+        .fill ({vl} - 1) * {rs2} + 1 , ({ebits}/8), 0;
         .popsection
 
   check:
@@ -62,7 +62,7 @@ vsse8_v:
   <<: *default
 
   cases:
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=8, ldins='vle8.v':
+    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=8, ldins='vle8.v':
       - '[np.linspace(-128,  127,  64, dtype=np.int8),         0,   64, 1]'
       - '[np.linspace(   0,    0, 128, dtype=np.int8),         0,  128, 1]'
       - '[np.linspace(0xff, 0xff, 400, dtype=np.int8),         4,   80, 1]'
@@ -198,7 +198,7 @@ vsse8_v:
       #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   16,   16, "f8"]'
       #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f8"]'
 
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=8, ldins='vle8.v':
+    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=8, ldins='vle8.v':
       - '[np.linspace(   0,    0,  128,     dtype=np.int8),    0,   32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-128,  127,  256,     dtype=np.int8),    2,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
       - '[np.linspace(-128,  127,  256,     dtype=np.int8),    4,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
@@ -336,7 +336,7 @@ vsse16_v:
   <<: *default
 
   cases:
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=16, ldins='vle16.v':
+    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=16, ldins='vle16.v':
       - '[np.linspace(-32767,  32767,  64,      dtype=np.int16),    0,   64, 1]'
       - '[np.linspace(     0,      0,  64,      dtype=np.int16),    0,   64, 1]'
       - '[np.linspace(0xffff, 0xffff, 512,      dtype=np.int16),    4,   64, 1]'
@@ -417,7 +417,7 @@ vsse16_v:
       #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   16,   16, "f4"]'
       #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   20,   16, "f4"]'
 
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=16, ldins='vle16.v':
+    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=16, ldins='vle16.v':
       - '[np.linspace(     0,      0, 128,      dtype=np.int16),    0,   32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-32768,  32767, 128,      dtype=np.int16),    2,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
       - '[np.linspace(-32768,  32767, 256,      dtype=np.int16),    4,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
@@ -503,7 +503,7 @@ vsse32_v:
   <<: *default
 
   cases:
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=32, ldins='vle32.v':
+    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=32, ldins='vle32.v':
       - '[np.linspace(-32768,  32767,  32, dtype=np.int32),  0, 15, 1]'
       - '[np.linspace(     0,      0,  32, dtype=np.int32),  0, 31, 1]'
       - '[np.linspace(0xffff, 0xffff, 128, dtype=np.int32),  4, 32, 1]'
@@ -580,7 +580,7 @@ vsse32_v:
       #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,   16, "f2"]'
       #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   64,   16, "f2"]'
 
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=32, ldins='vle32.v':
+    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=32, ldins='vle32.v':
       - '[np.linspace(     0,      0, 128, dtype=np.int32),  0, 32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-32768,  32767, 256, dtype=np.int32),  8, 31, 1, np.linspace(1, 255, 4, dtype=np.uint8)]'
       - '[np.linspace(0,  0xffffffff, 256, dtype=np.int32), 16, 32, 1, np.linspace(1, 255, 4, dtype=np.uint8)]'
@@ -661,7 +661,7 @@ vsse64_v:
   <<: *default
 
   cases:
-    test_vssx_v_without_mask @ vs3, rs2, vlen, lmul @ ebits=64, ldins='vle64.v':
+    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=64, ldins='vle64.v':
       - '[np.linspace(    -32768,      32767,  32, dtype=np.int64),  0,  3, 1]'
       - '[np.linspace(         0,          0,  32, dtype=np.int64),  0, 15, 1]'
       - '[np.linspace(0xffffffff, 0xffffffff, 256, dtype=np.int64),  8, 16, 1]'
@@ -710,7 +710,7 @@ vsse64_v:
       #- '[np.linspace(0,  0x7fffffff,  16384,   dtype=np.int64),  128,  128, 8]'
       #- '[np.linspace(0,  0x7fffffff,  17408,   dtype=np.int64),  136,  128, 8]'
 
-    test_vssx_v_with_mask @ vs3, rs2, vlen, lmul, mask @ ebits=64, ldins='vle64.v':
+    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=64, ldins='vle64.v':
       - '[np.linspace(     0,          0, 128,  dtype=np.int64),    0,   15, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
       - '[np.linspace(-32768,      32767, 256,  dtype=np.int64),    8,   16, 1, np.linspace(1, 255, 2, dtype=np.uint8)]'
       - '[np.linspace(     0, 0xffffffff, 256,  dtype=np.int64),   16,   16, 1, np.linspace(1, 255, 2, dtype=np.uint8)]'

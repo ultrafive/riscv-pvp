@@ -113,7 +113,7 @@ vfrec7_v:
       - "[np.linspace( -1e10, 1e10, 1, dtype=np.float32), 0]"
       - "[np.linspace( -1e10, 1e10, 10, dtype=np.float32), 0]"
       - "[np.linspace( -1e10, 1e10, 32, dtype=np.float32), 0]"     
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -1e10, 1e10, 1, dtype=np.float32), 0, random_mask(1), np.linspace( 100, 127, 1, dtype=np.float32), 1 ]"
       - "[np.linspace( -1e10, 1e10, 10, dtype=np.float32), 0, random_mask(10), np.linspace( 100, 127, 10, dtype=np.float32), 10 ]"
       - "[np.linspace( -1e10, 1e10, 32, dtype=np.float32), 0, random_mask(32), np.linspace( 100, 127, 32, dtype=np.float32), 32 ]" 

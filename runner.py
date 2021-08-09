@@ -9,6 +9,7 @@ import sys
 import io
 import argparse
 import time
+import yaml
 from rich.progress import (
     Progress,
     TextColumn,
@@ -30,22 +31,22 @@ parser.add_argument('--no-failing-info', help="don't print the failing info into
 
 
 # options to configure the test CPU
-parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
-parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
-parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
-parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
-parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
+# parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
+# parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
+# parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
+# parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
+# parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
 
 # options to configure the simulator
-parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")                                    
-parser.add_argument('--spike', help='path of spike simulator', default='spike')
-parser.add_argument('--vcs', help='path of vcs simulator', default=None)
-#parser.add_argument('--gem5', help='path of gem5 simulator', default="/home/chao.yang/npu_v2/simulator/gem5/build/RISCV/gem5.opt")
-parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
-parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
-parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
-parser.add_argument('--vcstimeout', help='Number of cycles after which VCS stops', default=1000000, type=int)
-parser.add_argument('--verilator', help='path of verilator simulator', default=None)
+# parser.add_argument('--lsf', help='run tests on with lsf clusters', action="store_true")                                    
+# parser.add_argument('--spike', help='path of spike simulator', default='spike')
+# parser.add_argument('--vcs', help='path of vcs simulator', default=None)
+# parser.add_argument('--gem5', help='path of gem5 simulator', default="/home/chao.yang/npu_v2/simulator/gem5/build/RISCV/gem5.opt")
+# parser.add_argument('--gem5', help='path of gem5 simulator', default=None)
+# parser.add_argument('--fsdb', help='generate fsdb waveform file when running vcs simulator', action="store_true")
+# parser.add_argument('--tsiloadmem', help='Load binary through TSI instead of backdoor', action="store_true")
+# parser.add_argument('--vcstimeout', help='Number of cycles after which VCS stops', default=1000000, type=int)
+# parser.add_argument('--verilator', help='path of verilator simulator', default=None)
 
 args, unknown_args = parser.parse_known_args()
 if unknown_args:
@@ -60,11 +61,37 @@ result_detail_dict = manager.dict()
 tests = Value('L', 0)
 fails = Value('L', 0)
 
-# run test.elf in spike
-def spike_run(args, memfile, binary, logfile, res_file, **kw):
-    sim = f'{args.spike} --isa=rv{args.xlen}gcv_zfh --varch=vlen:{args.vlen},elen:{args.elen},slen:{args.slen}'
+# analyse the env.yaml to get compile info
+with open("env/env.yaml", 'r' ) as f_env:
+    env = yaml.load(f_env, Loader=yaml.SafeLoader)
+    xlen = env["processor"]['xlen']
+    flen = env["processor"]['flen']
+    vlen = env["processor"]['vlen']
+    elen = env["processor"]['elen']
+    slen = env["processor"]['slen']
 
-    cmd = f'{sim} +signature={res_file} +signature-granularity={32} {binary} >> {logfile} 2>&1'
+    lsf_cmd = env["lsf"]["cmd"]
+    is_lsf = env["lsf"]["is_flag"]
+    
+    path = env["spike"]['path']
+    spike_cmd = eval(env["spike"]['cmd'])
+    
+    gem5_path = env["gem5"]["path"]
+    gem5_options = env["gem5"]["options"]
+
+    vcs_path = env["vcs"]["path"]
+    vcstimeout = env["vcs"]["vcstimeout"]
+    fsdb = env["vcs"]["fsdb"]
+    tsiloadmem = env["vcs"]["tsiloadmem"]
+
+    verilator_path = env["verilator"]["path"]
+
+  
+
+# run test.elf in spike
+def spike_run(args, memfile, binary, logfile, res_file, **kw):    
+
+    cmd = f'{spike_cmd} +signature={res_file} +signature-granularity={32} {binary} >> {logfile} 2>&1'
     print(f'# {cmd}\n', file=open(logfile, 'w'))
     ret = os.system(cmd)
     return ret
@@ -174,9 +201,8 @@ def diff_to_txt(a, b, filename):
                 print(f'%3d: %{w+4}{t}(%0{w}x), %{w+4}{t}(%0{w}x), mismatch' % (i, a[i], ah[i], b[i], bh[i]), file=file)
 
 # run test.elf in more simulator: gem5 vcs ...
-def sims_run( args, workdir, binary ):
-    lsf_cmd = 'bsub -n 1 -J simv -Ip'    
-    sims = { 'vcs': args.vcs, 'verilator': args.verilator, 'gem5': args.gem5 }
+def sims_run( args, workdir, binary ):   
+    sims = { 'vcs': vcs_path, 'verilator': verilator_path, 'gem5': gem5_path }
     options = ''
     result = { 'vcs': 0, 'verilator': 0, 'gem5': 0 }
     for k, sim in sims.items():
@@ -193,32 +219,34 @@ def sims_run( args, workdir, binary ):
                 result[k] = ret
                 continue
 
-            opt_ldmem = f'+loadmem={workdir}/test.hex +loadmem_addr=80000000 +max-cycles={args.vcstimeout}'
-            if args.tsiloadmem:
-                opt_ldmem = f'+max-cycles={args.vcstimeout}'
+            opt_ldmem = f'+loadmem={workdir}/test.hex +loadmem_addr=80000000 +max-cycles={vcstimeout}'
+            if tsiloadmem:
+                opt_ldmem = f'+max-cycles={vcstimeout}'
             opt_fsdb = ''
-            if args.fsdb:
+            if fsdb:
                 opt_fsdb = f'+fsdbfile={workdir}/test.fsdb'
             options += f' +permissive {opt_fsdb} {opt_ldmem} +permissive-off'
         elif k == 'gem5':
-            config_file = '/'
-            config_file = config_file.join(sim.split('/')[:-3]) + '/configs/example/fs.py'
-            options += f'--debug-flags=Fetch,Exec \
-                        {config_file} \
-                        --cpu-type=MinorCPU \
-                        --bp-type=LTAGE \
-                        --num-cpu=1 \
-                        --mem-channels=1 \
-                        --mem-size=3072MB \
-                        --caches \
-                        --l1d_size=32kB \
-                        --l1i_size=32kB \
-                        --cacheline_size=64 \
-                        --l1i_assoc=8 \
-                        --l1d_assoc=8 \
-                        --l2cache \
-                        --l2_size=512kB \
-                        --signature={workdir}/{k}.sig'
+            options += gem5_options
+            options += '--signature={workdir}/{k}.sig'
+            # config_file = '/'
+            # config_file = config_file.join(sim.split('/')[:-3]) + '/configs/example/fs.py'
+            # options += f'--debug-flags=Fetch,Exec \
+            #             {config_file} \
+            #             --cpu-type=MinorCPU \
+            #             --bp-type=LTAGE \
+            #             --num-cpu=1 \
+            #             --mem-channels=1 \
+            #             --mem-size=3072MB \
+            #             --caches \
+            #             --l1d_size=32kB \
+            #             --l1i_size=32kB \
+            #             --cacheline_size=64 \
+            #             --l1i_assoc=8 \
+            #             --l1d_assoc=8 \
+            #             --l2cache \
+            #             --l2_size=512kB \
+                        
 
         # set the cmd to run the sim and save the cmd
         if k == 'gem5':
@@ -227,7 +255,7 @@ def sims_run( args, workdir, binary ):
             cmd = f'{sim} {options} {binary} >> {workdir}/{k}.log 2>&1'
         print(f'# {cmd}\n', file=open(f'{workdir}/{k}.log', 'w'))
 
-        if args.lsf:
+        if is_lsf:
             cmd = f'{lsf_cmd} {cmd}'
 
         # run the cmd and save the result
@@ -299,7 +327,7 @@ def runner(test):
 
         sims_result = sims_run( args, f'build/{test}', binary )
         for sim in [ "vcs", "verilator", "gem5" ]:
-            if eval("args."+sim) == None:
+            if eval(sim+"_path") == None:
                 # don't set the path of sim, so dont't run it and needn't judge the result
                 continue
 

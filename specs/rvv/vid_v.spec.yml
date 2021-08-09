@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
 
         vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
         {name} v8;
@@ -20,16 +20,16 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
     test_basic_with_mask: |
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
 
         la a4, {mask_data};
-        li a5, ({vlen} + 7) /8;
+        li a5, ({vl} + 7) /8;
         vsetvli t0, a5, e8,m1,tu,mu;
         vle8.v v0, (a4);
 
@@ -42,12 +42,12 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
 
   cases:
-    test_basic_without_mask @ vlen, lmul, ebits:
+    test_basic_without_mask @ vl, lmul, ebits:
       - '[1,    1, 8 ]'
       - '[4,    1, 8 ]'
       - '[7,    1, 8 ]'
@@ -130,7 +130,7 @@ _: &default
       - '[65,   8, 64]'
       - '[127,  8, 64]'
       - '[128,  8, 64]'
-    test_basic_with_mask @ vlen, lmul, ebits, mask:
+    test_basic_with_mask @ vl, lmul, ebits, mask:
       - '[1,    1, 8 , random_mask(1   )]'
       - '[4,    1, 8 , random_mask(4   )]'
       - '[7,    1, 8 , random_mask(7   )]'

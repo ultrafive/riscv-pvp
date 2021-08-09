@@ -7,7 +7,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
         la x1, {rs1_data};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {idx_data};
 
         vsetvli t0, a0, e{ebits_idx},m8,tu,mu;
@@ -31,12 +31,12 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
         la x1, {rs1_data};
-        li a0, {vlen};
+        li a0, {vl};
         la a1, {idx_data};
         la a2, {mask_data};
         la a3, {orig_data};
 
-        li a5, ({vlen} + 7) /8;
+        li a5, ({vl} + 7) /8;
         vsetvli t0, a5, e8,m1,tu,mu;
         vle8.v v0, (a2);
 
@@ -2509,7 +2509,7 @@ _: &default
 vluxsegxeix_v:
   <<: *default
   cases:
-    test_basic_without_mask @ rs1, vlen, lmul, nfields, ebits_idx, ebits_d, idx @ prefix='vluxseg', vreg='v8', VLEN=1024 :
+    test_basic_without_mask @ rs1, vl, lmul, nfields, ebits_idx, ebits_d, idx @ prefix='vluxseg', vreg='v8', VLEN=1024 :
       #eew=8 sew=8 lmul='f8'
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  2,  8,  8,  np.linspace(0, 31,     1, dtype=np.uint8 )*8*4]"
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  3,  8,  8,  np.linspace(0, 31,     1, dtype=np.uint8 )*8*4]"
@@ -3730,7 +3730,7 @@ vluxsegxeix_v:
       - "[ np.linspace( -1000, 1000,   555, dtype=np.int64),  33,    4,  2, 64, 64,  np.linspace(0, 31,   33, dtype=np.uint64)*8*4]"
       - "[ np.linspace( -1000, 1000,   555, dtype=np.int64),  64,    4,  2, 64, 64,  np.linspace(0, 31,   64, dtype=np.uint64)*8*4]"
     
-    test_basic_with_mask    @ rs1, vlen, lmul, nfields, ebits_idx, ebits_d, idx, mask, orig @ prefix='vluxseg', vreg='v8', VLEN=1024:
+    test_basic_with_mask    @ rs1, vl, lmul, nfields, ebits_idx, ebits_d, idx, mask, orig @ prefix='vluxseg', vreg='v8', VLEN=1024:
       #eew=8 sew=8 lmul='f8'
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  2,  8,  8,  np.linspace(0, 31,    1, dtype=np.uint8 )*8*4, random_mask(  1), np.zeros(  1*2, dtype=np.int8 )]"
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  3,  8,  8,  np.linspace(0, 31,    1, dtype=np.uint8 )*8*4, random_mask(  1), np.zeros(  1*3, dtype=np.int8 )]"
@@ -4955,7 +4955,7 @@ vluxsegxeix_v:
 vloxsegxeix_v:
   <<: *default
   cases:
-    test_basic_without_mask @ rs1, vlen, lmul, nfields, ebits_idx, ebits_d, idx @ prefix='vloxseg', vreg='v8', VLEN=1024 :
+    test_basic_without_mask @ rs1, vl, lmul, nfields, ebits_idx, ebits_d, idx @ prefix='vloxseg', vreg='v8', VLEN=1024 :
       #eew=8 sew=8 lmul='f8'
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  2,  8,  8,  np.linspace(0, 31,     1, dtype=np.uint8 )*8*4]"
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  3,  8,  8,  np.linspace(0, 31,     1, dtype=np.uint8 )*8*4]"
@@ -6176,7 +6176,7 @@ vloxsegxeix_v:
       - "[ np.linspace( -1000, 1000,   555, dtype=np.int64),  33,    4,  2, 64, 64,  np.linspace(0, 31,   33, dtype=np.uint64)*8*4]"
       - "[ np.linspace( -1000, 1000,   555, dtype=np.int64),  64,    4,  2, 64, 64,  np.linspace(0, 31,   64, dtype=np.uint64)*8*4]"
     
-    test_basic_with_mask    @ rs1, vlen, lmul, nfields, ebits_idx, ebits_d, idx, mask, orig @ prefix='vloxseg', vreg='v8', VLEN=1024:
+    test_basic_with_mask    @ rs1, vl, lmul, nfields, ebits_idx, ebits_d, idx, mask, orig @ prefix='vloxseg', vreg='v8', VLEN=1024:
       #eew=8 sew=8 lmul='f8'
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  2,  8,  8,  np.linspace(0, 31,    1, dtype=np.uint8 )*8*4, random_mask(  1), np.zeros(  1*2, dtype=np.int8 )]"
       - "[ np.linspace( -1000, 1000,   536, dtype=np.int8 ),   1, 'f8',  3,  8,  8,  np.linspace(0, 31,    1, dtype=np.uint8 )*8*4, random_mask(  1), np.zeros(  1*3, dtype=np.int8 )]"

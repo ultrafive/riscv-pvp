@@ -8,7 +8,7 @@ _: &default
     test_vxxx_v_x: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vlen};
+        li a0, {vl};
         li a1, {rs1};
 
         vsetvli t0, a0, e{ebits},m1,tu,mu;
@@ -18,7 +18,7 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
   check:
@@ -29,7 +29,7 @@ vmv_v_x:
   <<: *default
 
   cases:
-    test_vxxx_v_x @ rs1, vlen @ ebits=32, stins='vse32.v':
+    test_vxxx_v_x @ rs1, vl @ ebits=32, stins='vse32.v':
       - '[1, 1]'
       - '[-1, 4]'
       - '[-128, 31]'

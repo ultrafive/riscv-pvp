@@ -15,7 +15,7 @@ class Vlexff_v(Inst):
             res.dtype = np.uint64
             
         if 'nvl' not in self:
-            res = res[0:self['vlen']]
+            res = res[0:self['vl']]
             return self.masked(res)
         else:
             return res[0-self['nvl']-1:-1]

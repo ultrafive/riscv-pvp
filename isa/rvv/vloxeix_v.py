@@ -7,8 +7,8 @@ class Vloxeix_v(Inst):
 
     def golden(self):
 
-        vd = np.zeros( self['vlen'], dtype=self['rs1'].dtype )
-        for no in range( 0, self['vlen'] ):
+        vd = np.zeros( self['vl'], dtype=self['rs1'].dtype )
+        for no in range( 0, self['vl'] ):
             vd[no] = self['rs1'][int( self['vs2'][no]/self['rs1'].itemsize )]
 
         return self.masked( vd, self['orig'] if 'orig' in self else 0 )

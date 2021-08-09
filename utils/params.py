@@ -467,9 +467,9 @@ def softfloat_hf_x8_mm(l):
     vs2 = ( np.random.random((k, n)) * ( ub - lb ) + lb ).astype('int8')
     return [ dequant, vs1, vs2 ]
 
-def random_velkrelu_mv( height, width, vlen, dim_flag ):
+def random_velkrelu_mv( height, width, vl, dim_flag ):
     rs1 = np.random.normal( 0.0, 1.0, height*width ).astype( np.float16 ).reshape( height, width )
-    rs2 = np.random.normal( 0.0, 1.0, vlen ).astype( np.float16 )
+    rs2 = np.random.normal( 0.0, 1.0, vl ).astype( np.float16 )
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
@@ -479,7 +479,7 @@ def random_velkrelu_mv( height, width, vlen, dim_flag ):
         dim_flag,
     ]
 
-def random_velkrelu_special_mv( height, width, vlen, dim_flag ):
+def random_velkrelu_special_mv( height, width, vl, dim_flag ):
     special_fp16_less_eq_zero = np.array([0, 0.0, np.half('inf'), np.half('-inf'), np.half('nan'), 0.1, 10, 65500, 6.104e-5], dtype=np.float16)
     rs1 = special_fp16_less_eq_zero;
     cnt = special_fp16_less_eq_zero.size
@@ -499,9 +499,9 @@ def random_velkrelu_special_mv( height, width, vlen, dim_flag ):
         dim_flag,
     ]
 
-def random_velkrelu_stride_mv( height, width, vlen, stride_s, stride_d, dim_flag ):
+def random_velkrelu_stride_mv( height, width, vl, stride_s, stride_d, dim_flag ):
     rs1 = np.random.normal( 0.0, 1.0, height*width ).astype( np.float16 ).reshape( height, width )
-    rs2 = np.random.normal( 0.0, 1.0, vlen ).astype( np.float16 )
+    rs2 = np.random.normal( 0.0, 1.0, vl ).astype( np.float16 )
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
@@ -513,9 +513,9 @@ def random_velkrelu_stride_mv( height, width, vlen, stride_s, stride_d, dim_flag
         stride_d,
     ]
 
-def random_velkrelu_misaligned_mv( height, width, vlen, offset, dim_flag ):
+def random_velkrelu_misaligned_mv( height, width, vl, offset, dim_flag ):
     rs1 = np.random.normal( 0.0, 1.0, height*width ).astype( np.float16 ).reshape( height, width )
-    rs2 = np.random.normal( 0.0, 1.0, vlen ).astype( np.float16 )
+    rs2 = np.random.normal( 0.0, 1.0, vl ).astype( np.float16 )
     if 1 == dim_flag:
         rs1 = rs1.swapaxes( 1, 0 )
 
@@ -795,154 +795,154 @@ def random_meconv_hf_x8_mm_misaligned_block( h, w, cin, cout, kh, kw, off_s1, of
         dequant,
     ]
 
-def rvv_v_generator(vlen, dtype=np.int16):
-    return np.linspace(1, 0xffff, vlen, dtype=dtype)
+def rvv_v_generator(vl, dtype=np.int16):
+    return np.linspace(1, 0xffff, vl, dtype=dtype)
 
-def linspace_rvv_vv(type, vlen):
+def linspace_rvv_vv(type, vl):
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_wv(type, vlen):
+def linspace_rvv_wv(type, vl):
     if type == np.float16:
         type_vs2 = np.float32
     elif type == np.float32:
         type_vs2 = np.float64
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type_vs2)
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type_vs2)
     ]
 
-def linspace_rvv_m_v(type, vlen):
+def linspace_rvv_m_v(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-127, 128, vlen, dtype=type_vd),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-127, 128, vl, dtype=type_vd),
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_vf(type, vlen):
+def linspace_rvv_vf(type, vl):
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-127, 128, vlen, dtype=type)
+        np.linspace(-127, 128, vl, dtype=type)
     ]
 
-def linspace_rvv_m_vf_w(type, vlen):
+def linspace_rvv_m_vf_w(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-5, 5, vlen, dtype=type_vd),
+        np.linspace(-5, 5, vl, dtype=type_vd),
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_wf(type, vlen):
+def linspace_rvv_wf(type, vl):
     if type == np.float16:
         type_vs2 = np.float32
     elif type == np.float32:
         type_vs2 = np.float64
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-127, 128, vlen, dtype=type_vs2)
+        np.linspace(-127, 128, vl, dtype=type_vs2)
     ]
 
-def linspace_rvv_vvv(type, vlen):
+def linspace_rvv_vvv(type, vl):
     return [
-        np.linspace(-5, 5, vlen, dtype=type),
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-5, 5, vl, dtype=type),
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_m_vv_w(type, vlen):
+def linspace_rvv_m_vv_w(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-5, 5, vlen, dtype=type_vd),
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-5, 5, vl, dtype=type_vd),
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_vvv_wred(type, vlen):
+def linspace_rvv_vvv_wred(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-5, 5, vlen, dtype=type_vd),
-        np.linspace(-127, 128, vlen, dtype=type_vd),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-5, 5, vl, dtype=type_vd),
+        np.linspace(-127, 128, vl, dtype=type_vd),
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_vv_wred(type, vlen):
+def linspace_rvv_vv_wred(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-127, 128, vlen, dtype=type_vd),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-127, 128, vl, dtype=type_vd),
+        np.linspace(-120, 135, vl, dtype=type)
     ]
 
-def linspace_rvv_m_vf(type, vlen):
+def linspace_rvv_m_vf(type, vl):
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-127, 128, vl, dtype=type),
         np.array(random.random(), dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type)
+        np.linspace(-120, 135, vl, dtype=type)
     ]
-def random_mask( vlen ):
-    return np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int16)), dtype=np.uint8)
+def random_mask( vl ):
+    return np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int16)), dtype=np.uint8)
 
-def random_e1( vlen ):
-    return np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.uint8)), dtype=np.uint8)
+def random_e1( vl ):
+    return np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.uint8)), dtype=np.uint8)
 
-def res_len_e1( vlen ):
-    return np.ceil( vlen/8 ).astype( np.uint8 )
+def res_len_e1( vl ):
+    return np.ceil( vl/8 ).astype( np.uint8 )
 
 
-def linspace_rvv_vv_with_mask(type, vlen):
+def linspace_rvv_vv_with_mask(type, vl):
 
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        np.linspace(-1, 1, vlen, dtype=type),
-        vlen
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vl, dtype=type),
+        vl
     ]
 
-def linspace_rvv_vf_with_mask(type, vlen):
+def linspace_rvv_vf_with_mask(type, vl):
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        np.linspace(-1, 1, vlen, dtype=type),
-        vlen
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vl, dtype=type),
+        vl
     ]
 
-def linspace_rvv_slide1up_vf_with_mask(type, vlen, fmask):
-    mask = np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
+def linspace_rvv_slide1up_vf_with_mask(type, vl, fmask):
+    mask = np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8)
     if fmask:
         mask[0] = mask[0] | 1
     else:
         mask[0] = mask[0] & 0xFE
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type),
         mask,
-        np.linspace(-1, 1, vlen, dtype=type), 
-        vlen
+        np.linspace(-1, 1, vl, dtype=type), 
+        vl
     ]
 
-def linspace_rvv_slide1down_vf_with_mask(type, vlen, fmask):
-    mask = np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
-    idx = int( np.floor( (vlen-1)/8 ) )
-    bitx= (vlen-1) % 8
+def linspace_rvv_slide1down_vf_with_mask(type, vl, fmask):
+    mask = np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8)
+    idx = int( np.floor( (vl-1)/8 ) )
+    bitx= (vl-1) % 8
     if fmask:
         mask[idx] = mask[idx] | ( 1 << bitx )
     else:
@@ -950,118 +950,118 @@ def linspace_rvv_slide1down_vf_with_mask(type, vlen, fmask):
 
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type),
         mask,
-        np.linspace(-1, 1, vlen, dtype=type),
-        vlen
+        np.linspace(-1, 1, vl, dtype=type),
+        vl
     ]
 
-def linspace_rvv_wf_with_mask(type, vlen):
+def linspace_rvv_wf_with_mask(type, vl):
     if type == np.float16:
         type_vs2 = np.float32
     elif type == np.float32:
         type_vs2 = np.float64
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type_vs2),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        np.linspace(-1, 1, vlen, dtype=type_vs2),
-        vlen
+        np.linspace(-120, 135, vl, dtype=type_vs2),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vl, dtype=type_vs2),
+        vl
     ]
 
-def linspace_rvv_m_vv_with_mask(type, vlen):
+def linspace_rvv_m_vv_with_mask(type, vl):
     return [
-        np.linspace(-1, 1, vlen, dtype=type),
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        vlen
+        np.linspace(-1, 1, vl, dtype=type),
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        vl
     ]
-def linspace_rvv_m_vf_with_mask(type, vlen):
+def linspace_rvv_m_vf_with_mask(type, vl):
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
+        np.linspace(-127, 128, vl, dtype=type),
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        vlen
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        vl
     ]
-def linspace_rvv_vv_w_with_mask(type, vlen):
+def linspace_rvv_vv_w_with_mask(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        np.linspace(-1, 1, vlen, dtype=type_vd),
-        vlen
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vl, dtype=type_vd),
+        vl
     ]
-def linspace_rvv_m_vv_w_with_mask(type, vlen):
+def linspace_rvv_m_vv_w_with_mask(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-1, 1, vlen, dtype=type_vd),        
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        vlen
-    ]
-
-def linspace_rvv_wred_with_mask(type, vlen):
-    if type == np.float16:
-        type_vd = np.float32
-    elif type == np.float32:
-        type_vd = np.float64
-    return [
-        np.linspace(-1, 1, vlen, dtype=type_vd),        
-        np.linspace(-127, 128, vlen, dtype=type_vd),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8)
+        np.linspace(-1, 1, vl, dtype=type_vd),        
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        vl
     ]
 
-def linspace_rvv_m_vf_w_with_mask(type, vlen):
+def linspace_rvv_wred_with_mask(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-1, 1, vlen, dtype=type_vd),        
+        np.linspace(-1, 1, vl, dtype=type_vd),        
+        np.linspace(-127, 128, vl, dtype=type_vd),
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8)
+    ]
+
+def linspace_rvv_m_vf_w_with_mask(type, vl):
+    if type == np.float16:
+        type_vd = np.float32
+    elif type == np.float32:
+        type_vd = np.float64
+    return [
+        np.linspace(-1, 1, vl, dtype=type_vd),        
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        vlen
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        vl
     ]
 
-def linspace_rvv_vf_w_with_mask(type, vlen):
+def linspace_rvv_vf_w_with_mask(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
         np.array(random.random(), dtype=np.float32),
-        np.linspace(-120, 135, vlen, dtype=type),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        np.linspace(-1, 1, vlen, dtype=type_vd),
-        vlen
+        np.linspace(-120, 135, vl, dtype=type),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vl, dtype=type_vd),
+        vl
     ]
 
-def linspace_rvv_wv_w_with_mask(type, vlen):
+def linspace_rvv_wv_w_with_mask(type, vl):
     if type == np.float16:
         type_vd = np.float32
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.linspace(-127, 128, vlen, dtype=type),
-        np.linspace(-120, 135, vlen, dtype=type_vd),
-        np.array( np.random.randint( 0, 255, np.ceil(vlen/8).astype(np.int8)), dtype=np.uint8),
-        np.linspace(-1, 1, vlen, dtype=type_vd),
-        vlen
+        np.linspace(-127, 128, vl, dtype=type),
+        np.linspace(-120, 135, vl, dtype=type_vd),
+        np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
+        np.linspace(-1, 1, vl, dtype=type_vd),
+        vl
     ]
 #special vector data
-def linspace_rvv_v_special(type, offset, vlen):
+def linspace_rvv_v_special(type, offset, vl):
     # boundary number table        -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
     bd0 = np.array([[0x0000]*6, [0x0000, 0x7c00,         0x7e00,                 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
     bd1 = np.array([[0x7c00]*8, [        0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001]], dtype=np.int16)
@@ -1074,8 +1074,8 @@ def linspace_rvv_v_special(type, offset, vlen):
     bound_data = np.concatenate((bd0, bd1, bd2, bd3, bd4, bd5, bd6, bd7),axis=1)
     bound_data.dtype = type
 
-    # vs data include boundary data, vlen is 64
-    vs = np.linspace(-1, 5, vlen, dtype=type)
+    # vs data include boundary data, vl is 64
+    vs = np.linspace(-1, 5, vl, dtype=type)
     if offset > 1:
         offset = 1;
     vs[:len(bound_data[offset])] = bound_data[offset]
@@ -1155,6 +1155,7 @@ def get_vlmax(lmul, ebits, vlen):
     return max
 
 def vlsenn_get_stride(vl, align):
+    vl = int(vl)
     align = int(align)
 
     if vl/align < 1:

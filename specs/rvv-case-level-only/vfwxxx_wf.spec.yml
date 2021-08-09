@@ -105,7 +105,7 @@ _: &default
       - linspace_rvv_wf(np.float32, 4)
       - linspace_rvv_wf(np.float32, 10)
       - linspace_rvv_wf(np.float32, 32) 
-    test_basic_with_mask @ rs1, vs2, mask, orig, vlen @ ebits=32, ebits_vd=64, fldins='flw', ldins='vle64.v', stins='vse64.v':
+    test_basic_with_mask @ rs1, vs2, mask, orig, vl @ ebits=32, ebits_vd=64, fldins='flw', ldins='vle64.v', stins='vse64.v':
       - linspace_rvv_wf_with_mask(np.float32, 1)
       - linspace_rvv_wf_with_mask(np.float32, 4)
       - linspace_rvv_wf_with_mask(np.float32, 10)

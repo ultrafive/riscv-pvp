@@ -9,11 +9,11 @@ class Vsoxeix_v(Inst):
 
         vd = np.zeros( self['rs1'].size, dtype=self['rs1'].dtype )
         if 'mask' not in self:
-            for no in range( 0, self['vlen'] ):
+            for no in range( 0, self['vl'] ):
                 vd[int( self['vs2'][no]/self['rs1'].itemsize )] = self['rs1'][no]
         else:
-            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vlen']]
-            for no in range( 0, self['vlen'] ):
+            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
+            for no in range( 0, self['vl'] ):
                 if mask[no] != 0:
                     vd[int( self['vs2'][no]/self['rs1'].itemsize )] = self['rs1'][no]
 

@@ -9,7 +9,7 @@ class Vrgather_vi(Inst):
     def golden(self):
         vd = np.zeros(self['vs2'].size, dtype = np.uint32)
         vlmax = int(lmul[str(self['lmul'])] * self['VLEN'] / self['ebits'])
-        for i in range (0, self['vlen']):
+        for i in range (0, self['vl']):
             if self['imm'] >= vlmax:
                 vd[i] = 0
             else:
@@ -23,7 +23,7 @@ class Vrgather_vx(Inst):
     def golden(self):
         vd = np.zeros(self['vs2'].size, dtype = np.uint32)
         vlmax = int(lmul[str(self['lmul'])] * self['VLEN'] / self['ebits'])
-        for i in range (0, self['vlen']):
+        for i in range (0, self['vl']):
             if self['rs1'] >= vlmax:
                 vd[i] = 0
             else:
@@ -37,7 +37,7 @@ class Vrgather_vv(Inst):
     def golden(self):
         vd = np.zeros(self['vs1'].size, dtype = np.uint32)
         vlmax = int(lmul[str(self['lmul'])] * self['VLEN'] / self['ebits'])
-        for i in range (0, self['vlen']):
+        for i in range (0, self['vl']):
             if self['vs1'][i] >= vlmax:
                 vd[i] = 0
             else:

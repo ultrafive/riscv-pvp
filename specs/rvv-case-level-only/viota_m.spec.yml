@@ -9,7 +9,7 @@ _: &default
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         la a2, {vs2_data};
 
         addi t1, a0, 7;
@@ -28,13 +28,13 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
     test_basic_with_mask: |
       test_{num}:
         li TESTNUM, {num};
 
-        li a0, {vlen};
+        li a0, {vl};
         la a2, {vs2_data};
         la a4, {mask_data};
 
@@ -55,13 +55,13 @@ _: &default
         .pushsection .data, 1;
         .balign ({ebits}/8)
       test_{num}_data:
-        .fill {vlen}, ({ebits}/8), 0;
+        .fill {vl}, ({ebits}/8), 0;
         .popsection
 
 
 
   cases:
-    test_basic_without_mask @ vs2, vlen, lmul, ebits:
+    test_basic_without_mask @ vs2, vl, lmul, ebits:
       - '[np.array([0x01], dtype=np.uint8),                    1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                    4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                    7,    1, 8 ]'
@@ -144,7 +144,7 @@ _: &default
       - '[np.linspace(-127, 127, 9, dtype=np.uint8),           65,   8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          127,  8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          128,  8, 64]'
-    test_basic_with_mask @ vs2, mask, vlen, lmul, ebits:
+    test_basic_with_mask @ vs2, mask, vl, lmul, ebits:
       - '[np.array([0x00], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 8 ]'

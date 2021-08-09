@@ -43,15 +43,9 @@ parser.add_argument('--collect', help='just collect the test case to know what c
 parser.add_argument('--basic-only', help='only run basic test cases for instructions', action="store_true") 
 parser.add_argument('--basic', help='run basic tests of basic_cases test data in yml for regression.', action='store_true')
 parser.add_argument('--random', help='run random tests of random_cases test data in yml', action='store_true')
-parser.add_argument('--clang', help='path of clang compiler', default='clang') 
 parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/generator_report.log.", action="store_true")                                              
-
-#options to configure the test CPU
-parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
-parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
-parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
-parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
-parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
+parser.add_argument('--param-info', help="print params information into log/params.yaml of cases collected.", action = "store_true")
+parser.add_argument('--seed', help="set random seed for random functions of each spec yaml", type=int, default=3428)
 
 args, unknown_args = parser.parse_known_args()
 if unknown_args:
@@ -66,6 +60,25 @@ result_condition = Condition()
 result_detail_dict = manager.dict()
 tests = Value('L', 0)
 fails = Value('L', 0) 
+
+# analyse the env.yaml to get compile info
+with open("env/env.yaml", 'r' ) as f_env:
+    env = yaml.load(f_env, Loader=yaml.SafeLoader)
+    xlen = env["processor"]['xlen']
+    flen = env["processor"]['flen']
+    vlen = env["processor"]['vlen']
+    elen = env["processor"]['elen']
+    slen = env["processor"]['slen']
+    path = env["compile"]['path']
+    cc = eval(env["compile"]['cc'])
+    defines = eval(env["compile"]['defines'])
+    cflags = env["compile"]['cflags']
+    incs = env["compile"]['incs']
+    linkflags = env["compile"]['linkflags']
+    compile_cmd = f'{cc} {defines} {cflags} {incs} {linkflags}'
+    objdump_cmd = env["compile"]["objdump"]
+    is_objdump = env["compile"]["is_objdump"]
+
 
 # find the params for matrix cases
 def search(arg_names, vals, no, params, **kwargs):
@@ -121,6 +134,8 @@ else:
 print("collecting the tests...")
 collected_case_list = [] # for --collect and generator use this list to generate files
 all_case_list = [] # take all cases in specs, used to compute the sum of cases which will be generated
+if args.param_info:
+    param_dict = dict()
 # analyze yml file to find the test cases
 for spec in specs:
     if os.path.isdir(spec):
@@ -131,6 +146,11 @@ for spec in specs:
         stream = open(filename, 'r')
         config = yaml.load(stream, Loader=yaml.SafeLoader)
 
+        if not args.random:
+            np.random.seed(args.seed)
+        if args.random and args.seed != 3428:
+            np.random.seed(args.seed)
+
         for inst, cfg in config.items():
             # don't handle options startswith _
             if inst.startswith('_'):
@@ -140,6 +160,8 @@ for spec in specs:
             #print(cfg['templates'])
 
             # get the value of different options
+            if args.param_info:
+                param_dict[inst] = dict()
             attrs = dict()
             attrs['name'] = inst
             attrs['inst'] = globals()[inst.capitalize()]
@@ -293,28 +315,38 @@ for spec in specs:
 
             # collect the instruction, test_type and test_param
             for test_type in attrs['test'].keys():
+                if args.param_info:
+                    param_dict[inst][test_type] = dict()
                 if args.level == "type":
                     # collect the instruction and test_type
                     collected_case_list.append(inst+'/'+test_type)                    
                 test_info = attrs['test'][test_type]
-                if args.level == "case":
-                    attrs['test'][test_type]["case_param"] = dict()
+                                    
+                attrs['test'][test_type]["case_param"] = dict()
                 if test_info["params"]:
-                    num = 0
-                    raw_case_name = ''
-                    for i in range(len(test_info["args"])):
-                        if i != 0:
-                            raw_case_name += '-'
-                        raw_case_name += test_info["args"][i]                    
+                    num = 0                  
                     for param in test_info["params"]:
-                        case_name = raw_case_name + '_' + str(num)
-                        all_case_list.append(inst+'/'+test_type+'/'+case_name)                                                                    
+                        param = eval(param) if isinstance(param, str) else param
+                        case_name = ''
+                        for i in range(len(test_info["args"])):
+                            if i != 0:
+                                case_name += '-'
+                            if isinstance(param[i], np.ndarray):
+                                case_name += test_info["args"][i] + "_" + str(num)
+                            else:
+                                case_name += test_info["args"][i] + "_" + str( param[i] )
+                        all_case_list.append(inst+'/'+test_type+'/'+case_name)
+                        attrs['test'][test_type]["case_param"][case_name] = param
                         if args.level == "case":
-                            attrs['test'][test_type]["case_param"][case_name] = param
                             collected_case_list.append(inst+'/'+test_type+'/'+case_name)
                         num += 1
+                        if args.param_info:
+                            param_dict[inst][test_type][case_name] = str(param)
+                    
                 else:
                     all_case_list.append(inst+'/'+test_type)
+                    if args.param_info:
+                        param_dict[inst][test_type] = None
                     if args.level == "case":
                         # if no param, just one case
                         collected_case_list.append(inst+'/'+test_type)
@@ -339,6 +371,12 @@ with open("log/all_case.log",'w') as all_log:
     for case in all_case_list:
         all_log.write(case)
         all_log.write('\n')
+
+# save cases' param into a params.yaml
+if args.param_info:
+    with open("log/params.yml", 'w') as params_file:
+        yaml.dump( param_dict, params_file, default_flow_style = False )
+
 
 # call the test_function in the test class to run the test
 def run_test( case ):
@@ -464,22 +502,20 @@ def generate( tpl, case, inst, case_num, **kw ):
 
 # compile the test.S
 def compile(args, binary, mapfile, dumpfile, source, logfile, **kw):
-    cc = f'{args.clang} --target=riscv{args.xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{args.xlen}gv0p10 -menable-experimental-extensions'
-    defines = f'-DXLEN={args.xlen} -DVLEN={args.vlen}'
-    cflags = '-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles'
-    incs = '-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc'
-    linkflags = '-Tenv/p/link.ld'
 
-    cmd = f'{cc} {defines} {cflags} {incs} {linkflags} -Wl,-Map,{mapfile} {source} -o {binary} >> {logfile} 2>&1'
+    cmd = f'{compile_cmd}  -Wl,-Map,{mapfile} {source} -o {binary} >> {logfile} 2>&1'
     print(f'# {cmd}\n', file=open(logfile, 'w'))
     ret = os.system(cmd)
     if ret != 0:
         return ret
 
-    cmd = f'riscv64-unknown-elf-objdump -S -D {binary} 1>{dumpfile} 2>>{logfile}'
+    cmd = f'{objdump_cmd} {binary} 1>{dumpfile} 2>>{logfile}'
     print(f'# {cmd}\n', file=open(logfile, 'a'))    
     ret = os.system(cmd)
-    return ret
+    if is_objdump:
+        return ret
+    else:
+        return 0
 
 def simulate( test_inst, args, test_type, test_case ):
     #print("test_inst:"+test_inst.name + " test_type:" + test_type + " test_case:"+test_case)
@@ -517,20 +553,7 @@ def simulate( test_inst, args, test_type, test_case ):
             test_info = test_inst.test[test_type]
             if test_info["params"]:
                 
-                for param in test_info["params"]:
-                    # get the param
-                    param = eval(param) if isinstance(param,str) else param
-                    # give a case name
-                    case_name = ''
-                    for i in range(len(param)):
-                        if i != 0:
-                            case_name += '-'
-                        if isinstance(param[i], np.ndarray):
-                            case_name += test_info["args"][i]
-                        else:
-                            case_name += test_info["args"][i]
-
-                    case_name += '_' + str(num)
+                for case_name, param in test_info["case_param"].items():
 
                     _kw = ','.join(f'{test_info["args"][i]}=param[{i}]' for i in range(len(param)))
                     default_str = ''
@@ -628,20 +651,7 @@ def simulate( test_inst, args, test_type, test_case ):
         case_list = []  
         if test_info["params"]:
             num = 0
-            for param in test_info["params"]:
-                # get the param
-                param = eval(param) if isinstance(param,str) else param
-
-                # give a case name
-                case_name = ''
-                for i in range(len(param)):
-                    if i != 0:
-                        case_name += '-'
-                    if isinstance(param[i], np.ndarray):
-                        case_name += test_info["args"][i]
-                    else:
-                        case_name += test_info["args"][i]
-                case_name += '_' + str(num)
+            for case_name, param in test_info["case_param"].items():
 
                 _kw = ','.join(f'{test_info["args"][i]}=param[{i}]' for i in range(len(param)))
 

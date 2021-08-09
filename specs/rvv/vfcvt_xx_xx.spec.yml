@@ -122,7 +122,7 @@ vfcvt_xu_f_v:
       - "[np.linspace( 0, 4294967295, 1, dtype=np.float32), 4]"
       - "[np.linspace( 0, 4294967295, 10, dtype=np.float32), 4]"
       - "[np.linspace( 0, 4294967295, 32, dtype=np.float32), 4]"       
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( 0, 4294967295, 1, dtype=np.float32), 0, random_mask(1), np.linspace( 100, 127, 1, dtype=np.uint32), 1 ]"
       - "[np.linspace( 0, 4294967295, 10, dtype=np.float32), 0, random_mask(10), np.linspace( 100, 127, 10, dtype=np.uint32), 10 ]"
       - "[np.linspace( 0, 4294967295, 32, dtype=np.float32), 0, random_mask(32), np.linspace( 100, 127, 32, dtype=np.uint32), 32 ]" 
@@ -190,7 +190,7 @@ vfcvt_x_f_v:
       - "[np.linspace( -2147483648, 2147483647, 1, dtype=np.float32), 4]"
       - "[np.linspace( -2147483648, 2147483647, 10, dtype=np.float32), 4]"
       - "[np.linspace( -2147483648, 2147483647, 32, dtype=np.float32), 4]"       
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -2147483648, 2147483647, 1, dtype=np.float32), 0, random_mask(1), np.linspace( 1, 127, 1, dtype=np.int32), 1 ]"
       - "[np.linspace( -2147483648, 2147483647, 10, dtype=np.float32), 0, random_mask(10), np.linspace( 1, 127, 10, dtype=np.int32), 10 ]"
       - "[np.linspace( -2147483648, 2147483647, 32, dtype=np.float32), 0, random_mask(32), np.linspace( 1, 127, 32, dtype=np.int32), 32 ]" 
@@ -226,7 +226,7 @@ vfcvt_rtz_xu_f_v:
       - "[np.linspace( 0, 4294967295, 1, dtype=np.float32), 0]"
       - "[np.linspace( 0, 4294967295, 10, dtype=np.float32), 0]"
       - "[np.linspace( 0, 4294967295, 32, dtype=np.float32), 0]"      
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( 0, 4294967295, 1, dtype=np.float32), 0, random_mask(1), np.linspace( 100, 127, 1, dtype=np.uint32), 1 ]"
       - "[np.linspace( 0, 4294967295, 10, dtype=np.float32), 0, random_mask(10), np.linspace( 100, 127, 10, dtype=np.uint32), 10 ]"
       - "[np.linspace( 0, 4294967295, 32, dtype=np.float32), 0, random_mask(32), np.linspace( 100, 127, 32, dtype=np.uint32), 32 ]" 
@@ -250,7 +250,7 @@ vfcvt_rtz_x_f_v:
       - "[np.linspace( -2147483648, 2147483647, 1, dtype=np.float32), 0]"
       - "[np.linspace( -2147483648, 2147483647, 10, dtype=np.float32), 0]"
       - "[np.linspace( -2147483648, 2147483647, 32, dtype=np.float32), 0]"      
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -2147483648, 2147483647, 1, dtype=np.float32), 0, random_mask(1), np.linspace( 1, 127, 1, dtype=np.int32), 1 ]"
       - "[np.linspace( -2147483648, 2147483647, 10, dtype=np.float32), 0, random_mask(10), np.linspace( 1, 127, 10, dtype=np.int32), 10 ]"
       - "[np.linspace( -2147483648, 2147483647, 32, dtype=np.float32), 0, random_mask(32), np.linspace( 1, 127, 32, dtype=np.int32), 32 ]" 
@@ -273,7 +273,7 @@ vfcvt_f_xu_v:
       - "[np.linspace( 0, 4294967295, 1, dtype=np.uint32), 0]"
       - "[np.linspace( 0, 4294967295, 10, dtype=np.uint32), 0]"
       - "[np.linspace( 0, 4294967295, 32, dtype=np.uint32), 0]"      
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( 0, 4294967295, 1, dtype=np.uint32), 0, random_mask(1), np.linspace( -127, 128, 1, dtype=np.float32), 1 ]"
       - "[np.linspace( 0, 4294967295, 10, dtype=np.uint32), 0, random_mask(10), np.linspace( -127, 128, 10, dtype=np.float32), 10 ]"
       - "[np.linspace( 0, 4294967295, 32, dtype=np.uint32), 0, random_mask(32), np.linspace( -127, 128, 32, dtype=np.float32), 32 ]" 
@@ -296,7 +296,7 @@ vfcvt_f_x_v:
       - "[np.linspace( -2147483648, 2147483647, 1, dtype=np.int32), 0]"
       - "[np.linspace( -2147483648, 2147483647, 10, dtype=np.int32), 0]"
       - "[np.linspace( -2147483648, 2147483647, 32, dtype=np.int32), 0]"      
-    test_basic_with_mask @ vs2, frm, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs2, frm, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - "[np.linspace( -2147483648, 2147483647, 1, dtype=np.int32), 0, random_mask(1), np.linspace( 1, 127, 1, dtype=np.float32), 1 ]"
       - "[np.linspace( -2147483648, 2147483647, 10, dtype=np.int32), 0, random_mask(10), np.linspace( 1, 127, 10, dtype=np.float32), 10 ]"
       - "[np.linspace( -2147483648, 2147483647, 32, dtype=np.int32), 0, random_mask(32), np.linspace( 1, 127, 32, dtype=np.float32), 32 ]" 

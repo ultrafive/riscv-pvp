@@ -98,7 +98,7 @@ _: &default
       - linspace_rvv_vf(np.float32, 4)
       - linspace_rvv_vf(np.float32, 10)
       - linspace_rvv_vf(np.float32, 32)
-    test_basic_with_mask @ vd, rs1, vs2, mask, vlen @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vd, rs1, vs2, mask, vl @ ebits=32, fldins='flw', ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_m_vf_with_mask(np.float32, 1)
       - linspace_rvv_m_vf_with_mask(np.float32, 4)
       - linspace_rvv_m_vf_with_mask(np.float32, 10)

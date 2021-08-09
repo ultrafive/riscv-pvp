@@ -170,7 +170,7 @@ _: &default
       - linspace_rvv_vv(np.float32, 4)
       - linspace_rvv_vv(np.float32, 10)
       - linspace_rvv_vv(np.float32, 32)    
-    test_basic_with_mask @ vs1, vs2, mask, orig, vlen @ ebits=32, ldins='vle32.v', stins='vse32.v':
+    test_basic_with_mask @ vs1, vs2, mask, orig, vl @ ebits=32, ldins='vle32.v', stins='vse32.v':
       - linspace_rvv_vv_with_mask(np.float32, 1)
       - linspace_rvv_vv_with_mask(np.float32, 4)
       - linspace_rvv_vv_with_mask(np.float32, 10)
