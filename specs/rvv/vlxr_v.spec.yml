@@ -15,38 +15,46 @@ _: &default
       test_{num}:
         li TESTNUM, {num}
 
-        la a1, {vs3_data}
-        li a0, {VLEN}*8/8;
-        vsetvli a2, a0, e8,m8,tu,mu;
-        vle8.v v8, (a1)
+        li a0, {VLEN}*8/{eew};
+        vsetvli a1, a0, e{eew},m8,tu,mu;
+        vsub.vv v8, v8, v8
 
-        la a0, test_{num}_data
-        vs{nf}r.v v8, (a0);
+        la a0, {rs1_data};
+        vl{nf}re{eew}.v v8, (a0);
+
+        li a0, {VLEN}*8/{eew};
+        vsetvli a1, a0, e{eew},m8,tu,mu;
+        la a1, test_{num}_data;
+        vse{eew}.v v8, (a1);
 
         .pushsection .data, 1;
-        .balign (8/8)
+        .balign ({eew}/8)
       test_{num}_data:
-        .fill (VLEN/8*8), (8/8), 0;
+        .fill (VLEN/8*{eew}), ({eew}/8), 0;
         .popsection
 
     test_vstart_without_mask: |
       test_{num}:
         li TESTNUM, {num}
 
-        la a1, {vs3_data}
-        li a0, {VLEN}*8/8;
-        vsetvli a2, a0, e8,m8,tu,mu;
-        vle8.v v8, (a1)
+        li a0, {VLEN}*8/{eew};
+        vsetvli a1, a0, e{eew},m8,tu,mu;
+        vsub.vv v8, v8, v8
 
-        la a0, test_{num}_data
-        li a1, {start};
-        csrw vstart, a1;
-        vs{nf}r.v v8, (a0);
+        la a0, {rs1_data};
+        li a1, {start}
+        csrw vstart, a1
+        vl{nf}re{eew}.v v8, (a0);
+
+        li a0, {VLEN}*8/{eew};
+        vsetvli a1, a0, e{eew},m8,tu,mu;
+        la a1, test_{num}_data;
+        vse{eew}.v v8, (a1);
 
         .pushsection .data, 1;
-        .balign (8/8)
+        .balign ({eew}/8)
       test_{num}_data:
-        .fill (VLEN/8*8), (8/8), 0;
+        .fill (VLEN/8*{eew}), ({eew}/8), 0;
         .popsection
 
     test_exception_invalid_addr: |
@@ -59,10 +67,10 @@ _: &default
         sd t0, 0(t1);
         li TESTNUM, {num};
        
-        li a0, {VLEN}*8/8;
+        li a0, {VLEN}*8/{eew};
         li a1, {addr}
-        vsetvli t0, a0, e8,m8,tu,mu;
-        vs{nf}r.v v8, (a1);
+        vsetvli t0, a0, e{eew},m8,tu,mu;
+        vl{nf}re{eew}.v v8, (a1);
 
         j fail;
       test_{num}_end:
@@ -72,25 +80,27 @@ _: &default
     test_basic_without_mask: np.array_equal(result, golden)
     test_vstart_without_mask: np.array_equal(result, golden)
 
-vsxr_v:
+vlxrx_v:
   <<: *default
   cases:
     test_basic_without_mask:
       matrix:
+        eew: [8, 16, 32, 64]
         nf: [1, 2, 4, 8]
         VLEN: 1024
-        vs3: np.linspace(0, 2**8, VLEN*8//8, dtype=np.uint8)
+        rs1: np.linspace(0, 2**eew, VLEN*8//eew, dtype=get_uintdtype(eew))
 
     test_vstart_without_mask:
       matrix:
+        eew: [8, 16, 32, 64]
         nf: [1, 2, 4, 8]
         VLEN: 1024
         start: list(np.random.uniform(0, VLEN*nf//8, 10).astype(np.int32))
-        vs3: np.linspace(0, 2**8, VLEN*8//8, dtype=np.uint8)
+        rs1: np.linspace(0, 2**eew, VLEN*8//eew, dtype=get_uintdtype(eew))
 
-    test_exception_invalid_addr @ vs3, addr, nf, VLEN, trapNum:
-      - '[np.linspace(0, 255, 256, dtype=np.uint8), 0xc0300000, 2, 1024, 7]'
-
+    test_exception_invalid_addr @ rs1, addr, eew, nf, VLEN, trapNum:
+      - '[np.linspace(0, 255, 256, dtype=np.uint8),  0xc0300000, 16, 2, 1024, 5]'
+      - '[np.linspace(0, 255, 256, dtype=np.uint16), 0xc0000001, 16, 2, 1024, 4]'
       
 
 

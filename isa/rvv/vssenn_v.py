@@ -2,41 +2,47 @@ from isa.inst import *
 import numpy as np
 import math
 
-class _Vssenn_v(Inst):
-    sew = 0
-    dtype = np.int8
+factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+
+class Vssex_v(Inst):
+    name = 'vssex.v'
 
     def golden(self):
-        zero_size = (self['vl'] - 1) * self['rs2'] + 1
-        res = np.zeros(zero_size, self.dtype)
 
+        if 'isExcept' in self:
+            if self['isExcept'] > 0:
+                return np.zeros(self['vl'], dtype=self['vs3'].dtype)
+        vl = self['vl']
+        emul = self['eew'] /self['sew']*factor_lmul[self['lmul']]
+        emul = 1 if emul < 1 else int(emul)
+        vlmax = int(emul * self['VLEN'] // (self['vs3'].itemsize*8))
+        eew = self['eew']//8
+        stride = self['rs2']//eew
+
+        vs3 = self['vs3']
+
+        if 'start' in self:
+            start = self['start']
+        else:
+            start = 0
+        
+        if 'origin' in self:
+            origin = self['origin']
+        else:
+            origin = np.zeros(vl, dtype=self['vs3'].dtype)
+        
         if 'mask' in self:
             mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
+        else :
+            mask = np.ones(self['vl'], dtype=np.uint8)
 
-        for i, v in enumerate(self['vs3']):
-            if i >= self['vl']:
-                break
-            if 'mask' in self and mask[i] == 0:
-                continue
-            res[i * int(self['rs2']/self.sew)] = v
-        return res
+        if stride == 0:
+            tmp = 0
+            for i in range(start, vl):
+                if mask[i] != 0:
+                    tmp = vs3[i]
+            origin[0: vl] = tmp        
+        else:
+            origin[start: vl] = self.masked(vs3[0:vl], origin[0: vl])[start: vl]
 
-class Vsse8_v(_Vssenn_v):
-    name = 'vsse8.v'
-    sew = 1
-    dtype = np.int8
-
-class Vsse16_v(_Vssenn_v):
-    name = 'vsse16.v'
-    sew = 2
-    dtype = np.int16
-
-class Vsse32_v(_Vssenn_v):
-    name = 'vsse32.v'
-    sew = 4
-    dtype = np.int32
-
-class Vsse64_v(_Vssenn_v):
-    name = 'vsse64.v'
-    sew = 8
-    dtype = np.int64
+        return origin

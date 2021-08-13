@@ -1,21 +1,16 @@
 from isa.inst import *
 import math
 
-class _Vlxr_v(Inst):
+class Vlxrx_v(Inst):
+    name = 'vlxrx.v'
     def golden(self):
-        return self['rs1']
+        res = np.zeros(self['VLEN']*8//self['eew'], dtype=self['rs1'].dtype)
+        vlen = self['nf']*self['VLEN'] // self['eew']
+        start = self['start'] if 'start' in self else 0
+        if start < vlen :
+            res[start: vlen] = self['rs1'][start: vlen]
+        return res
     
 
-
-class Vlxre8_v(_Vlxr_v):
-    name = 'vlxre8.v'
-
-class Vlxre16_v(_Vlxr_v):
-    name = 'vlxre16.v'    
-
-class Vlxre32_v(_Vlxr_v):
-    name = 'vlxre32.v'
-
-class Vlxre64_v(_Vlxr_v):
-    name = 'vlxre64.v'    
+  
 

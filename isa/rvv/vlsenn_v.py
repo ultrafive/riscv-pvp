@@ -1,33 +1,45 @@
-
 from isa.inst import *
 import numpy as np
 import math
 
-class _Vlsenn_v(Inst):
-    sew = 0
+factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+
+class Vlsex_v(Inst):
+    name = 'vlsex.v'
 
     def golden(self):
-        if self['rs2'] == 0:
-            vd= np.full([self['vl']], self['vs1'][0])
+        if 'isExcept' in self:
+            if self['isExcept'] > 0:
+                return np.zeros(self['vl'], dtype=self['rs1'].dtype)
+        vl = self['vl']
+        emul = self['eew'] /self['sew']*factor_lmul[self['lmul']]
+        emul = 1 if emul < 1 else int(emul)
+        vlmax = int(emul * self['VLEN'] // (self['rs1'].itemsize*8))
+
+        rs1 = self['rs1']
+        eew = self['eew']//8
+        stride = self['rs2']//eew
+
+        if 'start' in self:
+            start = self['start']
         else:
-            self['rs2'] = np.asarray(self['rs2'], dtype=np.int32)
-            vd = self['vs1'][::int(self['rs2']/self.sew)]
-            vd = vd[:self['vl']]
+            start = 0
 
-        return self.masked(vd)
+        if 'mask' in self:
+            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
+        else :
+            mask = np.ones(self['vl'], dtype=np.uint8)
+        
+        if 'origin' in self:
+            origin = self['origin']
+        else:
+            origin = np.zeros(vl, dtype=self['rs1'].dtype)
+        
+        tmp = np.zeros(stride*vl+1, dtype=self['rs1'].dtype)
+        for i in range(vl):
+            tmp[i*stride] = rs1[i]
+        for i in range(start, vl):
+            if mask[i] != 0:
+                origin[i] = tmp[i*stride]
 
-class Vlse8_v(_Vlsenn_v):
-    name = 'vlse8.v'
-    sew = 1
-
-class Vlse16_v(_Vlsenn_v):
-    name = 'vlse16.v'
-    sew = 2
-
-class Vlse32_v(_Vlsenn_v):
-    name = 'vlse32.v'
-    sew = 4
-
-class Vlse64_v(_Vlsenn_v):
-    name = 'vlse64.v'
-    sew = 8
+        return origin

@@ -2,20 +2,35 @@ from isa.inst import *
 import numpy as np
 import math
 
+factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+
 class Vssegxex_v(Inst):
     name = 'vssegxex.v'
 
     def golden(self):
+        if 'isExcept' in self:
+            if self['isExcept'] > 0:
+                return np.zeros(1024*8//(self['vs3'].itemsize*8), dtype=self['vs3'].dtype)
+        nf = self['nf']
+        vl = self['vl']
+        emul = self['eew'] /self['sew']*factor_lmul[self['lmul']]
+        emul = 1 if emul < 1 else int(emul)
+        vlmax = int(emul * self['VLEN'] // (self['vs3'].itemsize*8))
 
-        vd = self['vs3'].copy()
+        vs3 = self['vs3'][0: vlmax*nf].reshape(nf, vlmax)[:, 0:vl]
 
-        if 'mask' in self:
-            mask = []
-            for no in range(0, int(self['vs3'].size/self['nfields'])):
-                mask = ( self['mask'][np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1
-                if mask != 1:
-                    for idx in range( 0, self['nfields'] ):
-                        vd[ int(self['nfields']*no+idx) ] = 0
-            return vd
+        if 'start' in self:
+            start = self['start']
         else:
-            return vd
+            start = 0
+        
+        if 'origin' in self:
+            origin = self['origin']
+        else:
+            origin = np.zeros(self['VLEN']*8//(self['vs3'].itemsize*8), dtype=self['vs3'].dtype)
+        
+
+        for i in range(nf):
+            origin[start*nf+i: vl*nf+i: nf] = self.masked(vs3[i], origin[i: vl*nf+i: nf])[start: vl]
+
+        return origin

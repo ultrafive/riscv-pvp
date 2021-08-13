@@ -2,23 +2,40 @@ from isa.inst import *
 import numpy as np
 import math
 
+factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+
 class Vlsegxexff_v(Inst):
-    name = 'vlsegXeXff.v'
+    name = 'vlsegxexff.v'
 
     def golden(self):
-        res = np.linspace(1, 0x400, 0x400, dtype=np.uint8)
-        if self['ebits'] == 16:
-            res.dtype = np.uint16
-        elif self['ebits'] == 32:
-            res.dtype = np.uint32
-        elif self['ebits'] == 64:
-            res.dtype = np.uint64
-            
-        if 'nvl' not in self:
-            res = res[0:self['vl']*self['nf']]
-            return self.masked(res)
+        if 'isExcept' in self:
+            if self['isExcept'] > 0:
+                return np.zeros(1024*8//(self['rs1'].itemsize*8), dtype=self['rs1'].dtype)
+        nf = self['nf']
+        vl = self['vl']
+        emul = self['eew'] /self['sew']*factor_lmul[self['lmul']]
+        emul = 1 if emul < 1 else int(emul)
+        vlmax = int(emul * self['VLEN'] // (self['rs1'].itemsize*8))
+
+        rs1 = self['rs1'].reshape(vl, nf).T
+
+        if 'start' in self:
+            start = self['start']
         else:
-            return res[0-self['nvl']*self['nf']-1:-1]
+            start = 0
 
+        if 'nvl' in self:
+            end = self['nvl']
+        else :
+            end = vl
+        
+        if 'origin' in self:
+            origin = self['origin']
+        else:
+            origin = np.zeros(self['VLEN']*8//(self['rs1'].itemsize*8), dtype=self['rs1'].dtype)
+        
 
-                       
+        for i in range(nf):
+            origin[vlmax*i+start: vlmax*i+end] = self.masked(rs1[i], origin[vlmax*i: vlmax*i+end])[start: end]
+
+        return origin

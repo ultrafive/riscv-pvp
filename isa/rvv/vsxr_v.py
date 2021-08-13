@@ -2,20 +2,13 @@ from isa.inst import *
 import math
 
 class Vsxr_v(Inst):
+    name = 'vsxr.v'
     def golden(self):
-        return self['rs1']
-
-class Vsxre8_v(Vsxr_v):
-    name = 'vsxre8.v'
-
-class Vsxre16_v(Vsxr_v):
-    name = 'vsxre16.v'
-
-class Vsxre32_v(Vsxr_v):
-    name = 'vsxre32.v'
-
-class Vsxre64_v(Vsxr_v):
-    name = 'vsxre64.v'    
-
-  
+        res = np.zeros(self['VLEN']*8//8, dtype=np.uint8)
+        vlen = self['nf']*self['VLEN'] // 8
+        start = self['start'] if 'start' in self else 0
+        if start < vlen :
+            res[start: vlen] = self['vs3'][start: vlen]
+        return res
+    
           

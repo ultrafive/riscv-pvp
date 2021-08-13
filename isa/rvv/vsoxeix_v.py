@@ -6,18 +6,54 @@ class Vsoxeix_v(Inst):
     name = 'vsoxeix.v'
 
     def golden(self):
+        if 'isExcept' in self:
+            if self['isExcept'] > 0:
+                return np.zeros(self['vl'], dtype=self['vs3'].dtype)
+        
+        vs3 = self['vs3'].copy()
+        vs3.dtype = np.uint8
+        sew = self['sew'] // 8
 
-        vd = np.zeros( self['rs1'].size, dtype=self['rs1'].dtype )
-        if 'mask' not in self:
-            for no in range( 0, self['vl'] ):
-                vd[int( self['vs2'][no]/self['rs1'].itemsize )] = self['rs1'][no]
+        index = self['vs2']
+
+        if 'start' in self:
+            start = self['start']
         else:
-            mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
-            for no in range( 0, self['vl'] ):
-                if mask[no] != 0:
-                    vd[int( self['vs2'][no]/self['rs1'].itemsize )] = self['rs1'][no]
+            start = 0
+        
+        if 'offset' in self:
+            offset = self['offset']
+        else :
+            offset = 0
 
-        return vd
+        if 'origin' in self:
+            origin = self['origin']
+        else:
+            origin = np.zeros( self['vl'], dtype=self['vs3'].dtype )
+
+        origin.dtype = np.uint8
+
+        if 'mask' in self:
+            mask = self['mask'].copy()
+            mask.dtype = np.uint8
+            mask_bits = np.unpackbits(mask, bitorder='little')[0: self['vl']]
+        else:
+            mask_bits = np.ones(self['vl'], dtype=np.uint8)
+
+        tmp = np.zeros(int((np.max(self['vs2'])+sew)*sew), dtype=np.uint8)
+
+        for no in range(start, self['vl']):
+            curIdx = int(offset+index[no])
+            if mask_bits[no] != 0:
+                tmp[curIdx: curIdx+sew] = vs3[no*sew: no*sew+sew]
+
+        for no in range(start, self['vl']):
+            curIdx = int(offset+index[no])
+            origin[no*sew: no*sew+sew] = tmp[curIdx: curIdx+sew]
+        
+        origin.dtype = self['vs3'].dtype
+
+        return origin
 
 class Vsoxei8_v(Vsoxeix_v):
     name = 'vsoxei8.v'

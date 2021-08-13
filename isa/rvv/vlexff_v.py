@@ -5,34 +5,35 @@ import math
 class Vlexff_v(Inst):
     name = 'vlexff.v'
 
-    def golden(self):
-        res = np.linspace(1, 0x400, 0x400, dtype=np.uint8)
-        if self['ebits'] == 16:
-            res.dtype = np.uint16
-        elif self['ebits'] == 32:
-            res.dtype = np.uint32
-        elif self['ebits'] == 64:
-            res.dtype = np.uint64
-            
-        if 'nvl' not in self:
-            res = res[0:self['vl']]
-            return self.masked(res)
+    def golden(self): 
+        if 'isExcept' in self:
+            if self['isExcept'] > 0:
+                return np.zeros(self['vl'], dtype=self['rs1'].dtype)
+        if 'start' in self:
+            start = self['start']
         else:
-            return res[0-self['nvl']-1:-1]
+            start = 0
+        
+        if 'origin' in self:
+            origin = self['origin']
+        else:
+            origin = np.zeros(self['vl'], dtype=self['rs1'].dtype)
 
-class Vle8ff_v(Vlexff_v):
-    name = 'vle8ff.v'
+        end = self['nvl'] if 'nvl' in self else self['vl']
 
+        if 'offset' in self:
+            rs1 = self['rs1'].copy()
+            rs1.dtype = np.uint8
+            mul = self['rs1'].itemsize // rs1.itemsize
+            rs1[0: (self['vl']*mul-self['offset'])] = rs1[self['offset'] : self['vl']*mul]
+            rs1[(self['vl']*mul-self['offset']): self['vl']*mul] = 0
+            rs1.dtype = self['rs1'].dtype
+        else:
+            rs1 = self['rs1'].copy()
 
-class Vle16ff_v(Vlexff_v):
-    name = 'vle16ff.v'
-
-
-class Vle32ff_v(Vlexff_v):
-    name = 'vle32ff.v'
-
-
-class Vle64ff_v(Vlexff_v):
-    name = 'vle64ff.v'
+        res = self.masked(rs1, origin[0: self['vl']])
+        origin[start: end] = res[start: end]
+         
+        return origin
 
                        

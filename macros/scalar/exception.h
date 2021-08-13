@@ -22,7 +22,8 @@ mtvec_handler: \
     \
     la t0, _restore_addr; \
     ld t1, 0(t0); \
-    jr t1; \
+    csrw mepc, t1; \
+    mret; \
     .pushsection .data; \
     .align 4; .global _expected_cause; _expected_cause: .dword 0; \
     .align 4; .global _restore_addr; _restore_addr: .dword 0; \

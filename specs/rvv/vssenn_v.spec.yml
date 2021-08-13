@@ -1,760 +1,850 @@
 _: &default
-  env: RVTEST_RV64UV
   head: |
+    #undef EXTRA_INIT
+    #define EXTRA_INIT                               \
+      /* Set up a PMP to permit all accesses */      \
+      li t0, 0xc0200000;                       \
+      srli t0, t0, 2;                                \
+      csrw pmpaddr0, t0;                             \
+      li t0, PMP_TOR | PMP_R | PMP_W | PMP_X;        \
+      csrw pmpcfg0, t0; 
     #include "exception.h"
     #include "test_macros_v.h"
-
-  templates: 
-    test_vssx_v_without_mask: |
+    #define ST_ADDR 0x90000000
+    #define END_ADDR 0xC0000000
+  env: RVTEST_RV64UV
+  templates:
+    test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
-        li a0, {vl};
-
-        la a1, {vs3_data};
-        li a2, {rs2}; 
-        la a3, test_{num}_data;
-
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        {ldins} v8, (a1);
-        {name} v8, (a3), a2;
-
-        .pushsection .data, 1;
-        .balign ({ebits}/8)
-      test_{num}_data:
-      .fill ({vl} - 1) * {rs2} + 1, ({ebits}/8), 0;
-      .popsection
-
-    test_vssx_v_with_mask: |
-      test_{num}:
-        li TESTNUM, {num};
+        
         li a0, {vl};
         la a1, {vs3_data};
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
         li a2, {rs2};
-        la a3, test_{num}_data;
-        la a4, {mask_data};
+        vsse{eew}.v v8, (a1), a2;
 
-        li t1, 8;
-        remu t2, a0, t1;
-        bnez t2, 1f;
-        li t3,  {vl} / 8;
-        j 2f;
-      1:
-        li t3,  {vl} / 8 + 1;
-      2:
-        vsetvli t0, t3, e8,m1,tu,mu;
-        vle8.v v0, (a4);
-
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        {ldins} v8, (a1);
-        {name} v8, (a3), a2, v0.t;
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
 
         .pushsection .data, 1;
-        .balign ({ebits}/8)
+        .balign ({eew}/8)
       test_{num}_data:
-        .fill ({vl} - 1) * {rs2} + 1 , ({ebits}/8), 0;
+        .fill ({vl}), ({eew}/8), 0;
         .popsection
 
-  check:
-    test_vssx_v_without_mask: np.array_equal(result, golden)
-    test_vssx_v_with_mask: np.array_equal(result, golden)
-
-vsse8_v:
-  <<: *default
-
-  cases:
-    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=8, ldins='vle8.v':
-      - '[np.linspace(-128,  127,  64, dtype=np.int8),         0,   64, 1]'
-      - '[np.linspace(   0,    0, 128, dtype=np.int8),         0,  128, 1]'
-      - '[np.linspace(0xff, 0xff, 400, dtype=np.int8),         4,   80, 1]'
-      - '[np.linspace(-128,  127, 768, dtype=np.int8),         6,  128, 1]'
-      - '[np.array([0x5a], dtype=np.uint8),                    0,    1, 1]'
-      - '[np.array([0x5a], dtype=np.uint8),                    1,    1, 1]'
-      - '[np.linspace(-128,  127,  64,      dtype=np.int8),    0,   64, 1]'
-      - '[np.linspace(-128,  127,  64,      dtype=np.int8),    1,   64, 1]'
-      #- '[np.linspace(-128,  127,  640,     dtype=np.int8),   10,   64, 1]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   64,   64, 1]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   65,   64, 1]'
-      #- '[np.linspace(-128,  127,  128,     dtype=np.int8),    0,  128, 1]'
-      #- '[np.linspace(-128,  127,  128,     dtype=np.int8),    1,  128, 1]'
-      #- '[np.linspace(-128,  127,  768,     dtype=np.int8),    6,  128, 1]'
-      #- '[np.linspace(-128,  127,  16384,   dtype=np.int8),  128,  128, 1]'
-      #- '[np.linspace(-128,  127,  16512,   dtype=np.int8),  129,  128, 1]'
-      #- '[np.linspace(-128,  127,  129,     dtype=np.int8),    0,  129, 2]'
-      #- '[np.linspace(-128,  127,  129,     dtype=np.int8),    1,  129, 2]'
-      #- '[np.linspace(-128,  127,  1290,    dtype=np.int8),   10,  129, 2]'
-      #- '[np.linspace(-128,  127,  16641,   dtype=np.int8),  129,  129, 2]'
-      #- '[np.linspace(-128,  127,  16770,   dtype=np.int8),  130,  129, 2]'
-      #- '[np.linspace(-128,  127,  255,     dtype=np.int8),    0,  255, 2]'
-      #- '[np.linspace(-128,  127,  255,     dtype=np.int8),    1,  255, 2]'
-      #- '[np.linspace(-128,  127,  3825,    dtype=np.int8),   15,  255, 2]'
-      #- '[np.linspace(-128,  127,  65025,   dtype=np.int8),  255,  255, 2]'
-      #- '[np.linspace(-128,  127,  65280,   dtype=np.int8),  256,  255, 2]'
-      #- '[np.linspace(-128,  127,  256,     dtype=np.int8),    0,  256, 2]'
-      #- '[np.linspace(-128,  127,  256,     dtype=np.int8),    1,  256, 2]'
-      #- '[np.linspace(-128,  127,  3840,    dtype=np.int8),   15,  256, 2]'
-      #- '[np.linspace(-128,  127,  65536,   dtype=np.int8),  256,  256, 2]'
-      #- '[np.linspace(-128,  127,  71680,   dtype=np.int8),  280,  256, 2]'
-      #- '[np.linspace(-128,  127,  257,     dtype=np.int8),    0,  257, 4]'
-      #- '[np.linspace(-128,  127,  257,     dtype=np.int8),    1,  257, 4]'
-      #- '[np.linspace(-128,  127,  4112,    dtype=np.int8),   16,  257, 4]'
-      #- '[np.linspace(-128,  127,  65792,   dtype=np.int8),  256,  257, 4]'
-      #- '[np.linspace(-128,  127,  77100,   dtype=np.int8),  300,  257, 4]'
-      #- '[np.linspace(-128,  127,  511,     dtype=np.int8),    0,  511, 4]'
-      #- '[np.linspace(-128,  127,  511,     dtype=np.int8),    1,  511, 4]'
-      #- '[np.linspace(-128,  127,  25039,   dtype=np.int8),   49,  511, 4]'
-      #- '[np.linspace(-128,  127,  261121,  dtype=np.int8),  511,  511, 4]'
-      #- '[np.linspace(-128,  127,  266231,  dtype=np.int8),  521,  511, 4]'
-      #- '[np.linspace(-128,  127,  512,     dtype=np.int8),    0,  512, 4]'
-      #- '[np.linspace(-128,  127,  512,     dtype=np.int8),    1,  512, 4]'
-      #- '[np.linspace(-128,  127,  50688,   dtype=np.int8),   99,  512, 4]'
-      #- '[np.linspace(-128,  127,  262144,  dtype=np.int8),  512,  512, 4]'
-      #- '[np.linspace(-128,  127,  266240,  dtype=np.int8),  520,  512, 4]'
-      #- '[np.linspace(-128,  127,  513,     dtype=np.int8),    0,  513, 8]'
-      #- '[np.linspace(-128,  127,  513,     dtype=np.int8),    1,  513, 8]'
-      #- '[np.linspace(-128,  127,  62073,   dtype=np.int8),  121,  513, 8]'
-      #- '[np.linspace(-128,  127,  263169,  dtype=np.int8),  513,  513, 8]'
-      #- '[np.linspace(-128,  127,  268299,  dtype=np.int8),  523,  513, 8]'
-      #- '[np.linspace(-128,  127,  1023,    dtype=np.int8),    0, 1023, 8]'
-      #- '[np.linspace(-128,  127,  1023,    dtype=np.int8),    1, 1023, 8]'
-      #- '[np.linspace(-128,  127,  5115,    dtype=np.int8),    5, 1023, 8]'
-      #- '[np.linspace(-128,  127,  1046529, dtype=np.int8), 1023, 1023, 8]'
-      #- '[np.linspace(-128,  127,  1104840, dtype=np.int8), 1080, 1023, 8]'
-      #- '[np.linspace(-128,  127,  1024,    dtype=np.int8),    0, 1024, 8]'
-      #- '[np.linspace(-128,  127,  1024,    dtype=np.int8),    1, 1024, 8]'
-      #- '[np.linspace(-128,  127,  11264,   dtype=np.int8),   11, 1024, 8]'
-      #- '[np.linspace(-128,  127,  1048576, dtype=np.int8), 1024, 1024, 8]'
-      #- '[np.linspace(-128,  127,  1126400, dtype=np.int8), 1100, 1024, 8]'
-      
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   31, "f2"]'
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   31, "f2"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   31, "f2"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   31,   31, "f2"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   31, "f2"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   32, "f2"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   32, "f2"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   32, "f2"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   32,   32, "f2"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   32, "f2"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   33, "f2"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   33, "f2"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   33, "f2"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   33,   33, "f2"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   34,   33, "f2"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   63, "f2"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   63, "f2"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    7,   63, "f2"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   63,   63, "f2"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   64,   63, "f2"]'
-      #- '[np.linspace(-128,  127,  64,      dtype=np.int8),    0,   64, "f2"]'
-      #- '[np.linspace(-128,  127,  64,      dtype=np.int8),    1,   64, "f2"]'
-      #- '[np.linspace(-128,  127,  640,     dtype=np.int8),   10,   64, "f2"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   64,   64, "f2"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   65,   64, "f2"]'
-
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   15, "f4"]'
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   15, "f4"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    4,   15, "f4"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   15,   15, "f4"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   18,   15, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   16, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   16, "f4"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    3,   16, "f4"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   16,   16, "f4"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   17, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   17, "f4"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    5,   17, "f4"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   17,   17, "f4"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   20,   17, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   31, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   31, "f4"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   31, "f4"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   31,   31, "f4"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   31, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   32, "f4"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   32, "f4"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   32, "f4"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   32,   32, "f4"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   32, "f4"]'
-      #  
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,    7, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,    7, "f8"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    3,    7, "f8"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),    7,    7, "f8"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   10,    7, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,    8, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,    8, "f8"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    2,    8, "f8"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),    8,    8, "f8"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   11,    8, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   15, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   15, "f8"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    4,   15, "f8"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   15,   15, "f8"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   18,   15, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   16, "f8"]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   16, "f8"]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    3,   16, "f8"]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   16,   16, "f8"]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f8"]'
-
-    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=8, ldins='vle8.v':
-      - '[np.linspace(   0,    0,  128,     dtype=np.int8),    0,   32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  256,     dtype=np.int8),    2,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  256,     dtype=np.int8),    4,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  64,      dtype=np.int8),    0,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  64,      dtype=np.int8),    1,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  640,     dtype=np.int8),   10,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   64,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   65,   64, 1, np.linspace(1, 255,   8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  128,     dtype=np.int8),    0,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  128,     dtype=np.int8),    1,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  768,     dtype=np.int8),    6,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  16384,   dtype=np.int8),  128,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  16512,   dtype=np.int8),  129,  128, 1, np.linspace(1, 255,  16, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  129,     dtype=np.int8),    0,  129, 2, np.linspace(1, 255,  17, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  129,     dtype=np.int8),    1,  129, 2, np.linspace(1, 255,  17, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1290,    dtype=np.int8),   10,  129, 2, np.linspace(1, 255,  17, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  16641,   dtype=np.int8),  129,  129, 2, np.linspace(1, 255,  17, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  16770,   dtype=np.int8),  130,  129, 2, np.linspace(1, 255,  17, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  255,     dtype=np.int8),    0,  255, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  255,     dtype=np.int8),    1,  255, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  3825,    dtype=np.int8),   15,  255, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  65025,   dtype=np.int8),  255,  255, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  65280,   dtype=np.int8),  256,  255, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  256,     dtype=np.int8),    0,  256, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  256,     dtype=np.int8),    1,  256, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  3840,    dtype=np.int8),   15,  256, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  65536,   dtype=np.int8),  256,  256, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  71680,   dtype=np.int8),  280,  256, 2, np.linspace(1, 255,  32, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  257,     dtype=np.int8),    0,  257, 4, np.linspace(1, 255,  33, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  257,     dtype=np.int8),    1,  257, 4, np.linspace(1, 255,  33, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4112,    dtype=np.int8),   16,  257, 4, np.linspace(1, 255,  33, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  65792,   dtype=np.int8),  256,  257, 4, np.linspace(1, 255,  33, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  77100,   dtype=np.int8),  300,  257, 4, np.linspace(1, 255,  33, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  511,     dtype=np.int8),    0,  511, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  511,     dtype=np.int8),    1,  511, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  25039,   dtype=np.int8),   49,  511, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  261121,  dtype=np.int8),  511,  511, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  266231,  dtype=np.int8),  521,  511, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  512,     dtype=np.int8),    0,  512, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  512,     dtype=np.int8),    1,  512, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  50688,   dtype=np.int8),   99,  512, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  262144,  dtype=np.int8),  512,  512, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  266240,  dtype=np.int8),  520,  512, 4, np.linspace(1, 255,  64, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  513,     dtype=np.int8),    0,  513, 8, np.linspace(1, 255,  65, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  513,     dtype=np.int8),    1,  513, 8, np.linspace(1, 255,  65, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  62073,   dtype=np.int8),  121,  513, 8, np.linspace(1, 255,  65, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  263169,  dtype=np.int8),  513,  513, 8, np.linspace(1, 255,  65, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  268299,  dtype=np.int8),  523,  513, 8, np.linspace(1, 255,  65, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1023,    dtype=np.int8),    0, 1023, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1023,    dtype=np.int8),    1, 1023, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  5115,    dtype=np.int8),    5, 1023, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1046529, dtype=np.int8), 1023, 1023, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1104840, dtype=np.int8), 1080, 1023, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1024,    dtype=np.int8),    0, 1024, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1024,    dtype=np.int8),    1, 1024, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  11264,   dtype=np.int8),   11, 1024, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1048576, dtype=np.int8), 1024, 1024, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  1126400, dtype=np.int8), 1100, 1024, 8, np.linspace(1, 255, 128, dtype=np.uint8)]'
-
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   31, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   31, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   31, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   31,   31, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   31, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   32, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   32, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   32, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   32,   32, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   32, "f2", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   33, "f2", np.linspace(1, 255, 5, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   33, "f2", np.linspace(1, 255, 5, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   33, "f2", np.linspace(1, 255, 5, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   33,   33, "f2", np.linspace(1, 255, 5, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   34,   33, "f2", np.linspace(1, 255, 5, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   63, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   63, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    7,   63, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   63,   63, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   64,   63, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  64,      dtype=np.int8),    0,   64, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  64,      dtype=np.int8),    1,   64, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  640,     dtype=np.int8),   10,   64, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   64,   64, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   65,   64, "f2", np.linspace(1, 255, 8, dtype=np.uint8)]'
-
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   15, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   15, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    4,   15, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   15,   15, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   18,   15, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   16, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   16, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    3,   16, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   16,   16, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f4", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   17, "f4", np.linspace(1, 255, 3, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   17, "f4", np.linspace(1, 255, 3, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    5,   17, "f4", np.linspace(1, 255, 3, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   17,   17, "f4", np.linspace(1, 255, 3, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   20,   17, "f4", np.linspace(1, 255, 3, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   31, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   31, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   31, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   31,   31, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   31, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   32, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   32, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    8,   32, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   32,   32, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   33,   32, "f4", np.linspace(1, 255, 4, dtype=np.uint8)]'
+    test_stride_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
         
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,    7, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      - '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,    7, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    3,    7, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),    7,    7, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   10,    7, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,    8, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,    8, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    2,    8, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),    8,    8, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   11,    8, "f8", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   15, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   15, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    4,   15, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   15,   15, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   18,   15, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    0,   16, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  63,      dtype=np.int8),    1,   16, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  630,     dtype=np.int8),    3,   16, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4096,    dtype=np.int8),   16,   16, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-128,  127,  4160,    dtype=np.int8),   17,   16, "f8", np.linspace(1, 255, 2, dtype=np.uint8)]'
+        li a0, {vl};
+        la a1, {vs3_data};
 
-vsse16_v:
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
 
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_x0_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), x0;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+    
+    test_eew_neq_sew_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_vstart_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_tu_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        COPY_STRIDE_SRC(ST_ADDR, END_ADDR, {origin_data}, {vl}, 1, {rs2}, {eew}/8)
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {origin_data}
+
+        la a3, test_{num}_data;
+        li a4, VLEN*8/{eew};
+        vsetvli t0, a4, e{eew},m8,ta,mu;
+        vle{eew}.v v16, (a2);
+        vse{eew}.v v16, (a3);
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_misalign_without_mask: |
+      test_{num}:
+        li t0, 6;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+      
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        addi a1, a1, {offset};
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_misalign_stride_without_mask: |
+      test_{num}:
+        li t0, 6;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+      
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_regression_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+
+
+    test_basic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_stride_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_x0_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), x0, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_eew_neq_sew_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_vstart_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_tu_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        COPY_STRIDE_SRC(ST_ADDR, END_ADDR, {origin_data}, {vl}, 1, {rs2}, {eew}/8)
+
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+        la a3, test_{num}_data;
+        la a4, {origin_data}
+
+        li a5, ({vl}+7)/8;
+        vsetvli t0, a5, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v16, (a4);
+        vse{eew}.v v16, (a3);
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_misalign_with_mask: |
+      test_{num}:
+        li t0, 6;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        addi a1, a1, {offset};
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_misalign_stride_with_mask: |
+      test_{num}:
+        li t0, 6;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_regression_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        
+        li a0, {vl};
+        la a1, {vs3_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, {vl};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a1);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        li a1, ST_ADDR;
+        li a2, {rs2};
+        vsse{eew}.v v8, (a1), a2, v0.t;
+
+        COPY_STRIDE_DST(ST_ADDR, test_{num}_data, {vl}, 1, {rs2}, {eew}/8)
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({eew}/8), 0;
+        .popsection
+
+    test_exception_misalign_lmul: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {vs3_data}
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        li a1, ST_ADDR;
+        li a2, 64;
+        vsse{eew}.v v3, (a1), a2;
+        j fail;
+      test_{num}_end:
+
+    test_exception_emul: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {vs3_data}
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        li a1, ST_ADDR;
+        li a2, 64;
+        vsse{eew}.v v8, (a1), a2;
+        j fail;
+      test_{num}_end:
+
+    test_exception_invalid_addr: |
+      test_{num}:
+        li t0, 7;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        li a1, {addr};
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        li a2, 64;
+        vsse{eew}.v v8, (a1), a2;
+        j fail;
+      test_{num}_end:
+ 
+
+  check:
+    test_basic_without_mask: np.array_equal(result, golden)
+    test_stride_without_mask: np.array_equal(result, golden)
+    test_x0_without_mask: np.array_equal(result, golden)
+    test_eew_neq_sew_without_mask: np.array_equal(result, golden)
+    test_vstart_without_mask: np.array_equal(result, golden)
+    test_tu_without_mask: np.array_equal(result, golden)
+    test_misalign_without_mask: np.array_equal(result, golden)
+    test_misalign_stride_without_mask: np.array_equal(result, golden)
+    test_regression_without_mask: np.array_equal(result, golden)
+    test_basic_with_mask: np.array_equal(result, golden)
+    test_stride_with_mask: np.array_equal(result, golden)
+    test_x0_with_mask: np.array_equal(result, golden)
+    test_eew_neq_sew_with_mask: np.array_equal(result, golden)
+    test_vstart_with_mask: np.array_equal(result, golden)
+    test_tu_with_mask: np.array_equal(result, golden)
+    test_misalign_with_mask: np.array_equal(result, golden)
+    test_misalign_stride_with_mask: np.array_equal(result, golden)
+    test_regression_with_mask: np.array_equal(result, golden)
+
+vssex_v:
   <<: *default
-
   cases:
-    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=16, ldins='vle16.v':
-      - '[np.linspace(-32767,  32767,  64,      dtype=np.int16),    0,   64, 1]'
-      - '[np.linspace(     0,      0,  64,      dtype=np.int16),    0,   64, 1]'
-      - '[np.linspace(0xffff, 0xffff, 512,      dtype=np.int16),    4,   64, 1]'
-      - '[np.linspace(-32768,  32767, 512,      dtype=np.int16),    6,   64, 1]'
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   63, 1]'
-      - '[np.linspace(-32768,  32767,  126,     dtype=np.int16),    2,   63, 1]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),   10,   63, 1]'
-      #- '[np.linspace(-32768,  32767,  3906,    dtype=np.int16),   62,   63, 1]'
-      #- '[np.linspace(-32768,  32767,  4032,    dtype=np.int16),   64,   63, 1]'
-      #- '[np.linspace(-32768,  32767,  64,      dtype=np.int16),    0,   64, 1]'
-      #- '[np.linspace(-32768,  32767,  128,     dtype=np.int16),    2,   64, 1]'
-      #- '[np.linspace(-32768,  32767,  640,     dtype=np.int16),   10,   64, 1]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   64,   64, 1]'
-      #- '[np.linspace(-32768,  32767,  4224,    dtype=np.int16),   66,   64, 1]'
-      #- '[np.linspace(-32768,  32767,  65,      dtype=np.int16),    0,   65, 2]'
-      #- '[np.linspace(-32768,  32767,  130,     dtype=np.int16),    2,   65, 2]'
-      #- '[np.linspace(-32768,  32767,  650,     dtype=np.int16),   10,   65, 2]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   64,   65, 2]'
-      #- '[np.linspace(-32768,  32767,  4290,    dtype=np.int16),   66,   65, 2]'
-      #- '[np.linspace(-32768,  32767,  127,     dtype=np.int16),    0,  127, 2]'
-      #- '[np.linspace(-32768,  32767,  254,     dtype=np.int16),    2,  127, 2]'
-      #- '[np.linspace(-32768,  32767,  1026,    dtype=np.int16),    8,  127, 2]'
-      #- '[np.linspace(-32768,  32767,  16002,   dtype=np.int16),  126,  127, 2]'
-      #- '[np.linspace(-32768,  32767,  16256,   dtype=np.int16),  128,  127, 2]'
-      #- '[np.linspace(-32768,  32767,  128,     dtype=np.int16),    0,  128, 2]'
-      #- '[np.linspace(-32768,  32767,  256,     dtype=np.int16),    2,  128, 2]'
-      #- '[np.linspace(-32768,  32767,  768,     dtype=np.int16),    6,  128, 2]'
-      #- '[np.linspace(-32768,  32767,  16384,   dtype=np.int16),  128,  128, 2]'
-      #- '[np.linspace(-32768,  32767,  16640,   dtype=np.int16),  130,  128, 2]'
-      #- '[np.linspace(-32768,  32767,  129,     dtype=np.int16),    0,  129, 4]'
-      #- '[np.linspace(-32768,  32767,  258,     dtype=np.int16),    2,  129, 4]'
-      #- '[np.linspace(-32768,  32767,  1290,    dtype=np.int16),   10,  129, 4]'
-      #- '[np.linspace(-32768,  32767,  16512,   dtype=np.int16),  128,  129, 4]'
-      #- '[np.linspace(-32768,  32767,  16770,   dtype=np.int16),  130,  129, 4]'
-      #- '[np.linspace(-32768,  32767,  255,     dtype=np.int16),    0,  255, 4]'
-      #- '[np.linspace(-32768,  32767,  510,     dtype=np.int16),    2,  255, 4]'
-      #- '[np.linspace(-32768,  32767,  3825,    dtype=np.int16),   14,  255, 4]'
-      #- '[np.linspace(-32768,  32767,  65025,   dtype=np.int16),  254,  255, 4]'
-      #- '[np.linspace(-32768,  32767,  65280,   dtype=np.int16),  256,  255, 4]'
-      #- '[np.linspace(-32768,  32767,  256,     dtype=np.int16),    0,  256, 4]'
-      #- '[np.linspace(-32768,  32767,  512,     dtype=np.int16),    2,  256, 4]'
-      #- '[np.linspace(-32768,  32767,  3840,    dtype=np.int16),   14,  256, 4]'
-      #- '[np.linspace(-32768,  32767,  65536,   dtype=np.int16),  256,  256, 4]'
-      #- '[np.linspace(-32768,  32767,  71680,   dtype=np.int16),  280,  256, 4]'
-      #- '[np.linspace(-32768,  32767,  257,     dtype=np.int16),    0,  257, 8]'
-      #- '[np.linspace(-32768,  32767,  514,     dtype=np.int16),    2,  257, 8]'
-      #- '[np.linspace(-32768,  32767,  4112,    dtype=np.int16),   16,  257, 8]'
-      #- '[np.linspace(-32768,  32767,  65792,   dtype=np.int16),  256,  257, 8]'
-      #- '[np.linspace(-32768,  32767,  77100,   dtype=np.int16),  300,  257, 8]'
-      #- '[np.linspace(-32768,  32767,  511,     dtype=np.int16),    0,  511, 8]'
-      #- '[np.linspace(-32768,  32767,  1022,    dtype=np.int16),    2,  511, 8]'
-      #- '[np.linspace(-32768,  32767,  25039,   dtype=np.int16),   48,  511, 8]'
-      #- '[np.linspace(-32768,  32767,  261121,  dtype=np.int16),  510,  511, 8]'
-      #- '[np.linspace(-32768,  32767,  266231,  dtype=np.int16),  520,  511, 8]'
-      #- '[np.linspace(-32768,  32767,  512,     dtype=np.int16),    0,  512, 8]'
-      #- '[np.linspace(-32768,  32767,  1024,    dtype=np.int16),    2,  512, 8]'
-      #- '[np.linspace(-32768,  32767,  50688,   dtype=np.int16),   98,  512, 8]'
-      #- '[np.linspace(-32768,  32767,  262144,  dtype=np.int16),  512,  512, 8]'
-      #- '[np.linspace(-32768,  32767,  266240,  dtype=np.int16),  520,  512, 8]'
+    test_basic_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   31, "f2"]'
-      - '[np.linspace(-32768,  32767,  126,     dtype=np.int16),    2,   31, "f2"]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    8,   31, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   30,   31, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   32,   31, "f2"]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   32, "f2"]'
-      #- '[np.linspace(-32768,  32767,  64,      dtype=np.int16),    2,   32, "f2"]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    8,   32, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   32,   32, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   34,   32, "f2"]'
+    test_stride_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: vlsenn_get_stride(vl, eew//8)
 
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   15, "f4"]'
-      - '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    4,   15, "f4"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   12,   15, "f4"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   16,   15, "f4"]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   16, "f4"]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    4,   16, "f4"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   16,   16, "f4"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   20,   16, "f4"]'
+    test_x0_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: 0
 
-    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=16, ldins='vle16.v':
-      - '[np.linspace(     0,      0, 128,      dtype=np.int16),    0,   32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767, 128,      dtype=np.int16),    2,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767, 256,      dtype=np.int16),    4,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   63, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767,  126,     dtype=np.int16),    2,   63, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),   10,   63, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  3906,    dtype=np.int16),   62,   63, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4032,    dtype=np.int16),   64,   63, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  64,      dtype=np.int16),    0,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  128,     dtype=np.int16),    2,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  640,     dtype=np.int16),   10,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   64,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4224,    dtype=np.int16),   66,   64, 1, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  65,      dtype=np.int16),    0,   65, 2, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  130,     dtype=np.int16),    2,   65, 2, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  650,     dtype=np.int16),   10,   65, 2, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   64,   65, 2, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4290,    dtype=np.int16),   66,   65, 2, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  127,     dtype=np.int16),    0,  127, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  254,     dtype=np.int16),    2,  127, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  1026,    dtype=np.int16),    8,  127, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  16002,   dtype=np.int16),  126,  127, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  16256,   dtype=np.int16),  128,  127, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  128,     dtype=np.int16),    0,  128, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  256,     dtype=np.int16),    2,  128, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  768,     dtype=np.int16),    6,  128, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  16384,   dtype=np.int16),  128,  128, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  16640,   dtype=np.int16),  130,  128, 2, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  129,     dtype=np.int16),    0,  129, 4, np.linspace(1, 255, 17, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  258,     dtype=np.int16),    2,  129, 4, np.linspace(1, 255, 17, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  1290,    dtype=np.int16),   10,  129, 4, np.linspace(1, 255, 17, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  16512,   dtype=np.int16),  128,  129, 4, np.linspace(1, 255, 17, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  16770,   dtype=np.int16),  130,  129, 4, np.linspace(1, 255, 17, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  255,     dtype=np.int16),    0,  255, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  510,     dtype=np.int16),    2,  255, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  3825,    dtype=np.int16),   14,  255, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  65025,   dtype=np.int16),  254,  255, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  65280,   dtype=np.int16),  256,  255, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  256,     dtype=np.int16),    0,  256, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  512,     dtype=np.int16),    2,  256, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  3840,    dtype=np.int16),   14,  256, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  65536,   dtype=np.int16),  256,  256, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  71680,   dtype=np.int16),  280,  256, 4, np.linspace(1, 255, 32, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  257,     dtype=np.int16),    0,  257, 8, np.linspace(1, 255, 33, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  514,     dtype=np.int16),    2,  257, 8, np.linspace(1, 255, 33, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4112,    dtype=np.int16),   16,  257, 8, np.linspace(1, 255, 33, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  65792,   dtype=np.int16),  256,  257, 8, np.linspace(1, 255, 33, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  77100,   dtype=np.int16),  300,  257, 8, np.linspace(1, 255, 33, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  511,     dtype=np.int16),    0,  511, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  1022,    dtype=np.int16),    2,  511, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  25039,   dtype=np.int16),   48,  511, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  261121,  dtype=np.int16),  510,  511, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  266231,  dtype=np.int16),  520,  511, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  512,     dtype=np.int16),    0,  512, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  1024,    dtype=np.int16),    2,  512, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  50688,   dtype=np.int16),   98,  512, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  262144,  dtype=np.int16),  512,  512, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  266240,  dtype=np.int16),  520,  512, 8, np.linspace(1, 255, 64, dtype=np.uint8)]'
+    test_eew_neq_sew_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: get_sew_neq_eew(eew)
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   31, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767,  126,     dtype=np.int16),    2,   31, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    8,   31, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   30,   31, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   32,   31, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   32, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  64,      dtype=np.int16),    2,   32, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    8,   32, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   32,   32, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   34,   32, "f2", np.linspace(0x5a, 255, 4, dtype=np.uint8)]'
+    test_vstart_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        start: get_vstart(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   15, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    4,   15, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   12,   15, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   16,   15, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int16),    0,   16, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int16),    4,   16, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int16),   16,   16, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int16),   20,   16, "f4", np.linspace(0x5a, 255, 2, dtype=np.uint8)]'
+    test_tu_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(get_uintdtype(eew))
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
+    test_misalign_without_mask:
+      matrix:
+        isExcept: 1
+        eew: [16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        offset: np.random.randint(1, int(eew/8))
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-vsse32_v:
+    test_misalign_stride_without_mask:
+      matrix:
+        isExcept: 1
+        eew: [16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : list(np.linspace(2, 10, 5, dtype=np.int32))
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8+np.random.randint(1, int(eew//8))
 
-  <<: *default
+    test_regression_without_mask:
+      matrix:
+        matrix:
+        eew: [8, 16, 32, 64]
+        sew: list(2**np.random.uniform(3, 7, 2).astype(int))
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_random_vl(lmul, sew, eew, VLEN)
+        start: get_random_start(vl)
+        vs3: np.random.uniform(0, 2**eew, vl).astype(get_uintdtype(eew))
+        rs2: get_random_stride(eew//8)
 
-  cases:
-    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=32, ldins='vle32.v':
-      - '[np.linspace(-32768,  32767,  32, dtype=np.int32),  0, 15, 1]'
-      - '[np.linspace(     0,      0,  32, dtype=np.int32),  0, 31, 1]'
-      - '[np.linspace(0xffff, 0xffff, 128, dtype=np.int32),  4, 32, 1]'
-      - '[np.linspace(0,  0xffffffff, 256, dtype=np.int32),  8, 32, 1]'
-      - '[np.linspace(0,  0x7fffffff,  31,      dtype=np.int32),    0,   31, 1]'
-      - '[np.linspace(0,  0x7fffffff,  124,     dtype=np.int32),    4,   31, 1]'
-      - '[np.linspace(0,  0x7fffffff,  248,     dtype=np.int32),    8,   31, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  868,     dtype=np.int32),   28,   31, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  992,     dtype=np.int32),   32,   31, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  32,      dtype=np.int32),    0,   32, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int32),    4,   32, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int32),    8,   32, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  1024,    dtype=np.int32),   32,   32, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  1152,    dtype=np.int32),   36,   32, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  33,      dtype=np.int32),    0,   33, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  132,     dtype=np.int32),    4,   33, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  264,     dtype=np.int32),    8,   33, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  1056,    dtype=np.int32),   32,   33, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  1188,    dtype=np.int32),   36,   33, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  63,      dtype=np.int32),    0,   63, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  252,     dtype=np.int32),    4,   63, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  630,     dtype=np.int32),    8,   63, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  3906,    dtype=np.int32),   60,   63, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  4032,    dtype=np.int32),   64,   63, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  64,      dtype=np.int32),    0,   64, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int32),    4,   64, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  640,     dtype=np.int32),    8,   64, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  4096,    dtype=np.int32),   64,   64, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  4352,    dtype=np.int32),   68,   64, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  65,      dtype=np.int32),    0,   65, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  340,     dtype=np.int32),    4,   65, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  650,     dtype=np.int32),    8,   65, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  4160,    dtype=np.int32),   64,   65, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  4420,    dtype=np.int32),   68,   65, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  127,     dtype=np.int32),    0,  127, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  508,     dtype=np.int32),    4,  127, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  1026,    dtype=np.int32),    8,  127, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  16002,   dtype=np.int32),  124,  127, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  16256,   dtype=np.int32),  128,  127, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int32),    0,  128, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  512,     dtype=np.int32),    4,  128, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  1536,    dtype=np.int32),   12,  128, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  16384,   dtype=np.int32),  128,  128, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  16896,   dtype=np.int32),  132,  128, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  129,     dtype=np.int32),    0,  129, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  516,     dtype=np.int32),    4,  129, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  1290,    dtype=np.int32),    8,  129, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  16512,   dtype=np.int32),  128,  129, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  17028,   dtype=np.int32),  132,  129, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  255,     dtype=np.int32),    0,  255, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  1020,    dtype=np.int32),    4,  255, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  3825,    dtype=np.int32),   12,  255, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  65025,   dtype=np.int32),  252,  255, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  65280,   dtype=np.int32),  256,  255, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int32),    0,  256, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  1024,    dtype=np.int32),    4,  256, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  3840,    dtype=np.int32),   12,  256, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  65536,   dtype=np.int32),  256,  256, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  71680,   dtype=np.int32),  280,  256, 8]'
+    test_basic_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        mask: random_mask(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int32),    0,    8, "f2"]'
-      - '[np.linspace(-32768,  32767,  126,     dtype=np.int32),    4,    8, "f2"]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int32),    8,    8, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,    8, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   32,    8, "f2"]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int32),    0,   15, "f2"]'
-      #- '[np.linspace(-32768,  32767,  126,     dtype=np.int32),    4,   15, "f2"]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int32),    8,   15, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,   15, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   32,   15, "f2"]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int32),    0,   16, "f2"]'
-      #- '[np.linspace(-32768,  32767,  64,      dtype=np.int32),    4,   16, "f2"]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int32),    8,   16, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,   16, "f2"]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   64,   16, "f2"]'
+    test_stride_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        mask: random_mask(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: vlsenn_get_stride(vl, eew//8)
 
-    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=32, ldins='vle32.v':
-      - '[np.linspace(     0,      0, 128, dtype=np.int32),  0, 32, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767, 256, dtype=np.int32),  8, 31, 1, np.linspace(1, 255, 4, dtype=np.uint8)]'
-      - '[np.linspace(0,  0xffffffff, 256, dtype=np.int32), 16, 32, 1, np.linspace(1, 255, 4, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  31,      dtype=np.int32),    0,   31, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  124,     dtype=np.int32),    4,   31, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  248,     dtype=np.int32),    8,   31, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  868,     dtype=np.int32),   28,   31, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  992,     dtype=np.int32),   32,   31, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  32,      dtype=np.int32),    0,   32, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int32),    4,   32, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int32),    8,   32, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1024,    dtype=np.int32),   32,   32, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1152,    dtype=np.int32),   36,   32, 1, np.linspace(1, 255,  4, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  33,      dtype=np.int32),    0,   33, 2, np.linspace(1, 255,  5, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  132,     dtype=np.int32),    4,   33, 2, np.linspace(1, 255,  5, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  264,     dtype=np.int32),    8,   33, 2, np.linspace(1, 255,  5, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1056,    dtype=np.int32),   32,   33, 2, np.linspace(1, 255,  5, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1188,    dtype=np.int32),   36,   33, 2, np.linspace(1, 255,  5, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  63,      dtype=np.int32),    0,   63, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  252,     dtype=np.int32),    4,   63, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  630,     dtype=np.int32),    8,   63, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  3906,    dtype=np.int32),   60,   63, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  4032,    dtype=np.int32),   64,   63, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  64,      dtype=np.int32),    0,   64, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int32),    4,   64, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  640,     dtype=np.int32),    8,   64, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  4096,    dtype=np.int32),   64,   64, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  4352,    dtype=np.int32),   68,   64, 2, np.linspace(1, 255,  8, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  65,      dtype=np.int32),    0,   65, 4, np.linspace(1, 255,  9, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  340,     dtype=np.int32),    4,   65, 4, np.linspace(1, 255,  9, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  650,     dtype=np.int32),    8,   65, 4, np.linspace(1, 255,  9, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  4160,    dtype=np.int32),   64,   65, 4, np.linspace(1, 255,  9, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  4420,    dtype=np.int32),   68,   65, 4, np.linspace(1, 255,  9, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  127,     dtype=np.int32),    0,  127, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  508,     dtype=np.int32),    4,  127, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1026,    dtype=np.int32),    8,  127, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  16002,   dtype=np.int32),  124,  127, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  16256,   dtype=np.int32),  128,  127, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int32),    0,  128, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  512,     dtype=np.int32),    4,  128, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1536,    dtype=np.int32),   12,  128, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  16384,   dtype=np.int32),  128,  128, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  16896,   dtype=np.int32),  132,  128, 4, np.linspace(1, 255, 16, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  129,     dtype=np.int32),    0,  129, 8, np.linspace(1, 255, 17, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  516,     dtype=np.int32),    4,  129, 8, np.linspace(1, 255, 17, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1290,    dtype=np.int32),    8,  129, 8, np.linspace(1, 255, 17, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  16512,   dtype=np.int32),  128,  129, 8, np.linspace(1, 255, 17, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  17028,   dtype=np.int32),  132,  129, 8, np.linspace(1, 255, 17, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  255,     dtype=np.int32),    0,  255, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1020,    dtype=np.int32),    4,  255, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  3825,    dtype=np.int32),   12,  255, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  65025,   dtype=np.int32),  252,  255, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  65280,   dtype=np.int32),  256,  255, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int32),    0,  256, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  1024,    dtype=np.int32),    4,  256, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  3840,    dtype=np.int32),   12,  256, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  65536,   dtype=np.int32),  256,  256, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
-#      - '[np.linspace(0,  0x7fffffff,  71680,   dtype=np.int32),  280,  256, 8, np.linspace(1, 255, 32, dtype=np.uint8)]'
+    test_x0_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        mask: random_mask(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: 0
 
-      - '[np.linspace(-32768,  32767,  63,      dtype=np.int32),    0,    8, "f2", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      - '[np.linspace(-32768,  32767,  126,     dtype=np.int32),    4,    8, "f2", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int32),    8,    8, "f2", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,    8, "f2", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   32,    8, "f2", np.linspace(1, 255, 1, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int32),    0,   15, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  126,     dtype=np.int32),    4,   15, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int32),    8,   15, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,   15, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   32,   15, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  63,      dtype=np.int32),    0,   16, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  64,      dtype=np.int32),    4,   16, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  630,     dtype=np.int32),    8,   16, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4096,    dtype=np.int32),   16,   16, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
-      #- '[np.linspace(-32768,  32767,  4160,    dtype=np.int32),   64,   16, "f2", np.linspace(1, 255, 2, dtype=np.uint8)]'
+    test_eew_neq_sew_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: get_sew_neq_eew(eew)
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        mask: random_mask(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-vsse64_v:
+    test_vstart_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        start: get_vstart(vl)
+        mask: random_mask(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-  <<: *default
+    test_tu_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        origin: np.random.uniform(0, 2**eew, int(vl)).astype(get_uintdtype(eew))
+        mask: random_mask(vl)
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
 
-  cases:
-    test_vssx_v_without_mask @ vs3, rs2, vl, lmul @ ebits=64, ldins='vle64.v':
-      - '[np.linspace(    -32768,      32767,  32, dtype=np.int64),  0,  3, 1]'
-      - '[np.linspace(         0,          0,  32, dtype=np.int64),  0, 15, 1]'
-      - '[np.linspace(0xffffffff, 0xffffffff, 256, dtype=np.int64),  8, 16, 1]'
-      - '[np.linspace(         0, 0xffffffff, 256, dtype=np.int64), 16, 16, 1]'
-      - '[np.linspace(0,  0x7fffffff,  15,      dtype=np.int64),    0,   15, 1]'
-      - '[np.linspace(0,  0x7fffffff,  120,     dtype=np.int64),    8,   15, 1]'
-      - '[np.linspace(0,  0x7fffffff,  240,     dtype=np.int64),   16,   15, 1]'
-      - '[np.linspace(0,  0x7fffffff,  16,      dtype=np.int64),    0,   16, 1]'
-      - '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int64),    8,   16, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int64),   16,   16, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  512,     dtype=np.int64),   32,   16, 1]'
-      #- '[np.linspace(0,  0x7fffffff,  17,      dtype=np.int64),    0,   17, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  136,     dtype=np.int64),    8,   17, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  272,     dtype=np.int64),   16,   17, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  408,     dtype=np.int64),   24,   17, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  31,      dtype=np.int64),    0,   31, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  248,     dtype=np.int64),    8,   31, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  868,     dtype=np.int64),   24,   31, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  992,     dtype=np.int64),   32,   31, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  32,      dtype=np.int64),    0,   32, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int64),    8,   32, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  1024,    dtype=np.int64),   32,   32, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  1280,    dtype=np.int64),   40,   32, 2]'
-      #- '[np.linspace(0,  0x7fffffff,  33,      dtype=np.int64),    0,   33, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  264,     dtype=np.int64),    8,   33, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  1056,    dtype=np.int64),   32,   33, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  1320,    dtype=np.int64),   40,   33, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  63,      dtype=np.int64),    0,   63, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  630,     dtype=np.int64),    8,   63, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  3906,    dtype=np.int64),   56,   63, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  4032,    dtype=np.int64),   64,   63, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  64,      dtype=np.int64),    0,   64, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  640,     dtype=np.int64),    8,   64, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  4096,    dtype=np.int64),   64,   64, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  4608,    dtype=np.int64),   72,   64, 4]'
-      #- '[np.linspace(0,  0x7fffffff,  65,      dtype=np.int64),    0,   65, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  650,     dtype=np.int64),    8,   65, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  4160,    dtype=np.int64),   64,   65, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  4680,    dtype=np.int64),   72,   65, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  127,     dtype=np.int64),    0,  127, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  1026,    dtype=np.int64),    8,  127, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  16002,   dtype=np.int64),  120,  127, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  16256,   dtype=np.int64),  128,  127, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int64),    0,  128, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  1536,    dtype=np.int64),    8,  128, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  16384,   dtype=np.int64),  128,  128, 8]'
-      #- '[np.linspace(0,  0x7fffffff,  17408,   dtype=np.int64),  136,  128, 8]'
+    test_misalign_with_mask:
+      matrix:
+        isExcept: 1
+        eew: [16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_ls_vl(lmul, sew, eew, VLEN)
+        offset: np.random.randint(1, int(eew/8))
+        mask: random_mask(vl)*2+1
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8
+    
+    test_misalign_stride_with_mask:
+      matrix:
+        isExcept: 1
+        eew: [16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : list(np.linspace(2, 10, 5, dtype=np.int32))
+        mask: random_mask(vl)*4+3
+        vs3: np.linspace(0, 2**eew, vl, dtype=get_uintdtype(eew))
+        rs2: eew//8+np.random.randint(1, int(eew//8))
+    
+    test_regression_with_mask:
+      matrix:
+        matrix:
+        eew: [8, 16, 32, 64]
+        sew: list(2**np.random.uniform(3, 7, 2).astype(int))
+        VLEN: 1024
+        lmul: get_lmul((sew, eew))
+        vl : get_random_vl(lmul, sew, eew, VLEN)
+        start: get_random_start(vl)
+        mask: random_mask(vl)
+        vs3: np.random.uniform(0, 2**eew, vl).astype(get_uintdtype(eew))
+        rs2: get_random_stride(eew//8)
 
-    test_vssx_v_with_mask @ vs3, rs2, vl, lmul, mask @ ebits=64, ldins='vle64.v':
-      - '[np.linspace(     0,          0, 128,  dtype=np.int64),    0,   15, 1, np.array([0x5a, 0x55, 0xaa, 0x5a], dtype=np.uint8)]'
-      - '[np.linspace(-32768,      32767, 256,  dtype=np.int64),    8,   16, 1, np.linspace(1, 255, 2, dtype=np.uint8)]'
-      - '[np.linspace(     0, 0xffffffff, 256,  dtype=np.int64),   16,   16, 1, np.linspace(1, 255, 2, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  15,      dtype=np.int64),    0,   15, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  120,     dtype=np.int64),    8,   15, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  240,     dtype=np.int64),   16,   15, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  16,      dtype=np.int64),    0,   16, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int64),    8,   16, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      - '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int64),   16,   16, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  512,     dtype=np.int64),   32,   16, 1, np.linspace(1, 255,  2, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  17,      dtype=np.int64),    0,   17, 2, np.linspace(1, 255,  3, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  136,     dtype=np.int64),    8,   17, 2, np.linspace(1, 255,  3, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  272,     dtype=np.int64),   16,   17, 2, np.linspace(1, 255,  3, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  408,     dtype=np.int64),   24,   17, 2, np.linspace(1, 255,  3, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  31,      dtype=np.int64),    0,   31, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  248,     dtype=np.int64),    8,   31, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  868,     dtype=np.int64),   24,   31, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  992,     dtype=np.int64),   32,   31, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  32,      dtype=np.int64),    0,   32, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  256,     dtype=np.int64),    8,   32, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  1024,    dtype=np.int64),   32,   32, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  1280,    dtype=np.int64),   40,   32, 2, np.linspace(1, 255,  4, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  33,      dtype=np.int64),    0,   33, 4, np.linspace(1, 255,  5, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  264,     dtype=np.int64),    8,   33, 4, np.linspace(1, 255,  5, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  1056,    dtype=np.int64),   32,   33, 4, np.linspace(1, 255,  5, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  1320,    dtype=np.int64),   40,   33, 4, np.linspace(1, 255,  5, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  63,      dtype=np.int64),    0,   63, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  630,     dtype=np.int64),    8,   63, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  3906,    dtype=np.int64),   56,   63, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  4032,    dtype=np.int64),   64,   63, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  64,      dtype=np.int64),    0,   64, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  640,     dtype=np.int64),    8,   64, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  4096,    dtype=np.int64),   64,   64, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  4608,    dtype=np.int64),   72,   64, 4, np.linspace(1, 255,  8, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  65,      dtype=np.int64),    0,   65, 8, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  650,     dtype=np.int64),    8,   65, 8, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  4160,    dtype=np.int64),   64,   65, 8, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  4680,    dtype=np.int64),   72,   65, 8, np.linspace(1, 255,  9, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  127,     dtype=np.int64),    0,  127, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  1026,    dtype=np.int64),    8,  127, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  16002,   dtype=np.int64),  120,  127, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  16256,   dtype=np.int64),  128,  127, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  128,     dtype=np.int64),    0,  128, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  1536,    dtype=np.int64),    8,  128, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  16384,   dtype=np.int64),  128,  128, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
-      #- '[np.linspace(0,  0x7fffffff,  17408,   dtype=np.int64),  136,  128, 8, np.linspace(1, 255, 16, dtype=np.uint8)]'
+    
+    test_exception_misalign_lmul @ vs3, eew, sew, vl, lmul,isExcept:
+      - '[np.array([1], dtype=np.int16),   16,  16,   1,   4, 1]'
+      - '[np.array([1], dtype=np.int64),   64, 128,   1,   1, 1]' # compiler error
+    
+    test_exception_emul          @ vs3, eew, sew, vl, lmul, isExcept:
+      - '[np.array([1], dtype=np.int64),    64,   8, 1,    2, 1]' #eew/sew*lmul>8
+      - '[np.array([1], dtype=np.int8),      8,  64, 1, "f2", 1]' #eew/sew*lmul<1/8
+
+    test_exception_invalid_addr  @ vs3, addr, eew, sew, vl, lmul, isExcept:
+      - '[np.array([1], dtype=np.int16), 0xc0300000,  16,  16,    1,  1, 1]'
 

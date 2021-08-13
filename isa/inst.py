@@ -18,6 +18,13 @@ class Inst(dict):
 
     def as_mask(self, value):
         return np.packbits(np.unpackbits(value, bitorder='little')[0: self['vl']], bitorder='little')
+        
+    
+    def bits_copy(self, src, dst, start):
+        src_bits = np.unpackbits(src, bitorder='little')
+        dst_bits = np.unpackbits(dst, bitorder='little')
+        dst_bits[start: self['vl']] = src_bits[start: self['vl']]
+        return np.packbits(dst_bits, bitorder='little')
 
 
     def where(self):

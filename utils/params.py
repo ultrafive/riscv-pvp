@@ -1135,6 +1135,8 @@ def special_vv_fp64():
     return [ fpt_data[0], fpt_data[1] ] 
 
 factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+ld_ins = { 8: 'lbu', 16: 'lhu', 32: 'lwu', 64: 'ld'}
+st_ins = { 8: 'sbu', 16: 'shu', 32: 'swu', 64: 'sd'}
 
 def get_vl(lmul, ebits, vlen):
     max = int( vlen * factor_lmul[lmul] / ebits )
@@ -1154,30 +1156,152 @@ def get_vlmax(lmul, ebits, vlen):
     max = int( vlen * factor_lmul[lmul] / ebits )
     return max
 
-def vlsenn_get_stride(vl, align):
-    vl = int(vl)
-    align = int(align)
+def get_vstart(vlen):
+    return list(np.unique(np.linspace(0, vlen-1, vlen//10).astype(int)))    
 
-    if vl/align < 1:
-        return [ 0, align ]
-    if vl/align < 2:
-        return [ 0, align, 2*align]
-    if vl/align < 3:
-        return [ 0, align, 2*align, 3*align]
+def get_ls_vl(lmul, sew, eew, vlen):
+    emul = sew/eew * factor_lmul[lmul]
+    emul = int( emul if emul >= 1 else 1)
+    sum = int( vlen * factor_lmul[lmul] / sew )
+    esum = int ( vlen * emul / eew)
+    mid = np.random.randint(2,sum-1)
+    if sum <= esum :
+        return [1, mid, sum-1, sum]
+    else:
+        esum = int( vlen * factor_lmul[lmul] / eew )
+        vl_list = [1]
+        for i in range(1, emul+1):
+            isum = int (vlen * i / eew)
+            vl_list.append(isum - 1)
+            vl_list.append(isum)
+        return vl_list
 
-    vl_factor = int(np.floor(vl/align))
-    mid = int(np.random.randint(2, vl_factor))
-    return [ 0, align, mid*align, vl_factor*align, (vl_factor+1)*align] 
+def get_seg_vl(lmul, sew, eew, vlen):
+    emul = sew/eew * factor_lmul[lmul]
+    sum = int( vlen * factor_lmul[lmul] / sew )
+    esum = int ( vlen * emul / eew)
+    mid = np.random.randint(2,sum-1)
+    if sum <= esum :
+        return [1, mid, sum-1, sum]
+    else:
+        esum = int( vlen * factor_lmul[lmul] / eew )
+        vl_list = [1]
+        if emul < 1 :
+            return [1, esum-1, esum]
+        else:
+            for i in range(1, int(emul+1)):
+                isum = int (vlen * i / eew)
+                vl_list.append(isum - 1)
+                vl_list.append(isum)
+        return vl_list
 
-def get_lmul(sew):
+def get_random_vl(lmul, sew, eew, vlen):
+    emul = sew/eew * factor_lmul[lmul]
+    emul = int( emul if emul >= 1 else 1)
+    sum = int( vlen * factor_lmul[lmul] / sew )
+    esum = int ( vlen * emul / eew)
+    mid = np.random.randint(2,sum-1)
+    minSum = min(sum, esum)
+    return list(np.unique(np.random.uniform(1, minSum, 10)).astype(int))
+
+def get_random_start(vlen) :
+    return list(np.unique(np.random.uniform(0, vlen-1, 5).astype(int)))
+    
+def get_random_stride(eew):
+    return list(np.random.uniform(0, 0xff, 5).astype(int)*eew)
+
+
+
+def vlsenn_get_stride(vlen, eew, nf=1):
+    stride_list = [0, eew*nf, vlen*nf*eew]
+    if nf > 1:
+        stride_list.append(np.random.randint(0, nf)*eew)
+        stride_list.append(np.random.randint(nf+1, 16)*eew)
+    return stride_list
+
+
+def get_lmul(sew_t):
+    if type(sew_t) == int:
+        sew = sew_t
+        eew = sew
+    elif type(sew_t) == tuple or type(sew_t) == list:
+        sew = sew_t[0]
+        eew = sew_t[1]
     if 8 == sew:
-        return [1,2,4,8,'f2','f4','f8']
+        tmp = [1,2,4,8,'f2','f4','f8']
     if 16 == sew:
-        return [1,2,4,8,'f2','f4']
+        tmp = [1,2,4,8,'f2','f4']
     if 32 == sew:
-        return [1,2,4,8,'f2']
+        tmp = [1,2,4,8,'f2']
     if 64 == sew:
-        return [1,2,4,8]
+        tmp = [1,2,4,8]
+    
+    lmul_list = []
+    for i in tmp:
+        if (eew/sew*factor_lmul[i]) <= 8 and (eew/factor_lmul[i]) <= 64:
+            lmul_list.append(i)
+    
+    return lmul_list
+
+def get_seg_lmul(eew, sew, nf):
+    if 8 == sew:
+        tmp = [1,2,4,8,'f2','f4','f8']
+    if 16 == sew:
+        tmp = [1,2,4,8,'f2','f4']
+    if 32 == sew:
+        tmp = [1,2,4,8,'f2']
+    if 64 == sew:
+        tmp = [1,2,4,8]
+
+    lmul_list = []
+    for i in tmp:
+        if (eew/sew*factor_lmul[i]) <= 8 and (eew/factor_lmul[i]) <= 64 and (nf*eew/sew*factor_lmul[i]) <= 8:
+            lmul_list.append(i)
+
+    return lmul_list
+
+def get_segi_lmul(eew, sew, nf):
+    if 8 == sew:
+        tmp = [1,2,4,8,'f2','f4','f8']
+    if 16 == sew:
+        tmp = [1,2,4,8,'f2','f4']
+    if 32 == sew:
+        tmp = [1,2,4,8,'f2']
+    if 64 == sew:
+        tmp = [1,2,4,8]
+
+    lmul_list = []
+    for i in tmp:
+        if (eew/sew*factor_lmul[i]) <= 8 and (eew/factor_lmul[i]) <= 64 and (nf*factor_lmul[i]) <= 8:
+            lmul_list.append(i)
+
+    return lmul_list
+
+def get_sew_neq_eew(eew):
+    if 8 == eew:
+        return [16, 32, 64]
+    elif 16 == eew:
+        return [8, 32, 64]
+    elif 32 == eew:
+        return [8, 16, 64]
+    elif 64 == eew:
+        return [8, 16, 32]
+    
+def get_quent_index(eew, sew, vlen):
+    index=[]
+    index.append(np.zeros(vlen, dtype=get_uintdtype(eew)))
+    index.append(np.linspace(0, vlen-1, vlen, dtype=get_uintdtype(eew))*(sew//8))
+    return index
+
+def get_index(eew, sew, vlen):
+    return np.linspace(0, 2**20, vlen, dtype=get_uintdtype(eew))*(sew//8)
+
+def get_misalign_index(eew, sew, vlen):
+    return np.linspace(0, 0xff, vlen, dtype=get_uintdtype(eew))*(sew//8)*4+3
+
+def get_max_num(mask, eew):
+    mask.dtype = get_uintdtype(eew)
+    return np.max(mask)
 
 def get_lmul_seg(sew):
     if 8 == sew:
@@ -1256,3 +1380,6 @@ def random_float(sew, vl):
         raise ValueError(f'{sew} is not a good option for sew.')
 
     return num
+def get_uintdtype(sew):
+    int_dtype_dict = { 8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64 }
+    return int_dtype_dict[sew]

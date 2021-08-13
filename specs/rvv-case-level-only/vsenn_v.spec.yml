@@ -1,27 +1,148 @@
 _: &default
   env: RVTEST_RV64UV
   head: |
+    #undef EXTRA_INIT
+    #define EXTRA_INIT                               \
+      /* Set up a PMP to permit all accesses */      \
+      li t0, 0xc0200000;                       \
+      srli t0, t0, 2;                                \
+      csrw pmpaddr0, t0;                             \
+      li t0, PMP_TOR | PMP_R | PMP_W | PMP_X;        \
+      csrw pmpcfg0, t0;                        
     #include "exception.h"
     #include "test_macros_v.h"
 
   templates: 
-    test_vsx_v_without_mask: |
+    test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
         li a0, {vl};
         la a1, {rs1_data};
         la a3, test_{num}_data;
         vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        {ldins} v8, (a1);
+        vle{ebits}.v v8, (a1);
         {name} v8, (a3);
-
         .pushsection .data, 1;
         .balign ({ebits} / 8)
       test_{num}_data:
         .fill {vl}, ({ebits} / 8), 0;
         .popsection
 
-    test_vsx_v_with_mask: |
+    test_eew_gt_sew_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a3, test_{num}_data;
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vle{eew}.v v8, (a1);
+        {name} v8, (a3);
+        .pushsection .data, 1;
+        .balign ({eew} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({eew} / 8), 0;
+        .popsection
+      
+    test_eew_lt_sew_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a3, test_{num}_data;
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vle{eew}.v v8, (a1);
+        {name} v8, (a3);
+        .pushsection .data, 1;
+        .balign ({eew} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({eew} / 8), 0;
+        .popsection
+      
+    test_vstart_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a3, test_{num}_data;
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        vle{ebits}.v v8, (a1);
+        li a2, {start};
+        csrw vstart, a2;
+        {name} v8, (a3);
+        .pushsection .data, 1;
+        .balign ({ebits} / 8)
+      test_{num}_data:
+        .fill {vl}, ({ebits} / 8), 0;
+        .popsection
+
+    test_tu_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {origin_data};
+        la a3, test_{num}_data;
+
+        li a4, VLEN*8/{ebits};
+        vsetvli t0, a4, e{ebits},m8,tu,mu;
+        vle{ebits}.v v8, (a2);
+        {name} v8, (a3);
+
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        {name} v8, (a3);
+
+        .pushsection .data, 1;
+        .balign ({ebits} / 8)
+      test_{num}_data:
+        .fill (VLEN*8/{ebits}), ({ebits} / 8), 0;
+        .popsection
+
+    test_misalign_without_mask: |
+      test_{num}:
+        li t0, 6;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a3, test_{num}_data;
+        addi a3, a3, {offset}
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        vle{ebits}.v v8, (a1);
+        {name} v8, (a3);
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({ebits} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({ebits} / 8), 0;
+        .popsection
+
+    test_regression_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a3, test_{num}_data;
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vle{eew}.v v8, (a1);
+        li a2, {start};
+        csrw vstart, a2;
+        {name} v8, (a3);
+        .pushsection .data, 1;
+        .balign ({eew} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({eew} / 8), 0;
+        .popsection
+
+    test_basic_with_mask: |
       test_{num}:
         li TESTNUM, {num};
         li a0, {vl};
@@ -29,21 +150,12 @@ _: &default
         la a4, {mask_data};
         la a3, test_{num}_data;
 
-        li t0, {vl};
-        li t1, 8;
-        remu t2, t0, t1;
-        bnez t2, 1f;
-        li t3,  {vl} / 8;
-        j 2f;
-      1:
-        li t3,  {vl} / 8 + 1;
-      2:
+        li t3, ({vl}+7)/8;
         vsetvli t0, t3 , e8,m1,tu,mu;
         vle8.v v0, (a4);
 
         vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        {ldins} v8, (a1);
-
+        vle{ebits}.v v8, (a1);
         {name} v8, (a3), v0.t;
         .pushsection .data, 1;
         .balign ({ebits} / 8)
@@ -51,47 +163,231 @@ _: &default
         .fill {vl}, ({ebits} / 8), 0;
         .popsection
 
-  check:
-    test_vsx_v_without_mask: np.array_equal(result, golden)
-    test_vsx_v_with_mask: np.array_equal(result, golden)
-
-vse1_v:
-  <<: *default
-  templates:
-    test_vsx_v_without_mask : |
+    test_eew_gt_sew_with_mask: |
       test_{num}:
         li TESTNUM, {num};
         li a0, {vl};
         la a1, {rs1_data};
+        la a4, {mask_data};
         la a3, test_{num}_data;
-        vsetvli t0, a0, e8,m8,tu,mu;
-        vle1.v v1, (a1);
-        {name} v1, (a3);
+
+        li t3, ({vl}+7)/8;
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vle{eew}.v v8, (a1);
+        {name} v8, (a3), v0.t;
         .pushsection .data, 1;
-        .balign 1
+        .balign ({eew} / 8)
       test_{num}_data:
-        .fill {res_len}, 1, 0;
+        .fill ({vl}), ({eew} / 8), 0;
         .popsection
-  cases:
-    test_vsx_v_without_mask @ rs1, vl, res_len:
-      - '[ random_e1(1), 1, res_len_e1(1) ]'
-      - '[ random_e1(63), 63, res_len_e1(63) ]'      
-      - '[ random_e1(64), 64, res_len_e1(64) ]'
-      - '[ random_e1(127), 127, res_len_e1(127) ]'      
-      - '[ random_e1(128), 128, res_len_e1(128) ]'
-      - '[ random_e1(255), 255, res_len_e1(255) ]'      
-      - '[ random_e1(256), 256, res_len_e1(256) ]' 
-      - '[ random_e1(510), 510, res_len_e1(510) ]'      
-      - '[ random_e1(512), 512, res_len_e1(512) ]'       
-      - '[ random_e1(1023), 1023, res_len_e1(1023) ]'            
-      - '[ random_e1(1024), 1024, res_len_e1(1024) ]'   
+      
+    test_eew_lt_sew_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a4, {mask_data};
+        la a3, test_{num}_data;
+
+        li t3, ({vl}+7)/8;
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vle{eew}.v v8, (a1);
+        {name} v8, (a3), v0.t;
+        .pushsection .data, 1;
+        .balign ({eew} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({eew} / 8), 0;
+        .popsection
+      
+    test_vstart_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a4, {mask_data};
+        la a3, test_{num}_data;
+
+        li t3, ({vl}+7)/8;
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        vle{ebits}.v v8, (a1);
+        li a2, {start};
+        csrw vstart, a2;
+        {name} v8, (a3), v0.t;
+        .pushsection .data, 1;
+        .balign ({ebits} / 8)
+      test_{num}_data:
+        .fill {vl}, ({ebits} / 8), 0;
+        .popsection
+
+    test_tu_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {origin_data};
+        la a4, {mask_data};
+        la a3, test_{num}_data;
+
+        li t3, ({vl}+7)/8;
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+
+        li a4, VLEN*8/{ebits};
+        vsetvli t0, a4, e{ebits},m8,tu,mu;
+        vle{ebits}.v v8, (a2);
+        {name} v8, (a3);
+
+        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        {name} v8, (a3), v0.t;
+
+        .pushsection .data, 1;
+        .balign ({ebits} / 8)
+      test_{num}_data:
+        .fill (VLEN*8/{ebits}), ({ebits} / 8), 0;
+        .popsection
+
+    test_misalign_with_mask: |
+      test_{num}:
+        li t0, 4;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a4, {mask_data};
+        la a3, test_{num}_data;
+
+        li t3, ({vl}+7)/8;
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        addi a3, a3, {offset}
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        vle{ebits}.v v8, (a3);
+        {name} v8, (a3), v0.t;
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({ebits} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({ebits} / 8), 0;
+        .popsection
+
+    test_regression_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a4, {mask_data};
+        la a3, test_{num}_data;
+
+        li t3, ({vl}+7)/8;
+        vsetvli t0, t3 , e8,m1,tu,mu;
+        vle8.v v0, (a4);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vle{eew}.v v8, (a1);
+        li a2, {start};
+        csrw vstart, a2;
+        {name} v8, (a3), v0.t;
+        .pushsection .data, 1;
+        .balign ({eew} / 8)
+      test_{num}_data:
+        .fill ({vl}), ({eew} / 8), 0;
+        .popsection
+
+    test_exception_misalign_lmul: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {rs1_data}
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        {name} v3, (a1);
+        j fail;
+      test_{num}_end:
+
+    test_exception_emul: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {rs1_data}
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        {name} v8, (a1);
+        j fail;
+      test_{num}_end:
+
+    test_exception_invalid_addr: |
+      test_{num}:
+        li t0, 7;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        li a1, {addr};
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        {name} v8, (a1);
+        j fail;
+      test_{num}_end:
+
+  check:
+    test_basic_without_mask: np.array_equal(result, golden)
+    test_eew_gt_sew_without_mask: np.array_equal(result, golden)
+    test_eew_lt_sew_without_mask: np.array_equal(result, golden)
+    test_vstart_without_mask: np.array_equal(result, golden)
+    test_tu_without_mask: np.array_equal(result, golden)
+    test_misalign_without_mask: np.array_equal(result, golden)
+    test_regression_without_mask: np.array_equal(result, golden)
+    test_basic_with_mask: np.array_equal(result, golden)
+    test_eew_gt_sew_with_mask: np.array_equal(result, golden)
+    test_eew_lt_sew_with_mask: np.array_equal(result, golden)
+    test_vstart_with_mask: np.array_equal(result, golden)
+    test_tu_with_mask: np.array_equal(result, golden)
+    test_misalign_with_mask: np.array_equal(result, golden)
+    test_regression_with_mask: np.array_equal(result, golden)
+
+  
 
 vse8_v:
 
   <<: *default
 
   cases:
-    test_vsx_v_without_mask @ rs1, vl, lmul @ ebits=8, ldins='vle8.v':
+    test_basic_without_mask @ rs1, vl, lmul @ ebits=8, ldins='vle8.v':
       - '[np.array([1],               dtype=np.int8), 1,      1 ]'
       - '[np.array([1, 1, -1, 64],    dtype=np.int8), 4,      1 ]'
       - '[np.linspace(0, 0xff, 15,    dtype=np.int8), 15,     1 ]'
@@ -102,7 +398,7 @@ vse8_v:
       - '[np.linspace(0, 0xff, 33,    dtype=np.int8), 33,     1 ]'
       - '[np.linspace(0, 0xff, 63,    dtype=np.int8), 63,     1 ]'
       - '[np.linspace(0, 0xff, 64,    dtype=np.int8), 64,     1 ]'
-      - '[np.linspace(0, 0xff, 64,    dtype=np.int8), 65,     1 ]'
+      - '[np.linspace(0, 0xff, 65,    dtype=np.int8), 65,     1 ]'
       - '[np.linspace(0, 0xff, 127,   dtype=np.int8), 127,    1 ]'
       - '[np.linspace(0, 0xff, 128,   dtype=np.int8), 128,    1 ]'
       - '[np.linspace(0, 0xff, 33,    dtype=np.int8), 33,     2 ]'
@@ -114,7 +410,7 @@ vse8_v:
       - '[np.linspace(0, 0xff, 257,   dtype=np.int8), 257,    4 ]'
       - '[np.linspace(0, 0xff, 511,   dtype=np.int8), 511,    4 ]'
       - '[np.linspace(0, 0xff, 512,   dtype=np.int8), 512,    4 ]'
-      - '[np.linspace(0, 0xff, 512,   dtype=np.int8), 513,    8 ]'
+      - '[np.linspace(0, 0xff, 513,   dtype=np.int8), 513,    8 ]'
       - '[np.linspace(0, 0xff, 1023,  dtype=np.int8), 1023,   8 ]'
       - '[np.linspace(0, 0xff, 1024,  dtype=np.int8), 1024,   8 ]'
 
@@ -142,8 +438,46 @@ vse8_v:
       - '[np.linspace(0, 0xff, 15,    dtype=np.int8), 15,   "f8"]'
       - '[np.linspace(0, 0xff, 16,    dtype=np.int8), 16,   "f8"]'
       
-
-    test_vsx_v_with_mask @ rs1, vl, lmul, mask @ ebits=8, ldins='vle8.v':
+    test_eew_lt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 8
+        for i in range(4, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
+    
+    test_tu_without_mask:
+      matrix:
+        ebits: 8
+        lmul: [1, 2, 4, 8, 'f2', 'f4', 'f8']
+        vl: get_vl(lmul, ebits, vlen)
+        origin: np.random.uniform(0, 0xFF, int(vlen*8/ebits)).astype(np.uint8)
+        rs1: np.linspace(0, 0xFF, vl, dtype=np.uint8)
+    
+    test_regression_without_mask @ rs1, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 8
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.random.uniform(0, vl, int(vl/10)).astype(int)):
+                rs1 = np.random.uniform(0, 0xFF, vl).astype(np.uint8)
+                params_yml.append([rs1, vl, lmul, sew, eew, start])
+    
+    test_vstart_without_mask:
+      matrix:
+        ebits: 8
+        lmul: [1, 2, 4, 8, 'f2', 'f4', 'f8']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        rs1: np.linspace(0, 0xFF, vl, dtype=np.uint8)
+   
+    test_basic_with_mask @ rs1, vl, lmul, mask @ ebits=8, ldins='vle8.v':
       - '[np.array([1],               dtype=np.int8), 1,      1 , np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64],    dtype=np.int8), 4,      1 , np.array([0x5], dtype=np.uint8)]'
       - '[np.linspace(0, 0xff, 15,    dtype=np.int8), 15,     1 , np.linspace(0x50, 0xff, 2,   dtype=np.uint8)]'
@@ -193,12 +527,65 @@ vse8_v:
       - '[np.linspace(0, 0xff, 15,    dtype=np.int8), 15,   "f8", np.linspace(0x50, 0xff, 2, dtype=np.uint8)]'
       - '[np.linspace(0, 0xff, 16,    dtype=np.int8), 16,   "f8", np.linspace(0x50, 0xff, 2, dtype=np.uint8)]'
 
+    test_eew_lt_sew_with_mask @ rs1, mask, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 8
+        for i in range(4, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              mask = random_mask(vl)
+              params_yml.append([rs1, mask, vl, lmul, sew, eew])
+
+    test_vstart_with_mask:
+      matrix:
+        ebits: 8
+        lmul: [1, 2, 4, 8, 'f2', 'f4', 'f8']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 0xFF, vl, dtype=np.uint8)
+    
+    test_tu_with_mask:
+      matrix:
+        ebits: 8
+        lmul: [1, 2, 4, 8, 'f2', 'f4', 'f8']
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)
+        origin: np.random.uniform(0, 0xFF, int(vlen*8/ebits)).astype(np.uint8)
+        rs1: np.linspace(0, 0xFF, vl, dtype=np.uint8)
+
+    test_regression_with_mask @ rs1, mask, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 8
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.unique(np.random.uniform(0, vl, int(vl/10)).astype(int))):
+                rs1 = np.random.uniform(0, 0xFF, vl).astype(np.uint8)
+                mask = random_mask(vl)
+                params_yml.append([rs1, mask, vl, lmul, sew, eew, start])
+
+    test_exception_misalign_lmul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int8),    8,  8,    1,    4]'
+      - '[np.array([1], dtype=np.int8),  128,  8,    1,    1]'
+    
+    test_exception_emul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int8),   32,  8,    1, "f4"]'
+
+    test_exception_invalid_addr @ rs1, addr, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int8), 0xc0300000,   8,  8,    1,  1]'
+
 vse16_v:
 
   <<: *default
 
   cases:
-    test_vsx_v_without_mask @ rs1, vl, lmul @ ebits=16, ldins='vle16.v':
+    test_basic_without_mask @ rs1, vl, lmul @ ebits=16, ldins='vle16.v':
       - '[np.array([1],                 dtype=np.int16), 1,      1 ]'
       - '[np.array([1, 1, -1, 64],      dtype=np.int16), 4,      1 ]'
       - '[np.linspace(0, 0xffff, 15,    dtype=np.int16), 15,     1 ]'
@@ -236,7 +623,67 @@ vse16_v:
       - '[np.linspace(0, 0xffff, 15,    dtype=np.int16), 15,   "f4"]'
       - '[np.linspace(0, 0xffff, 16,    dtype=np.int16), 16,   "f4"]'
 
-    test_vsx_v_with_mask @ rs1, vl, lmul, mask @ ebits=16, ldins='vle16.v' :
+    test_eew_gt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 16
+        for i in range(3, 4):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
+    
+    test_eew_lt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 16
+        for i in range(5, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
+
+    test_vstart_without_mask:
+      matrix:
+        ebits: 16
+        lmul: [1, 2, 4, 8, 'f2', 'f4']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        rs1: np.linspace(0, 0xFFFF, vl, dtype=np.uint16)
+    
+    test_tu_without_mask:
+      matrix:
+        ebits: 16
+        lmul: [1, 2, 4, 8, 'f2', 'f4']
+        vl: get_vl(lmul, ebits, vlen)
+        origin: np.random.uniform(0, 0xFFFF, int(vlen*8/ebits)).astype(np.uint16)
+        rs1: np.linspace(0, 0xFFFF, vl, dtype=np.uint16)
+
+    test_misalign_without_mask:
+      matrix:
+        isExcept: 1
+        ebits: 16
+        lmul: [1, 2, 4, 8, 'f2', 'f4']
+        vl: get_vl(lmul, ebits, vlen)
+        offset: np.random.randint(1, int(ebits/8))
+        rs1: np.linspace(0, 0xFFFF, vl, dtype=np.uint16)
+    
+    test_regression_without_mask @ rs1, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 16
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.random.uniform(0, vl, int(vl/10)).astype(int)):
+                rs1 = np.random.uniform(0, 0xFFFF, vl).astype(np.uint16)
+                params_yml.append([rs1, vl, lmul, sew, eew, start])
+
+
+    test_basic_with_mask @ rs1, vl, lmul, mask @ ebits=16, ldins='vle16.v' :
       - '[np.array([1],                 dtype=np.int16), 1,      1 , np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64],      dtype=np.int16), 4,      1 , np.array([0x5], dtype=np.uint8)]'
       - '[np.linspace(0, 0xffff, 15,    dtype=np.int16), 15,     1 , np.linspace(0x50, 0xff, 2,   dtype=np.uint8)]'
@@ -273,12 +720,89 @@ vse16_v:
       - '[np.linspace(0, 0xffff, 15,    dtype=np.int16), 15,   "f4", np.linspace(0x50, 0xff, 8, dtype=np.uint8)]'
       - '[np.linspace(0, 0xffff, 16,    dtype=np.int16), 16,   "f4", np.linspace(0x50, 0xff, 8, dtype=np.uint8)]'
 
+    test_eew_gt_sew_with_mask @ rs1, mask, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 16
+        for i in range(3, 4):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              mask = random_mask(vl)
+              params_yml.append([rs1, mask, vl, lmul, sew, eew])
+    
+    test_eew_lt_sew_with_mask @ rs1, mask, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 16
+        for i in range(5, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              mask = random_mask(vl)
+              params_yml.append([rs1, mask, vl, lmul, sew, eew])
+
+    test_vstart_with_mask:
+      matrix:
+        ebits: 16
+        lmul: [1, 2, 4, 8, 'f2', 'f4']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 0xFFFF, vl, dtype=np.uint16)
+    
+    test_tu_with_mask:
+      matrix:
+        ebits: 16
+        lmul: [1, 2, 4, 8, 'f2', 'f4']
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)
+        origin: np.random.uniform(0, 0xFFFF, int(vlen*8/ebits)).astype(np.uint16)
+        rs1: np.linspace(0, 0xFFFF, vl, dtype=np.uint16)
+
+    test_misalign_with_mask:
+      matrix:
+        isExcept: 1
+        ebits: 16
+        lmul: [1, 2, 4, 8, 'f2', 'f4']
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)*2+1
+        offset: np.random.randint(1, int(ebits/8))
+        rs1: np.linspace(0, 0xFFFF, vl, dtype=np.uint16)
+
+    test_regression_with_mask @ rs1, mask, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 16
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.unique(np.random.uniform(0, vl, int(vl/10)).astype(int))):
+                rs1 = np.random.uniform(0, 0xFFFF, vl).astype(np.uint16)
+                mask = random_mask(vl)
+                params_yml.append([rs1, mask, vl, lmul, sew, eew, start])
+
+    test_exception_misalign_lmul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int16),    8,  16,    1,    4]'
+      - '[np.array([1], dtype=np.int16),  128,  16,    1,    1]'
+    
+    test_exception_emul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int16),    8,  16,    1,    8]'
+      - '[np.array([1], dtype=np.int16),   32,  16,    1, "f8"]'
+
+    test_exception_invalid_addr @ rs1, addr, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int16), 0xc0300000,   8,  16,    1,  1]'
+
+
 vse32_v:
 
   <<: *default
 
   cases:
-    test_vsx_v_without_mask @ rs1, vl, lmul @ ebits=32, ldins='vle32.v':
+    test_basic_without_mask @ rs1, vl, lmul @ ebits=32, ldins='vle32.v':
       - '[np.array([1], dtype=np.int32),                     1,      1 ]'
       - '[np.array([1, 1, -1, 64], dtype=np.int32),          4,      1 ]'
       - '[np.linspace(0, 0xffffffff, 15,    dtype=np.int32), 15,     1 ]'
@@ -302,8 +826,66 @@ vse32_v:
       - '[np.linspace(0, 0xffffffff, 15,    dtype=np.int32), 15,   "f2"]'
       - '[np.linspace(0, 0xffffffff, 16,    dtype=np.int32), 16,   "f2"]'
 
+    test_eew_gt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 32
+        for i in range(3, 5):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
+    
+    test_eew_lt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 32
+        for i in range(6, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
 
-    test_vsx_v_with_mask @ rs1, vl, lmul, mask @ ebits=32, ldins='vle32.v' :
+    test_vstart_without_mask:
+      matrix:
+        ebits: 32
+        lmul: [1, 2, 4, 8, 'f2']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        rs1: np.linspace(0, 0xFFFFFFFF, vl, dtype=np.uint32)
+
+    test_tu_without_mask:
+      matrix:
+        ebits: 32
+        lmul: [1, 2, 4, 8, 'f2']
+        vl: get_vl(lmul, ebits, vlen)
+        origin: np.random.uniform(0, 0xFFFFFFFF, int(vlen*8/ebits)).astype(np.uint32)
+        rs1: np.linspace(0, 0xFFFFFFFF, vl, dtype=np.uint32)
+
+    test_misalign_without_mask:
+      matrix:
+        isExcept: 1
+        ebits: 32
+        lmul: [1, 2, 4, 8, 'f2']
+        vl: get_vl(lmul, ebits, vlen)
+        offset: np.random.randint(1, int(ebits/8))
+        rs1: np.linspace(0, 0xFFFFFFFF, vl, dtype=np.uint32)
+    
+    test_regression_without_mask @ rs1, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 32
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.random.uniform(0, vl, int(vl/10)).astype(int)):
+                rs1 = np.random.uniform(0, 0xFFFFFFFF, vl).astype(np.uint32)
+                params_yml.append([rs1, vl, lmul, sew, eew, start])
+
+    test_basic_with_mask @ rs1, vl, lmul, mask @ ebits=32, ldins='vle32.v' :
       - '[np.array([1],                     dtype=np.int32), 1,      1 , np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64],          dtype=np.int32), 4,      1 , np.array([0x5], dtype=np.uint8)]'
       - '[np.linspace(0, 0xffffffff, 15,    dtype=np.int32), 15,     1 , np.linspace(0x50, 0xff, 2,  dtype=np.uint8)]'
@@ -327,12 +909,88 @@ vse32_v:
       - '[np.linspace(0, 0xffffffff, 15,    dtype=np.int32), 15,   "f2", np.linspace(0x50, 0xff, 2, dtype=np.uint8)]'
       - '[np.linspace(0, 0xffffffff, 16,    dtype=np.int32), 16,   "f2", np.linspace(0x50, 0xff, 2, dtype=np.uint8)]'
 
+    test_eew_gt_sew_with_mask @ rs1, mask, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 32
+        for i in range(3, 5):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              mask = random_mask(vl)
+              params_yml.append([rs1, mask, vl, lmul, sew, eew])
+    
+    test_eew_lt_sew_with_mask @ rs1, mask, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 32
+        for i in range(6, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              mask = random_mask(vl)
+              params_yml.append([rs1, mask, vl, lmul, sew, eew])
+
+    test_vstart_with_mask:
+      matrix:
+        ebits: 32
+        lmul: [1, 2, 4, 8, 'f2']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 0xFFFFFFFF, vl, dtype=np.uint32)
+    
+    test_tu_with_mask:
+      matrix:
+        ebits: 32
+        lmul: [1, 2, 4, 8, 'f2']
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)
+        origin: np.random.uniform(0, 0xFFFFFFFF, int(vlen*8/ebits)).astype(np.uint32)
+        rs1: np.linspace(0, 0xFFFFFFFF, vl, dtype=np.uint32)
+
+    test_misalign_with_mask:
+      matrix:
+        isExcept: 1
+        ebits: 32
+        lmul: [1, 2, 4, 8, 'f2']
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)*2+1
+        offset: np.random.randint(1, int(ebits/8))
+        rs1: np.linspace(0, 0xFFFFFFFF, vl, dtype=np.uint32)
+
+    test_regression_with_mask @ rs1, mask, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 32
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.unique(np.random.uniform(0, vl, int(vl/10)).astype(int))):
+                rs1 = np.random.uniform(0, 0xFFFFFFFF, vl).astype(np.uint32)
+                mask = random_mask(vl)
+                params_yml.append([rs1, mask, vl, lmul, sew, eew, start])
+
+    test_exception_misalign_lmul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int32),    8,  32,    1,    4]'
+      - '[np.array([1], dtype=np.int32),  128,  32,    1,    1]'
+    
+    test_exception_emul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int32),    8,  32,    1,    8]'
+      - '[np.array([1], dtype=np.int32),   64,  32,    1, "f8"]'
+
+    test_exception_invalid_addr @ rs1, addr, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int32), 0xc0300000,   8,  16,    1,  1]'
+
 vse64_v:
 
   <<: *default
 
   cases:
-    test_vsx_v_without_mask @ rs1, vl, lmul @ ebits=64, ldins='vle64.v':
+    test_basic_without_mask @ rs1, vl, lmul @ ebits=64, ldins='vle64.v':
       - '[np.array([1], dtype=np.int64), 1, 1]'
       - '[np.array([1, 1, -1, 64], dtype=np.int64), 4, 1]'
       - '[np.linspace(0, 0xffffffffffffffff, 15,    dtype=np.int32), 15,     1 ]'
@@ -347,8 +1005,56 @@ vse64_v:
       - '[np.linspace(0, 0xffffffffffffffff, 65,    dtype=np.int32), 65,     8 ]'
       - '[np.linspace(0, 0xffffffffffffffff, 127,   dtype=np.int32), 127,    8 ]'
       - '[np.linspace(0, 0xffffffffffffffff, 128,   dtype=np.int32), 128,    8 ]'
+    
+    test_eew_gt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 64
+        for i in range(3, 6):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
 
-    test_vsx_v_with_mask @ rs1, vl, lmul, mask @ ebits=64, ldins='vle64.v' :
+    test_vstart_without_mask:
+      matrix:
+        ebits: 64
+        lmul: [1, 2, 4, 8]
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        rs1: np.linspace(0, 0xFFFFFFFFFFFF, vl, dtype=np.uint64)
+
+    test_tu_without_mask:
+      matrix:
+        ebits: 64
+        lmul: [1, 2, 4, 8]
+        vl: get_vl(lmul, ebits, vlen)
+        origin: np.random.uniform(0, 0xFFFFFFFFFFFF, int(vlen*8/ebits)).astype(np.uint64)
+        rs1: np.linspace(0, 0xFFFFFFFFFFFF, vl, dtype=np.uint64)
+
+    test_misalign_without_mask:
+      matrix:
+        isExcept: 1
+        ebits: 64
+        lmul: [1, 2, 4, 8]
+        vl: get_vl(lmul, ebits, vlen)
+        offset: np.random.randint(1, int(ebits/8))
+        rs1: np.linspace(0, 0xFFFFFFFFFFFF, vl, dtype=np.uint64)
+    
+    test_regression_without_mask @ rs1, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 64
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.random.uniform(0, vl, int(vl/10)).astype(int)):
+                rs1 = np.random.uniform(0, 0xFFFFFFFFFFFF, vl).astype(np.uint64)
+                params_yml.append([rs1, vl, lmul, sew, eew, start])
+
+    test_basic_with_mask @ rs1, vl, lmul, mask @ ebits=64, ldins='vle64.v' :
       - '[np.array([1],                             dtype=np.int64), 1,      1, np.array([0xa], dtype=np.uint8)]'
       - '[np.array([1, 1, -1, 64],                  dtype=np.int64), 4,      1, np.array([0x5], dtype=np.uint8)]'
       - '[np.linspace(0, 0xffffffffffffffff, 15,    dtype=np.int64), 15,     1, np.array([0x5a, 0x55], dtype=np.uint8)]'
@@ -364,12 +1070,76 @@ vse64_v:
       - '[np.linspace(0, 0xffffffffffffffff, 127,   dtype=np.int64), 127,    8, np.linspace(0x50, 0xff, 16, dtype=np.uint8)]'
       - '[np.linspace(0, 0xffffffffffffffff, 128,   dtype=np.int64), 128,    8, np.linspace(0x50, 0xff, 16, dtype=np.uint8)]'
 
+    test_eew_gt_sew_with_mask @ rs1, mask, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 64
+        for i in range(3, 6):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, vl, dtype=get_intdtype(eew))
+              mask = random_mask(vl)
+              params_yml.append([rs1, mask, vl, lmul, sew, eew])
+  
+
+    test_vstart_with_mask:
+      matrix:
+        ebits: 64
+        lmul: [1, 2, 4, 8]
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(vl)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 0xFFFFFFFFFFFF, vl, dtype=np.uint64)
+    
+    test_tu_with_mask:
+      matrix:
+        ebits: 64
+        lmul: [1, 2, 4, 8]
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)
+        origin: np.random.uniform(0, 0xFFFFFFFFFFFF, int(vlen*8/ebits)).astype(np.uint64)
+        rs1: np.linspace(0, 0xFFFFFFFFFFFF, vl, dtype=np.uint64)
+
+    test_misalign_with_mask:
+      matrix:
+        isExcept: 1
+        ebits: 64
+        lmul: [1, 2, 4, 8]
+        vl: get_vl(lmul, ebits, vlen)
+        mask: random_mask(vl)*2+1
+        offset: np.random.randint(1, int(ebits/8))
+        rs1: np.linspace(0, 0xFFFFFFFFFFFF, vl, dtype=np.uint64)
+
+    test_regression_with_mask @ rs1, mask, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 64
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.unique(np.random.uniform(0, vl, int(vl/10)).astype(int))):
+                rs1 = np.random.uniform(0, 0xFFFFFFFFFFFF, vl).astype(np.uint64)
+                mask = random_mask(vl)
+                params_yml.append([rs1, mask, vl, lmul, sew, eew, start])
+
+    test_exception_misalign_lmul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int64),    8,  64,    1,    4]'
+      - '[np.array([1], dtype=np.int64),  128,  64,    1,    1]'
+    
+    test_exception_emul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int64),    8,  64,    1,    8]'
+
+    test_exception_invalid_addr @ rs1, addr, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int64), 0xc0300000,   8,  64,    1,  1]'
+
 vse1_v:
 
   <<: *default
 
   cases:
-    test_vsx_v_without_mask @ rs1, vl, lmul @ ebits=8, ldins='vle8.v':
+    test_basic_without_mask @ rs1, vl, lmul @ ebits=8, ldins='vle8.v':
       - '[np.array([1],               dtype=np.uint8), 1,      1 ]'
       - '[np.array([0xC],             dtype=np.uint8), 4,      1 ]'
       - '[np.linspace(0, 0xff, 2,     dtype=np.uint8), 15,     1 ]'
@@ -416,3 +1186,44 @@ vse1_v:
       - '[np.array([0xF],             dtype=np.uint8), 4,    "f8"]'
       - '[np.linspace(0, 0xff, 2,     dtype=np.uint8), 15,   "f8"]'
       - '[np.linspace(0, 0xff, 2,     dtype=np.uint8), 16,   "f8"]'
+
+
+    test_vstart_without_mask:
+      matrix:
+        ebits: 8
+        lmul: [1, 2, 4, 8, 'f2', 'f4', 'f8']
+        vl: get_vl(lmul, ebits, vlen)
+        start: get_vstart(math.ceil(vl/8))
+        rs1: np.linspace(0, 0xFF, math.ceil(vl/8), dtype=np.uint8)
+    
+    test_eew_lt_sew_without_mask @ rs1, vl, lmul, sew, eew:
+      setup: |
+        params_yml=[]
+        eew = 8
+        for i in range(4, 7):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_ls_vl(lmul, sew, eew, vlen):
+              rs1 = np.linspace(-10000, 10000, math.ceil(vl/8), dtype=get_intdtype(eew))
+              params_yml.append([rs1, vl, lmul, sew, eew])
+
+    test_regression_without_mask @ rs1, vl, lmul, sew, eew, start:
+      setup: |
+        params_yml = []
+        eew = 8
+        for i in np.random.uniform(3, 7, 2).astype(int):
+          sew = 2**i
+          for lmul in get_lmul((sew, eew)):
+            for vl in get_random_vl(lmul, sew, eew, vlen):
+              for start in list(np.random.uniform(0, vl, int(math.ceil(vl/8)/10)).astype(int)):
+                rs1 = np.random.uniform(0, 0xFF, math.ceil(vl/8)).astype(np.uint8)
+                params_yml.append([rs1, vl, lmul, sew, eew, start])
+
+    test_exception_misalign_lmul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int8),  128,  8,    1,    1]'
+    
+    test_exception_emul @ rs1, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int8),   32,  8,    1, "f4"]'
+
+    test_exception_invalid_addr @ rs1, addr, sew, eew, vl, lmul:
+      - '[np.array([1], dtype=np.int8), 0xc0300000,   8,  8,    1,  1]'

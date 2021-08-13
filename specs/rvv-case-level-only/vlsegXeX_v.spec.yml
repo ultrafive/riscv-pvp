@@ -1,312 +1,585 @@
 _: &default
   head: |
+    #undef EXTRA_INIT
+    #define EXTRA_INIT                               \
+      /* Set up a PMP to permit all accesses */      \
+      li t0, 0xc0200000;                       \
+      srli t0, t0, 2;                                \
+      csrw pmpaddr0, t0;                             \
+      li t0, PMP_TOR | PMP_R | PMP_W | PMP_X;        \
+      csrw pmpcfg0, t0; 
     #include "exception.h"
   env: RVTEST_RV64UV
   templates:
     test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
-        la x1, {rs1_data};
-        li a0, ({rs1_shape[0]}/{nfields});
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        {inst_name} v8, (x1);
+        li a0, {vl};
+        la a1, {rs1_data};
 
-        // save data for max 8 vregs (nf * lmul <= 8)
-        li a0, VLEN / 8 * 8
-        vsetvli t0, a0, e8,m8,tu,mu;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1);
+
         la a1, test_{num}_data;
-        vse8.v v8, (a1);
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
 
         .pushsection .data, 1;
-        .balign 1
+        .balign ({eew}/8)
       test_{num}_data:
-        .fill VLEN / 8 * 8, 1, 0;
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
         .popsection
+
+    test_eew_neq_sew_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1);
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_vstart_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        vlseg{nf}e{eew}.v v8, (a1);
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_tu_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {origin_data}
+
+        li a3, VLEN*8/{eew};
+        vsetvli t0, a3, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a2);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1);
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_misalign_without_mask: |
+      test_{num}:
+        li t0, 4;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        addi a1, a1, {offset};
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1);
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_regression_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        vlseg{nf}e{eew}.v v8, (a1);
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+
+
     test_basic_with_mask: |
       test_{num}:
         li TESTNUM, {num};
-        la x1, {rs1_data};
-        li a0, ({rs1_shape[0]}/{nfields});
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
-        la a2, {orig_data};
-        {inst_name} v8, (a2);
-        la a1, {mask_data};
-        {ldins} v0, (a1);
-        {inst_name} v8, (x1), v0.t;
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {mask_data};
 
-        // save data for max 8 vregs (nf * lmul <= 8)
-        li a0, VLEN / 8 * 8
-        vsetvli t0, a0, e8,m8,tu,mu;
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1), v0.t;
+
         la a1, test_{num}_data;
-        vse8.v v8, (a1);
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
 
         .pushsection .data, 1;
-        .balign 1
+        .balign ({eew}/8)
       test_{num}_data:
-        .fill VLEN / 8 * 8, 1, 0;
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
         .popsection
+
+    test_eew_neq_sew_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1), v0.t;
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_vstart_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        vlseg{nf}e{eew}.v v8, (a1), v0.t;
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_tu_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {mask_data};
+        la a4, {origin_data}
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vle{eew}.v v8, (a4);
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1), v0.t;
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_misalign_with_mask: |
+      test_{num}:
+        li t0, 4;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        addi a1, a1, {offset}
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        vlseg{nf}e{eew}.v v8, (a1), v0.t;
+        li a4, {isExcept}
+        beqz a4, 11f;
+        j fail;
+      11:
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+      test_{num}_end:
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_regression_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        la a1, {rs1_data};
+        la a2, {mask_data};
+
+        li a3, ({vl}+7)/8;
+        vsetvli t0, a3, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vsub.vv v8, v8, v8;
+
+        vsetvli t0, a0, e{sew},m{lmul},ta,mu;
+        li a2, {start};
+        csrw vstart, a2;
+        vlseg{nf}e{eew}.v v8, (a1), v0.t;
+
+        la a1, test_{num}_data;
+        li a2, VLEN*8/{eew};
+        vsetvli t0, a2, e{eew},m8,ta,mu;
+        vse{eew}.v v8, (a1);
+
+        .pushsection .data, 1;
+        .balign ({eew}/8)
+      test_{num}_data:
+        .fill (VLEN*8/{eew}), ({eew}/8), 0;
+        .popsection
+
+    test_exception_misalign_lmul: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {rs1_data}
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        vlseg{nf}e{eew}.v v3, (a1);
+        j fail;
+      test_{num}_end:
+
+    test_exception_emul: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {rs1_data}
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        vlseg{nf}e{eew}.v v8, (a1);
+        j fail;
+      test_{num}_end:
+
+    test_exception_invalid_addr: |
+      test_{num}:
+        li t0, 5;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        li a1, {addr};
+        vsetvli t0, a0, e{sew},m{lmul},tu,mu;
+        vlseg{nf}e{eew}.v v8, (a1);
+        j fail;
+      test_{num}_end:
+ 
 
   check:
     test_basic_without_mask: np.array_equal(result, golden)
+    test_eew_neq_sew_without_mask: np.array_equal(result, golden)
+    test_vstart_without_mask: np.array_equal(result, golden)
+    test_tu_without_mask: np.array_equal(result, golden)
+    test_misalign_without_mask: np.array_equal(result, golden)
+    test_regression_without_mask: np.array_equal(result, golden)
     test_basic_with_mask: np.array_equal(result, golden)
+    test_eew_neq_sew_with_mask: np.array_equal(result, golden)
+    test_vstart_with_mask: np.array_equal(result, golden)
+    test_tu_with_mask: np.array_equal(result, golden)
+    test_misalign_with_mask: np.array_equal(result, golden)
+    test_regression_with_mask: np.array_equal(result, golden)
 
 vlsegxex_v:
   <<: *default
   cases:
-    test_basic_without_mask @ rs1, vl, lmul, inst_name, nfields, ebits, stins @ VLEN=1024:
-      #sew=8
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int8 ),   1, 1, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int8 ),   1, 1, 'vlseg3e8.v',  3,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int8 ),   1, 1, 'vlseg4e8.v',  4,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int8 ),   1, 1, 'vlseg5e8.v',  5,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int8 ),   1, 1, 'vlseg6e8.v',  6,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int8 ),   1, 1, 'vlseg7e8.v',  7,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int8 ),   1, 1, 'vlseg8e8.v',  8,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int8 ),  10, 1, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int8 ),  10, 1, 'vlseg3e8.v',  3,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int8 ),  10, 1, 'vlseg4e8.v',  4,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int8 ),  10, 1, 'vlseg5e8.v',  5,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int8 ),  10, 1, 'vlseg6e8.v',  6,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int8 ),  10, 1, 'vlseg7e8.v',  7,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int8 ),  10, 1, 'vlseg8e8.v',  8,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*2, dtype=np.int8 ), 128, 1, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*3, dtype=np.int8 ), 128, 1, 'vlseg3e8.v',  3,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*4, dtype=np.int8 ), 128, 1, 'vlseg4e8.v',  4,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*5, dtype=np.int8 ), 128, 1, 'vlseg5e8.v',  5,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*6, dtype=np.int8 ), 128, 1, 'vlseg6e8.v',  6,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*7, dtype=np.int8 ), 128, 1, 'vlseg7e8.v',  7,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 128*8, dtype=np.int8 ), 128, 1, 'vlseg8e8.v',  8,  8, 'vse8.v' ]"
+    test_basic_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      #sew=8, lmul=2
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int8 ),   1, 2, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 129*2, dtype=np.int8 ), 129, 2, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 256*2, dtype=np.int8 ), 256, 2, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
+    test_eew_neq_sew_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: get_sew_neq_eew(eew)
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int8 ),   1, 2, 'vlseg3e8.v',  3,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 129*3, dtype=np.int8 ), 129, 2, 'vlseg3e8.v',  3,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 256*3, dtype=np.int8 ), 256, 2, 'vlseg3e8.v',  3,  8, 'vse8.v' ]"
+    test_vstart_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        start: get_vstart(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int8 ),   1, 2, 'vlseg4e8.v',  4,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 129*4, dtype=np.int8 ), 129, 2, 'vlseg4e8.v',  4,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 256*4, dtype=np.int8 ), 256, 2, 'vlseg4e8.v',  4,  8, 'vse8.v' ]"
+    test_tu_without_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(get_uintdtype(eew))
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      #sew=8, lmul=4
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int8 ),   1, 4, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 129*2, dtype=np.int8 ), 129, 4, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 257*2, dtype=np.int8 ), 257, 4, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
-      - "[ np.linspace( -1000, 1000, 512*2, dtype=np.int8 ), 512, 4, 'vlseg2e8.v',  2,  8, 'vse8.v' ]"
+    test_misalign_without_mask:
+      matrix:
+        isExcept: 1
+        eew: [16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        offset: np.random.randint(1, int(eew/8))
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      #sew=16
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int16),   1, 1, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int16),   1, 1, 'vlseg3e16.v', 3, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int16),   1, 1, 'vlseg4e16.v', 4, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int16),   1, 1, 'vlseg5e16.v', 5, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int16),   1, 1, 'vlseg6e16.v', 6, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int16),   1, 1, 'vlseg7e16.v', 7, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int16),   1, 1, 'vlseg8e16.v', 8, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int16),  10, 1, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int16),  10, 1, 'vlseg3e16.v', 3, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int16),  10, 1, 'vlseg4e16.v', 4, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int16),  10, 1, 'vlseg5e16.v', 5, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int16),  10, 1, 'vlseg6e16.v', 6, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int16),  10, 1, 'vlseg7e16.v', 7, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int16),  10, 1, 'vlseg8e16.v', 8, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*2, dtype=np.int16),  64, 1, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*3, dtype=np.int16),  64, 1, 'vlseg3e16.v', 3, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*4, dtype=np.int16),  64, 1, 'vlseg4e16.v', 4, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*5, dtype=np.int16),  64, 1, 'vlseg5e16.v', 5, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*6, dtype=np.int16),  64, 1, 'vlseg6e16.v', 6, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*7, dtype=np.int16),  64, 1, 'vlseg7e16.v', 7, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*8, dtype=np.int16),  64, 1, 'vlseg8e16.v', 8, 16, 'vse16.v']"
+    test_regression_without_mask:
+      matrix:
+        matrix:
+        eew: [8, 16, 32, 64]
+        sew: list(2**np.random.uniform(3, 7, 2).astype(int))
+        VLEN: 1024
+        nf: list(np.random.uniform(2, 8, 2).astype(int))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_random_vl(lmul, sew, eew, vlen)
+        start: get_random_start(vl)
+        rs1: np.random.uniform(0, 2**eew, vl*nf).astype(get_uintdtype(eew))
 
-      #sew=16, lmul=2
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int16),   1, 2, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  65*2, dtype=np.int16),  65, 2, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000, 128*2, dtype=np.int16), 128, 2, 'vlseg2e16.v', 2, 16, 'vse16.v']"
+    test_basic_with_mask:
+      matrix:
+        eew: 8
+        sew: 8
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int16),   1, 2, 'vlseg3e16.v', 3, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  65*3, dtype=np.int16),  65, 2, 'vlseg3e16.v', 3, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000, 128*3, dtype=np.int16), 128, 2, 'vlseg3e16.v', 3, 16, 'vse16.v']"
+    test_eew_neq_sew_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: get_sew_neq_eew(eew)
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int16),   1, 2, 'vlseg4e16.v', 4, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  65*4, dtype=np.int16),  65, 2, 'vlseg4e16.v', 4, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000, 128*4, dtype=np.int16), 128, 2, 'vlseg4e16.v', 4, 16, 'vse16.v']"
+    test_vstart_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        start: get_vstart(vl)
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      #sew=16, lmul=4
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int16),   1, 4, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  65*2, dtype=np.int16),  65, 4, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000, 129*2, dtype=np.int16), 129, 4, 'vlseg2e16.v', 2, 16, 'vse16.v']"
-      - "[ np.linspace( -1000, 1000, 256*2, dtype=np.int16), 256, 4, 'vlseg2e16.v', 2, 16, 'vse16.v']"
+    test_tu_with_mask:
+      matrix:
+        eew: [8, 16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(get_uintdtype(eew))
+        mask: random_mask(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      #sew=32
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int32),   1, 1, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int32),   1, 1, 'vlseg3e32.v', 3, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int32),   1, 1, 'vlseg4e32.v', 4, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int32),   1, 1, 'vlseg5e32.v', 5, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int32),   1, 1, 'vlseg6e32.v', 6, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int32),   1, 1, 'vlseg7e32.v', 7, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int32),   1, 1, 'vlseg8e32.v', 8, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int32),  10, 1, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int32),  10, 1, 'vlseg3e32.v', 3, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int32),  10, 1, 'vlseg4e32.v', 4, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int32),  10, 1, 'vlseg5e32.v', 5, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int32),  10, 1, 'vlseg6e32.v', 6, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int32),  10, 1, 'vlseg7e32.v', 7, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int32),  10, 1, 'vlseg8e32.v', 8, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*2, dtype=np.int32),  32, 1, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*3, dtype=np.int32),  32, 1, 'vlseg3e32.v', 3, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*4, dtype=np.int32),  32, 1, 'vlseg4e32.v', 4, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*5, dtype=np.int32),  32, 1, 'vlseg5e32.v', 5, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*6, dtype=np.int32),  32, 1, 'vlseg6e32.v', 6, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*7, dtype=np.int32),  32, 1, 'vlseg7e32.v', 7, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*8, dtype=np.int32),  32, 1, 'vlseg8e32.v', 8, 32, 'vse32.v']"
+    test_misalign_with_mask:
+      matrix:
+        isExcept: 1
+        eew: [16, 32, 64]
+        sew: eew
+        VLEN: 1024
+        nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_seg_vl(lmul, sew, eew, vlen)
+        offset: np.random.randint(1, int(eew/8))
+        mask: random_mask(vl)*2+1
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
 
-      #sew=32, lmul=2
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int32),   1, 2, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  33*2, dtype=np.int32),  33, 2, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  64*2, dtype=np.int32),  64, 2, 'vlseg2e32.v', 2, 32, 'vse32.v']"
+    test_regression_with_mask:
+      matrix:
+        matrix:
+        eew: [8, 16, 32, 64]
+        sew: list(2**np.random.uniform(3, 7, 2).astype(int))
+        VLEN: 1024
+        nf: list(np.random.uniform(2, 8, 2).astype(int))
+        lmul: get_seg_lmul(eew, sew, nf)
+        vl : get_random_vl(lmul, sew, eew, vlen)
+        start: get_random_start(vl)
+        mask: random_mask(vl)
+        rs1: np.random.uniform(0, 2**eew, vl*nf).astype(get_uintdtype(eew))
 
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int32),   1, 2, 'vlseg3e32.v', 3, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  33*3, dtype=np.int32),  33, 2, 'vlseg3e32.v', 3, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  64*3, dtype=np.int32),  64, 2, 'vlseg3e32.v', 3, 32, 'vse32.v']"
+    
+    test_exception_misalign_lmul @ rs1, eew, sew, vl, lmul, nf, isExcept:
+      - '[np.array([1], dtype=np.int16),   16,  16,   1,   4, 2, 1]'
+      - '[np.array([1], dtype=np.int64),   64, 128,   1,   1, 2, 1]' 
+    
+    test_exception_emul          @ rs1, eew, sew, vl, lmul, nf, isExcept:
+      - '[np.array([1], dtype=np.int64),    64,   8, 1,    2,  2, 1]' #eew/sew*lmul>8
+      - '[np.array([1], dtype=np.int8),      8,  64, 1, "f2",  2, 1]' #eew/sew*lmul<1/8
+      - '[np.array([1], dtype=np.int32),    32,   8, 1,    1,  3, 1]' #eew/sew*lmul * nf > 8
 
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int32),   1, 2, 'vlseg4e32.v', 4, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  33*4, dtype=np.int32),  33, 2, 'vlseg4e32.v', 4, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  64*4, dtype=np.int32),  64, 2, 'vlseg4e32.v', 4, 32, 'vse32.v']"
+    test_exception_invalid_addr  @ rs1, addr, eew, sew, vl, lmul, nf, isExcept:
+      - '[np.array([1], dtype=np.int16), 0xc0300000,  16,  16,    1,  1, 2, 1]'
 
-      #sew=32, lmul=4
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int32),   1, 4, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  33*2, dtype=np.int32),  33, 4, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  65*2, dtype=np.int32),  65, 4, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-      - "[ np.linspace( -1000, 1000, 128*2, dtype=np.int32), 128, 4, 'vlseg2e32.v', 2, 32, 'vse32.v']"
-
-      #sew=64
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int64),   1, 1, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int64),   1, 1, 'vlseg3e64.v', 3, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int64),   1, 1, 'vlseg4e64.v', 4, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int64),   1, 1, 'vlseg5e64.v', 5, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int64),   1, 1, 'vlseg6e64.v', 6, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int64),   1, 1, 'vlseg7e64.v', 7, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int64),   1, 1, 'vlseg8e64.v', 8, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int64),  10, 1, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int64),  10, 1, 'vlseg3e64.v', 3, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int64),  10, 1, 'vlseg4e64.v', 4, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int64),  10, 1, 'vlseg5e64.v', 5, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int64),  10, 1, 'vlseg6e64.v', 6, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int64),  10, 1, 'vlseg7e64.v', 7, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int64),  10, 1, 'vlseg8e64.v', 8, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*2, dtype=np.int64),  16, 1, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*3, dtype=np.int64),  16, 1, 'vlseg3e64.v', 3, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*4, dtype=np.int64),  16, 1, 'vlseg4e64.v', 4, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*5, dtype=np.int64),  16, 1, 'vlseg5e64.v', 5, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*6, dtype=np.int64),  16, 1, 'vlseg6e64.v', 6, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*7, dtype=np.int64),  16, 1, 'vlseg7e64.v', 7, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*8, dtype=np.int64),  16, 1, 'vlseg8e64.v', 8, 64, 'vse64.v']"
-
-      #sew=64, lmul=2
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int64),   1, 2, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  17*2, dtype=np.int64),  17, 2, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  32*2, dtype=np.int64),  32, 2, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int64),   1, 2, 'vlseg3e64.v', 3, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  17*3, dtype=np.int64),  17, 2, 'vlseg3e64.v', 3, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  32*3, dtype=np.int64),  32, 2, 'vlseg3e64.v', 3, 64, 'vse64.v']"
-
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int64),   1, 2, 'vlseg4e64.v', 4, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  17*4, dtype=np.int64),  17, 2, 'vlseg4e64.v', 4, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  32*4, dtype=np.int64),  32, 2, 'vlseg4e64.v', 4, 64, 'vse64.v']"
-
-      #sew=64, lmul=4
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int64),   1, 4, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  17*2, dtype=np.int64),  17, 4, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  33*2, dtype=np.int64),  33, 4, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  64*2, dtype=np.int64),  64, 4, 'vlseg2e64.v', 2, 64, 'vse64.v']"
-    test_basic_with_mask @ rs1, vl, lmul, mask, orig, inst_name, nfields, ebits, ldins, stins @ VLEN=1024:
-      #sew=8
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*2, dtype=np.int8 ), 'vlseg2e8.v', 2, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*3, dtype=np.int8 ), 'vlseg3e8.v', 3, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*4, dtype=np.int8 ), 'vlseg4e8.v', 4, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*5, dtype=np.int8 ), 'vlseg5e8.v', 5, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*6, dtype=np.int8 ), 'vlseg6e8.v', 6, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*7, dtype=np.int8 ), 'vlseg7e8.v', 7, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int8 ),   1, 1, random_mask(1),   np.zeros(   1*8, dtype=np.int8 ), 'vlseg8e8.v', 8, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*2, dtype=np.int8 ), 'vlseg2e8.v', 2, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*3, dtype=np.int8 ), 'vlseg3e8.v', 3, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*4, dtype=np.int8 ), 'vlseg4e8.v', 4, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*5, dtype=np.int8 ), 'vlseg5e8.v', 5, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*6, dtype=np.int8 ), 'vlseg6e8.v', 6, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*7, dtype=np.int8 ), 'vlseg7e8.v', 7, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int8 ),  10, 1, random_mask(10),  np.zeros(  10*8, dtype=np.int8 ), 'vlseg8e8.v', 8, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*2, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*2, dtype=np.int8 ), 'vlseg2e8.v', 2, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*3, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*3, dtype=np.int8 ), 'vlseg3e8.v', 3, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*4, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*4, dtype=np.int8 ), 'vlseg4e8.v', 4, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*5, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*5, dtype=np.int8 ), 'vlseg5e8.v', 5, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*6, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*6, dtype=np.int8 ), 'vlseg6e8.v', 6, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*7, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*7, dtype=np.int8 ), 'vlseg7e8.v', 7, 8, 'vle8.v', 'vse8.v']"
-      - "[ np.linspace( -1000, 1000, 128*8, dtype=np.int8 ), 128, 1, random_mask(128), np.zeros( 128*8, dtype=np.int8 ), 'vlseg8e8.v', 8, 8, 'vle8.v', 'vse8.v']"
-      #sew=16
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*2, dtype=np.int16 ), 'vlseg2e16.v', 2, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*3, dtype=np.int16 ), 'vlseg3e16.v', 3, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*4, dtype=np.int16 ), 'vlseg4e16.v', 4, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*5, dtype=np.int16 ), 'vlseg5e16.v', 5, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*6, dtype=np.int16 ), 'vlseg6e16.v', 6, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*7, dtype=np.int16 ), 'vlseg7e16.v', 7, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int16),  1,  1, random_mask(1),  np.zeros(   1*8, dtype=np.int16 ), 'vlseg8e16.v', 8, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*2, dtype=np.int16 ), 'vlseg2e16.v', 2, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*3, dtype=np.int16 ), 'vlseg3e16.v', 3, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*4, dtype=np.int16 ), 'vlseg4e16.v', 4, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*5, dtype=np.int16 ), 'vlseg5e16.v', 5, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*6, dtype=np.int16 ), 'vlseg6e16.v', 6, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*7, dtype=np.int16 ), 'vlseg7e16.v', 7, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int16), 10,  1, random_mask(10), np.zeros(  10*8, dtype=np.int16 ), 'vlseg8e16.v', 8, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*2, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*2, dtype=np.int16 ), 'vlseg2e16.v', 2, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*3, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*3, dtype=np.int16 ), 'vlseg3e16.v', 3, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*4, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*4, dtype=np.int16 ), 'vlseg4e16.v', 4, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*5, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*5, dtype=np.int16 ), 'vlseg5e16.v', 5, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*6, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*6, dtype=np.int16 ), 'vlseg6e16.v', 6, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*7, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*7, dtype=np.int16 ), 'vlseg7e16.v', 7, 16, 'vle8.v', 'vse16.v']"
-      - "[ np.linspace( -1000, 1000,  64*8, dtype=np.int16), 64,  1, random_mask(64), np.zeros(  64*8, dtype=np.int16 ), 'vlseg8e16.v', 8, 16, 'vle8.v', 'vse16.v']"
-      #sew=32
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*2, dtype=np.int32 ), 'vlseg2e32.v', 2, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*3, dtype=np.int32 ), 'vlseg3e32.v', 3, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*4, dtype=np.int32 ), 'vlseg4e32.v', 4, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*5, dtype=np.int32 ), 'vlseg5e32.v', 5, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*6, dtype=np.int32 ), 'vlseg6e32.v', 6, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*7, dtype=np.int32 ), 'vlseg7e32.v', 7, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int32),  1,  1, random_mask(1),  np.zeros(   1*8, dtype=np.int32 ), 'vlseg8e32.v', 8, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*2, dtype=np.int32 ), 'vlseg2e32.v', 2, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*3, dtype=np.int32 ), 'vlseg3e32.v', 3, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*4, dtype=np.int32 ), 'vlseg4e32.v', 4, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*5, dtype=np.int32 ), 'vlseg5e32.v', 5, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*6, dtype=np.int32 ), 'vlseg6e32.v', 6, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*7, dtype=np.int32 ), 'vlseg7e32.v', 7, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int32), 10,  1, random_mask(10), np.zeros(  10*8, dtype=np.int32 ), 'vlseg8e32.v', 8, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*2, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*2, dtype=np.int32 ), 'vlseg2e32.v', 2, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*3, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*3, dtype=np.int32 ), 'vlseg3e32.v', 3, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*4, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*4, dtype=np.int32 ), 'vlseg4e32.v', 4, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*5, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*5, dtype=np.int32 ), 'vlseg5e32.v', 5, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*6, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*6, dtype=np.int32 ), 'vlseg6e32.v', 6, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*7, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*7, dtype=np.int32 ), 'vlseg7e32.v', 7, 32, 'vle8.v', 'vse32.v']"
-      - "[ np.linspace( -1000, 1000,  32*8, dtype=np.int32), 32,  1, random_mask(32), np.zeros(  32*8, dtype=np.int32 ), 'vlseg8e32.v', 8, 32, 'vle8.v', 'vse32.v']"
-      #sew=64
-      - "[ np.linspace( -1000, 1000,   1*2, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*2, dtype=np.int64 ), 'vlseg2e64.v', 2, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*3, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*3, dtype=np.int64 ), 'vlseg3e64.v', 3, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*4, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*4, dtype=np.int64 ), 'vlseg4e64.v', 4, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*5, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*5, dtype=np.int64 ), 'vlseg5e64.v', 5, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*6, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*6, dtype=np.int64 ), 'vlseg6e64.v', 6, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*7, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*7, dtype=np.int64 ), 'vlseg7e64.v', 7, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,   1*8, dtype=np.int64),  1,  1, random_mask(1),  np.zeros(   1*8, dtype=np.int64 ), 'vlseg8e64.v', 8, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*2, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*2, dtype=np.int64 ), 'vlseg2e64.v', 2, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*3, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*3, dtype=np.int64 ), 'vlseg3e64.v', 3, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*4, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*4, dtype=np.int64 ), 'vlseg4e64.v', 4, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*5, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*5, dtype=np.int64 ), 'vlseg5e64.v', 5, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*6, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*6, dtype=np.int64 ), 'vlseg6e64.v', 6, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*7, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*7, dtype=np.int64 ), 'vlseg7e64.v', 7, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  10*8, dtype=np.int64), 10,  1, random_mask(10), np.zeros(  10*8, dtype=np.int64 ), 'vlseg8e64.v', 8, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*2, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*2, dtype=np.int64 ), 'vlseg2e64.v', 2, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*3, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*3, dtype=np.int64 ), 'vlseg3e64.v', 3, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*4, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*4, dtype=np.int64 ), 'vlseg4e64.v', 4, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*5, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*5, dtype=np.int64 ), 'vlseg5e64.v', 5, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*6, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*6, dtype=np.int64 ), 'vlseg6e64.v', 6, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*7, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*7, dtype=np.int64 ), 'vlseg7e64.v', 7, 64, 'vle8.v', 'vse64.v']"
-      - "[ np.linspace( -1000, 1000,  16*8, dtype=np.int64), 16,  1, random_mask(16), np.zeros(  16*8, dtype=np.int64 ), 'vlseg8e64.v', 8, 64, 'vle8.v', 'vse64.v']"
