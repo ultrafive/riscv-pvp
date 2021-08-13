@@ -1380,6 +1380,16 @@ def random_float(sew, vl):
         raise ValueError(f'{sew} is not a good option for sew.')
 
     return num
+
 def get_uintdtype(sew):
     int_dtype_dict = { 8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64 }
     return int_dtype_dict[sew]
+
+def get_vreg(prev=()):
+    vreg = 'v' + str(np.random.randint(0, 31))
+
+    while vreg in prev:
+        vreg = 'v' + str(np.random.randint(0, 31))
+
+    return vreg
+    

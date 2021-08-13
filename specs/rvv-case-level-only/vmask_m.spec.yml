@@ -5,7 +5,7 @@ _: &default
     #include "test_macros_v.h"
   
   templates:
-    test_vmask_m_without_mask: |
+    test_basic_without_mask: |
       test_{num}:
         li TESTNUM, {num};
 
@@ -16,10 +16,10 @@ _: &default
         li t2, 8;
         div t1, t1, t2;
 
-        vsetvli t0, t1, e8,m1,tu,mu;
-        {ldins} v2, (a2);
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v2, (a2);
 
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
         {name} a4, v2;
 
         la a3, test_{num}_data;
@@ -29,7 +29,58 @@ _: &default
       test_{num}_data:
         .fill {ebits}, 1, 0;
         .popsection
-    test_vmask_m_with_mask: |
+  
+    test_regression_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a2, {vs2_data};
+
+        addi t1, a0, 7;
+        li t2, 8;
+        div t1, t1, t2;
+
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v2, (a2);
+
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        {name} a4, v2;
+
+        la a3, test_{num}_data;
+        sd a4, (a3);
+        .pushsection .data, 1;
+        .balign 1
+      test_{num}_data:
+        .fill {ebits}, 1, 0;
+        .popsection
+
+    test_v0_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a2, {vs2_data};
+
+        addi t1, a0, 7;
+        li t2, 8;
+        div t1, t1, t2;
+
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v0, (a2);
+
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        {name} a4, v0;
+
+        la a3, test_{num}_data;
+        sd a4, (a3);
+        .pushsection .data, 1;
+        .balign 1
+      test_{num}_data:
+        .fill {ebits}, 1, 0;
+        .popsection
+
+    test_basic_with_mask: |
       test_{num}:
         li TESTNUM, {num};
 
@@ -41,11 +92,11 @@ _: &default
         li t2, 8;
         div t1, t1, t2;
 
-        vsetvli t0, t1, e8,m1,tu,mu;
-        {ldins} v0, (a1);
-        {ldins} v2, (a2);
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v0, (a1);
+        vle8.v v2, (a2);
 
-        vsetvli t0, a0, e{ebits},m{lmul},tu,mu;
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
         {name} a4, v2, v0.t;
 
         la a3, test_{num}_data;
@@ -56,9 +107,102 @@ _: &default
         .fill {ebits}, 1, 0;
         .popsection
     
+    test_regression_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {mask_data};
+        la a2, {vs2_data};
+
+        addi t1, a0, 7;
+        li t2, 8;
+        div t1, t1, t2;
+
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v0, (a1);
+        vle8.v v2, (a2);
+
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        {name} a4, v2, v0.t;
+
+        la a3, test_{num}_data;
+        sd a4, (a3);
+        .pushsection .data, 1;
+        .balign 1
+      test_{num}_data:
+        .fill {ebits}, 1, 0;
+        .popsection
+    
+    test_v0_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a1, {mask_data};
+
+        addi t1, a0, 7;
+        li t2, 8;
+        div t1, t1, t2;
+
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v0, (a1);
+
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        {name} a4, v0, v0.t;
+
+        la a3, test_{num}_data;
+        sd a4, (a3);
+        .pushsection .data, 1;
+        .balign 1
+      test_{num}_data:
+        .fill {ebits}, 1, 0;
+        .popsection
+
+    test_exception: |
+      test_{num}:
+        li t0, 2;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sd t0, 0(t1);
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        li a1, {start};
+        csrw vstart, a1;
+        {name} a4, v2;
+      test_{num}_end:
+
+    test_special_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+
+        li a0, {vl};
+        la a2, {vs2_data};
+
+        addi t1, a0, 7;
+        li t2, 8;
+        div t1, t1, t2;
+
+        vsetvli t0, t1, e8,m1,ta,mu;
+        vle8.v v2, (a2);
+
+        vsetvli t0, a0, e{ebits},m{lmul},ta,mu;
+        {name} a4, v2;
+
+        la a3, test_{num}_data;
+        sd a4, (a3);
+        .pushsection .data, 1;
+        .balign 1
+      test_{num}_data:
+        .fill {ebits}, 1, 0;
+        .popsection
 
   cases:
-    test_vmask_m_without_mask @ vs2, vl, lmul, ebits @ ldins='vle8.v', stins='vse8.v':
+    test_basic_without_mask @ vs2, vl, lmul, ebits :
       - '[np.array([0x00], dtype=np.uint8),                    1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                    4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                    7,    1, 8 ]'
@@ -141,7 +285,8 @@ _: &default
       - '[np.linspace(-127, 127, 9, dtype=np.uint8),           65,   8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          127,  8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),          128,  8, 64]'
-    test_vmask_m_with_mask @ vs2, mask, vl, lmul, ebits @ ldins='vle8.v', stins='vse8.v':
+    
+    test_basic_with_mask @ vs2, mask, vl, lmul, ebits :
       - '[np.array([0x00], dtype=np.uint8),                   np.array([0x01], dtype=np.uint8),                   1,    1, 8 ]'
       - '[np.array([0x0c], dtype=np.uint8),                   np.array([0x06], dtype=np.uint8),                   4,    1, 8 ]'
       - '[np.array([0x0f], dtype=np.uint8),                   np.array([0x3c], dtype=np.uint8),                   7,    1, 8 ]'
@@ -225,9 +370,43 @@ _: &default
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            127,  8, 64]'
       - '[np.linspace(-127, 127, 16, dtype=np.uint8),         np.linspace(0, 255, 16, dtype=np.uint8),            128,  8, 64]'
 
+    test_regression_without_mask :
+      matrix: 
+        ebits: [8, 16, 32, 64]
+        lmul: get_lmul(ebits)
+        vl: get_random_vl(lmul, ebits, ebits, vlen)
+        vs2: np.random.uniform(0, 0xff, np.ceil(vl/8).astype(np.int16)).astype(np.uint8)
+    
+    test_regression_with_mask :
+      matrix: 
+        ebits: [8, 16, 32, 64]
+        lmul: get_lmul(ebits)
+        vl: get_random_vl(lmul, ebits, ebits, vlen)
+        mask: random_mask(vl)
+        vs2: np.random.uniform(0, 0xff, np.ceil(vl/8).astype(np.int16)).astype(np.uint8)
+
+    test_v0_without_mask @ vs2, vl, lmul, ebits :
+      - '[np.random.uniform(0, 256, 128).astype(np.uint8), np.random.randint(1,1025), 8, 8]'
+    
+    test_v0_with_mask @ mask, vl, lmul, ebits :
+      - '[np.random.uniform(0, 256, 128).astype(np.uint8), np.random.randint(1,1025), 8, 8]'
+
+    test_exception @ vs2, vl, lmul, ebits, start :
+      - '[np.random.uniform(0, 256, 128).astype(np.uint8), 10, 1,   8, 1]'
+      - '[np.random.uniform(0, 256, 128).astype(np.uint8), 10, 1, 128, 0]'
+
+    test_special_without_mask @ vs2, vl, lmul, ebits:
+      - '[np.array([0x00], dtype=np.uint8), 8, 1, 8]'
+      - '[np.array([0xff], dtype=np.uint8), 8, 1, 8]'
+      
   check:
-    test_vmask_m_without_mask: np.equal(result, golden)
-    test_vmask_m_with_mask: np.equal(result, golden)
+    test_basic_without_mask: np.equal(result, golden)
+    test_basic_with_mask: np.equal(result, golden)
+    test_v0_without_mask: np.equal(result, golden)
+    test_v0_with_mask: np.equal(result, golden)
+    test_regression_without_mask: np.equal(result, golden)
+    test_regression_with_mask: np.equal(result, golden)
+    test_special_without_mask: np.equal(result, golden)
 
 vpopc_m:
   <<: *default
