@@ -1,0 +1,1127 @@
+_: &default
+  head: |
+    #include "exception.h"
+  env: RVTEST_RV64UV
+  templates:
+    test_basic_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, 4;
+        fsrm t1, t0;         // set rounding mode as RMM
+        li a0, {vl} ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a2, {vs2_data} ;  // vs2 data label
+        vle{ebits}.v v16, (a2) ;
+        li t0, 0;
+        csrw vstart, t0;      // set vstart as 0
+        {name} v24, v16;  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:vsetvli x0, x0, e{ebits_vd},m{lmul_vd},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits_vd}/8)        
+      test_{num}_data:
+        .fill {vl}, ({ebits_vd}/8), 0;  // there are {vl} sets of ({ebits_vd}/8) bytes 0
+        .popsection
+
+
+    test_special_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, 4;
+        fsrm t1, t0;         // set rounding mode as RMM
+        li a0, {vl} ; 
+        vsetvli t0, a0, e{ebits},m1,ta,ma;
+        la a2, {vs2_data} ;  // vs2 data label
+        vle{ebits}.v v16, (a2) ;
+        li t0, 0;
+        csrw vstart, t0;      // set vstart as 0
+        {name} v24, v16;  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:vsetvli x0, x0, e{ebits_vd},m2,ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits_vd}/8)        
+      test_{num}_data:
+        .fill {vl}, ({ebits_vd}/8), 0;  // there are {vl} sets of ({ebits_vd}/8) bytes 0
+        .popsection  
+
+    test_vta_eq_tu_without_mask: |   
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically            
+        li t0, 4;
+        fsrm t1, t0;      //set rounding mode as RMM            
+        li a0, {vs2_shape[0]} ; // vl of source data = (vlmax, VLEN/SEW)
+        vsetvli t0, a0, e{ebits},m{lmul_tail},ta,ma;
+        la a2, {vs2_data} ; // vs2 data label
+        vle{ebits}.v v16, (a2) ;
+        vsetvli x0, x0, e{ebits_vd},m{lmul_orig},ta,ma;
+        la a3, {orig_data}; // original data label of target register
+        vle{ebits_vd}.v v24, (a3);        
+        li a0, {vl} ;       // set vl of test instruction
+        vsetvli t0, a0, e{ebits},m{lmul},tu,ma;
+        li t0, 0;
+        csrw vstart, t0;    // set vstart as 0
+        {name} v24, v16; // {name} is the test instruction            
+      1:li a0, {vs2_shape[0]} ;
+        vsetvli t0, a0, e{ebits_vd},m{lmul_orig},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);  // save the result data into test_{num}_data memory
+        .pushsection .data, 1; 
+        .balign  ({ebits_vd}/8)
+      test_{num}_data:
+        .fill {vs2_shape[0]}, ({ebits_vd}/8), 0;// there are {vs2_shape[0]} sets of ({ebits_vd}/8) bytes 0
+        .popsection   
+    test_rounding_mode_without_mask: |   
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, {frm};
+        fsrm t1, t0;         // set rounding mode 
+        li a0, {vl} ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a2, {vs2_data} ;  // vs2 data label
+        vle{ebits}.v v16, (a2) ;
+        li t0, 0;
+        csrw vstart, t0;      // set vstart as 0
+        {name} v24, v16;  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:vsetvli x0, x0, e{ebits_vd},m{lmul_vd},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits_vd}/8)        
+      test_{num}_data:
+        .fill {vl}, ({ebits_vd}/8), 0;  // there are {vl} sets of ({ebits_vd}/8) bytes 0
+        .popsection  
+  
+    test_basic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num}; // num set automatically            
+        li t0, 4;
+        fsrm t1, t0;      //set rounding mode as RMM            
+        li a0, {vl} ;  // set vl of test instruction 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a2, {vs2_data} ; // vs1 data label
+        vle{ebits}.v v16, (a2) ;        
+        la a0, {mask_data} ;//v0 data label
+        vle1.v v0, (a0);
+        li t0, 0;
+        csrw vstart, t0; //set vstart as 0 
+        {name} v24, v16, v0.t ; // name is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;    // test if vstart==0 after the instruction
+        j fail;              
+      1:vsetvli x0, x0, e{ebits_vd},m{lmul_vd},ta,mu;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3), v0.t;# save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits_vd}/8)
+      test_{num}_data:
+          .fill {vl}, ({ebits_vd}/8), 0;# there are {vl} sets of ({ebits_vd}/8) bytes 0
+          .popsection
+    test_basic_with_mask_mu: |
+      test_{num}:
+        li TESTNUM, {num}; // num set automatically            
+        li t0, 4;
+        fsrm t1, t0;      //set rounding mode as RMM            
+        li a0, {vl} ;  // set vl of test instruction 
+        vsetvli t0, a0, e{ebits_vd},m{lmul_vd},ta,ma;               
+        la a3, {orig_data}; // original data label of target register
+        vle{ebits_vd}.v v24, (a3);        
+        vsetvli x0, x0, e{ebits},m{lmul},ta,mu;
+        la a2, {vs2_data} ; // vs1 data label
+        vle{ebits}.v v16, (a2) ;       
+        la a0, {mask_data} ;//v0 data label
+        vle1.v v0, (a0);
+        li t0, 0;
+        csrw vstart, t0; //set vstart as 0 
+        {name} v24, v16, v0.t ; // name is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;    // test if vstart==0 after the instruction
+        j fail;              
+      1:vsetvli x0, x0, e{ebits_vd},m{lmul_vd},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);# save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits_vd}/8)
+      test_{num}_data:
+          .fill {vl}, ({ebits_vd}/8), 0;# there are {vl} sets of ({ebits_vd}/8) bytes 0
+          .popsection             
+    test_vstart_not_eq_zero_without_mask: |   
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, 4;
+        fsrm t1, t0;         // set rounding mode as RMM
+        li a0, {vl} ; 
+        vsetvli t0, a0, e{ebits_vd},m{lmul_vd},ta,ma; 
+        la a3, {orig_data}; // original data label of target register
+        vle{ebits_vd}.v v24, (a3);        
+        vsetvli x0, x0, e{ebits},m{lmul},ta,ma;
+        la a2, {vs2_data} ;  // vs2 data label
+        vle{ebits}.v v16, (a2) ;
+        li t0, {vstart};
+        csrw vstart, t0;      // set vstart
+        {name} v24, v16  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:vsetvli x0, x0, e{ebits_vd},m{lmul_vd},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1; 
+        .balign  ({ebits_vd}/8)
+      test_{num}_data:
+        .fill {vl}, ({ebits_vd}/8), 0;  // there are {vl} sets of ({ebits_vd}/8) bytes 0
+        .popsection
+    test_vstart_not_eq_zero_with_mask: | 
+      test_{num}:
+        li TESTNUM, {num}; // num set automatically            
+        li t0, 4;
+        fsrm t1, t0;      //set rounding mode as RMM            
+        li a0, {vl} ;  // set vl of test instruction 
+        vsetvli t0, a0, e{ebits_vd},m{lmul_vd},ta,ma;               
+        la a3, {orig_data}; // original data label of target register
+        vle{ebits_vd}.v v24, (a3);                 
+        vsetvli x0, x0, e{ebits},m{lmul},ta,mu;        
+        la a2, {vs2_data} ; // vs1 data label
+        vle{ebits}.v v16, (a2) ;      
+        la a0, {mask_data} ;//v0 data label
+        vle1.v v0, (a0);
+        li t0, {vstart};
+        csrw vstart, t0; //set vstart
+        {name} v24, v16, v0.t ; // name is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;    // test if vstart==0 after the instruction
+        j fail;              
+      1:vsetvli x0, x0, e{ebits_vd},m{lmul_vd},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits_vd}.v v24, (a3);# save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits_vd}/8)
+      test_{num}_data:
+          .fill {vl}, ({ebits_vd}/8), 0;# there are {vl} sets of ({ebits_vd}/8) bytes 0
+          .popsection
+    test_exception_wrong_sew_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically            
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);          
+        li a0, {vl} ;     //vl
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        {name} v24, v16; // {name} is the test instruction
+        j fail;
+      test_{num}_end:
+    test_exception_lmul_vreg_no_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically              
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);       
+        li a0, {vl} ;     // vl
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        {name} {vd_name}, {vs2_name}; // {name} is the test instruction
+        j fail;
+      test_{num}_end:
+    test_exception_wrong_lmul_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically            
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);          
+        li a0, 1 ;     //vl
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        {name} v24, v16; // {name} is the test instruction
+        j fail;
+      test_{num}_end: 
+
+
+vfwcvt_xu_f_v: &vfwcvt_xu_f_v
+  <<: *default
+  basic_cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))  
+    test_basic_with_mask:
+      matrix:
+        ebits: [16, 32 ]   
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))       
+
+  cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))      
+
+    test_special_without_mask:
+      matrix:
+        ebits: [16,32]
+        ebits_vd: 2*ebits        
+        vl: 10
+        vs2: special_v_float(ebits)        
+
+    test_vta_eq_tu_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_tail: 1 if isinstance(lmul,str) else lmul
+        lmul_orig: double_lmul(lmul_tail)
+        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
+        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits)) 
+        orig: np.linspace(-400, 400, get_tail_end(lmul, ebits, vlen)).astype(get_uintdtype(2*ebits))    
+
+    test_rounding_mode_without_mask:
+      matrix:
+        frm: [ 0, 1, 2, 3]
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: list(np.random.choice( get_lmul_w(ebits), 1 ))
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))             
+    
+    test_basic_with_mask:
+      matrix:
+        ebits: [16, 32 ]   
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
+      
+    test_basic_with_mask_mu:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_uintdtype(2*ebits))
+      
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_uintdtype(2*ebits))
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_uintdtype(2*ebits))
+        mask: random_mask(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"   
+  
+    test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
+      - [ 8, 1, 50 ]
+      - [ 8, 4, 200 ] 
+      - [ 8, "f2", 15 ]
+      - [ 64, 1, 11 ]
+      - [ 64, 2, 25 ] 
+      - [ 64, 8, 45 ]       
+      - [ 128, 1, 3 ]
+      - [ 128, 2, 10 ]
+      - [ 128, 4, 20 ]
+      - [ 256, 1, 2 ]
+      - [ 256, 4, 10 ]
+      - [ 256, 8, 25 ]
+      - [ 512, 2, 2 ]
+      - [ 512, 4, 5 ]
+      - [ 512, 8, 11 ]
+      - [ 1024, 1, 1 ]
+      - [ 1024, 4, 3 ]
+      - [ 1024, 8, 5 ]
+    test_exception_lmul_vreg_no_without_mask  @ ebits, lmul, vl, vs2_name, vd_name:
+      - [ 32, 1, 10, "v8", "v11" ]
+      - [ 16, 1, 6, "v25", "v21" ]
+      - [ 64, 1, 11, "v8", "v27" ]    
+      - [ 32, 2, 35, "v3", "v8" ]
+      - [ 64, 2, 15, "v18", "v11" ]
+      - [ 16, 4, 77, "v15", "v24" ]
+      - [ 32, 4, 37, "v28", "v27" ]
+    test_exception_wrong_lmul_without_mask:
+      matrix:
+        sew: [16, 32]
+        lmul: get_illegal_lmul_w(sew) 
+
+  random_cases:
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_float(ebits, vl)  
+        orig:  random_uint(2*ebits, vl)
+        vstart:   np.random.randint(0, vl)
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_float(ebits, vl) 
+        orig:  random_uint(2*ebits, vl)
+        mask: random_mask(vl)
+        vstart:   np.random.randint(0, vl)
+   
+
+  basic_check:
+    test_basic_without_mask: np.equal( result, golden ).all()
+    test_basic_with_mask: np.equal( result, golden ).all()   
+
+  check:
+    test_basic_without_mask: np.equal( result, golden ).all()     
+    test_special_without_mask: np.equal( result, golden ).all() 
+    test_vta_eq_tu_without_mask: np.equal( result, golden ).all() 
+    test_rounding_mode_without_mask: np.equal( result, golden ).all()
+    test_basic_with_mask: np.equal( result, golden ).all()
+    test_basic_with_mask_mu: np.equal( result, golden ).all()
+    test_vstart_not_eq_zero_without_mask: np.equal( result, golden ).all()
+    test_vstart_not_eq_zero_with_mask: np.equal( result, golden ).all()
+  
+  random_check:
+    test_vstart_not_eq_zero_without_mask: np.equal( result, golden ).all()
+    test_vstart_not_eq_zero_with_mask: np.equal( result, golden ).all()
+
+vfwcvt_x_f_v: &vfwcvt_x_f_v
+  <<: *default
+  basic_cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))  
+    test_basic_with_mask:
+      matrix:
+        ebits: [16, 32 ]   
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))       
+
+  cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))      
+
+    test_special_without_mask:
+      matrix:
+        ebits: [16,32]
+        ebits_vd: 2*ebits        
+        vl: 10
+        vs2: special_v_float(ebits)        
+
+    test_vta_eq_tu_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_tail: 1 if isinstance(lmul,str) else lmul
+        lmul_orig: double_lmul(lmul_tail)
+        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
+        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits)) 
+        orig: np.linspace(-400, 400, get_tail_end(lmul, ebits, vlen)).astype(get_intdtype(2*ebits))    
+
+    test_rounding_mode_without_mask:
+      matrix:
+        frm: [ 0, 1, 2, 3]
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: list(np.random.choice( get_lmul_w(ebits), 1 ))
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))             
+    
+    test_basic_with_mask:
+      matrix:
+        ebits: [16, 32 ]   
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
+      
+    test_basic_with_mask_mu:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_intdtype(2*ebits))
+      
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_intdtype(2*ebits))
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_intdtype(2*ebits))
+        mask: random_mask(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"   
+  
+    test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
+      - [ 8, 1, 50 ]
+      - [ 8, 4, 200 ] 
+      - [ 8, "f2", 15 ]
+      - [ 64, 1, 11 ]
+      - [ 64, 2, 25 ] 
+      - [ 64, 8, 45 ]       
+      - [ 128, 1, 3 ]
+      - [ 128, 2, 10 ]
+      - [ 128, 4, 20 ]
+      - [ 256, 1, 2 ]
+      - [ 256, 4, 10 ]
+      - [ 256, 8, 25 ]
+      - [ 512, 2, 2 ]
+      - [ 512, 4, 5 ]
+      - [ 512, 8, 11 ]
+      - [ 1024, 1, 1 ]
+      - [ 1024, 4, 3 ]
+      - [ 1024, 8, 5 ]
+    test_exception_lmul_vreg_no_without_mask  @ ebits, lmul, vl, vs2_name, vd_name:
+      - [ 32, 1, 10, "v8", "v11" ]
+      - [ 16, 1, 6, "v25", "v21" ]
+      - [ 64, 1, 11, "v8", "v27" ]    
+      - [ 32, 2, 35, "v3", "v8" ]
+      - [ 64, 2, 15, "v18", "v11" ]
+      - [ 16, 4, 77, "v15", "v24" ]
+      - [ 32, 4, 37, "v28", "v27" ]
+    test_exception_wrong_lmul_without_mask:
+      matrix:
+        sew: [16, 32]
+        lmul: get_illegal_lmul_w(sew) 
+
+  random_cases:
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_float(ebits, vl)  
+        orig:  random_int(2*ebits, vl)
+        vstart:   np.random.randint(0, vl)
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_float(ebits, vl) 
+        orig:  random_int(2*ebits, vl)
+        mask: random_mask(vl)
+        vstart:   np.random.randint(0, vl)
+   
+
+  basic_check:
+    test_basic_without_mask: np.equal( result, golden ).all()
+    test_basic_with_mask: np.equal( result, golden ).all()   
+
+  check:
+    test_basic_without_mask: np.equal( result, golden ).all()     
+    test_special_without_mask: np.equal( result, golden ).all() 
+    test_vta_eq_tu_without_mask: np.equal( result, golden ).all() 
+    test_rounding_mode_without_mask: np.equal( result, golden ).all()
+    test_basic_with_mask: np.equal( result, golden ).all()
+    test_basic_with_mask_mu: np.equal( result, golden ).all()
+    test_vstart_not_eq_zero_without_mask: np.equal( result, golden ).all()
+    test_vstart_not_eq_zero_with_mask: np.equal( result, golden ).all()
+  
+  random_check:
+    test_vstart_not_eq_zero_without_mask: np.equal( result, golden ).all()
+    test_vstart_not_eq_zero_with_mask: np.equal( result, golden ).all()
+
+vfwcvt_rtz_xu_f_v:
+  <<: *vfwcvt_xu_f_v
+
+
+vfwcvt_rtz_x_f_v:
+  <<: *vfwcvt_x_f_v
+
+vfwcvt_f_xu_v: 
+  <<: *default
+  basic_cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_uintdtype(ebits))  
+    test_basic_with_mask:
+      matrix:
+        ebits: [8, 16, 32]  
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_uintdtype(ebits))       
+
+  cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_uintdtype(ebits))      
+      
+
+    test_vta_eq_tu_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_tail: 1 if isinstance(lmul,str) else lmul
+        lmul_orig: double_lmul(lmul_tail)
+        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
+        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_uintdtype(ebits)) 
+        orig: np.linspace(-400, 400, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(2*ebits))    
+
+    test_rounding_mode_without_mask:
+      matrix:
+        frm: [ 0, 1, 2, 3]
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: list(np.random.choice( get_lmul_w(ebits), 1 ))
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, vl).astype(get_uintdtype(ebits))             
+    
+    test_basic_with_mask:
+      matrix:
+        ebits: [8, 16, 32]  
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_uintdtype(ebits))
+      
+    test_basic_with_mask_mu:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_uintdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+      
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_uintdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_uintdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+        mask: random_mask(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"   
+  
+    test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
+      - [ 64, 1, 11 ]
+      - [ 64, 2, 25 ] 
+      - [ 64, 8, 45 ]       
+      - [ 128, 1, 3 ]
+      - [ 128, 2, 10 ]
+      - [ 128, 4, 20 ]
+      - [ 256, 1, 2 ]
+      - [ 256, 4, 10 ]
+      - [ 256, 8, 25 ]
+      - [ 512, 2, 2 ]
+      - [ 512, 4, 5 ]
+      - [ 512, 8, 11 ]
+      - [ 1024, 1, 1 ]
+      - [ 1024, 4, 3 ]
+      - [ 1024, 8, 5 ]
+    test_exception_lmul_vreg_no_without_mask  @ ebits, lmul, vl, vs2_name, vd_name:
+      - [ 32, 1, 10, "v8", "v11" ]
+      - [ 16, 1, 6, "v25", "v21" ]
+      - [ 64, 1, 11, "v8", "v27" ]    
+      - [ 32, 2, 35, "v3", "v8" ]
+      - [ 64, 2, 15, "v18", "v11" ]
+      - [ 16, 4, 77, "v15", "v24" ]
+      - [ 32, 4, 37, "v28", "v27" ]
+    test_exception_wrong_lmul_without_mask:
+      matrix:
+        sew: [8, 16, 32]
+        lmul: get_illegal_lmul_w(sew) 
+
+  random_cases:
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_uint(ebits, vl)  
+        orig:  random_float(2*ebits, vl)
+        vstart:   np.random.randint(0, vl)
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_uint(ebits, vl) 
+        orig:  random_float(2*ebits, vl)
+        mask: random_mask(vl)
+        vstart:   np.random.randint(0, vl)
+   
+
+  basic_check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+
+  check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)    
+    test_vta_eq_tu_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_rounding_mode_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask_mu: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+  
+  random_check:
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+
+
+vfwcvt_f_x_v: 
+  <<: *default
+  basic_cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_intdtype(ebits))  
+    test_basic_with_mask:
+      matrix:
+        ebits: [8, 16, 32]  
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_intdtype(ebits))       
+
+  cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_intdtype(ebits))      
+      
+
+    test_vta_eq_tu_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_tail: 1 if isinstance(lmul,str) else lmul
+        lmul_orig: double_lmul(lmul_tail)
+        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
+        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_intdtype(ebits)) 
+        orig: np.linspace(-400, 400, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(2*ebits))    
+
+    test_rounding_mode_without_mask:
+      matrix:
+        frm: [ 0, 1, 2, 3]
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: list(np.random.choice( get_lmul_w(ebits), 1 ))
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, vl).astype(get_intdtype(ebits))             
+    
+    test_basic_with_mask:
+      matrix:
+        ebits: [8, 16, 32]  
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_intdtype(ebits))
+      
+    test_basic_with_mask_mu:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_intdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+      
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_intdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_intdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+        mask: random_mask(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"   
+  
+    test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
+      - [ 64, 1, 11 ]
+      - [ 64, 2, 25 ] 
+      - [ 64, 8, 45 ]       
+      - [ 128, 1, 3 ]
+      - [ 128, 2, 10 ]
+      - [ 128, 4, 20 ]
+      - [ 256, 1, 2 ]
+      - [ 256, 4, 10 ]
+      - [ 256, 8, 25 ]
+      - [ 512, 2, 2 ]
+      - [ 512, 4, 5 ]
+      - [ 512, 8, 11 ]
+      - [ 1024, 1, 1 ]
+      - [ 1024, 4, 3 ]
+      - [ 1024, 8, 5 ]
+    test_exception_lmul_vreg_no_without_mask  @ ebits, lmul, vl, vs2_name, vd_name:
+      - [ 32, 1, 10, "v8", "v11" ]
+      - [ 16, 1, 6, "v25", "v21" ]
+      - [ 64, 1, 11, "v8", "v27" ]    
+      - [ 32, 2, 35, "v3", "v8" ]
+      - [ 64, 2, 15, "v18", "v11" ]
+      - [ 16, 4, 77, "v15", "v24" ]
+      - [ 32, 4, 37, "v28", "v27" ]
+    test_exception_wrong_lmul_without_mask:
+      matrix:
+        sew: [8, 16, 32]
+        lmul: get_illegal_lmul_w(sew) 
+
+  random_cases:
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_int(ebits, vl)  
+        orig:  random_float(2*ebits, vl)
+        vstart:   np.random.randint(0, vl)
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [8, 16, 32]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_int(ebits, vl) 
+        orig:  random_float(2*ebits, vl)
+        mask: random_mask(vl)
+        vstart:   np.random.randint(0, vl)
+   
+
+  basic_check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+
+  check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)    
+    test_vta_eq_tu_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_rounding_mode_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask_mu: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+  
+  random_check:
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+
+
+vfwcvt_f_f_v:
+  <<: *default
+  basic_cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))  
+    test_basic_with_mask:
+      matrix:
+        ebits: [16, 32 ]   
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))       
+
+  cases:
+    test_basic_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: get_vl(lmul, ebits, vlen)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))      
+
+    test_special_without_mask:
+      matrix:
+        ebits: [16,32]
+        ebits_vd: 2*ebits        
+        vl: 10
+        vs2: special_v_float(ebits)        
+
+    test_vta_eq_tu_without_mask:
+      matrix:
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_tail: 1 if isinstance(lmul,str) else lmul
+        lmul_orig: double_lmul(lmul_tail)
+        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
+        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits)) 
+        orig: np.linspace(-400, 400, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(2*ebits))    
+
+    test_rounding_mode_without_mask:
+      matrix:
+        frm: [ 0, 1, 2, 3]
+        ebits: [16, 32]
+        ebits_vd: 2*ebits
+        lmul: list(np.random.choice( get_lmul_w(ebits), 1 ))
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))             
+    
+    test_basic_with_mask:
+      matrix:
+        ebits: [16, 32 ]   
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
+      
+    test_basic_with_mask_mu:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        mask: random_mask(vl)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+      
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: get_lmul_w(ebits)
+        lmul_vd: double_lmul(lmul)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(2*ebits))
+        mask: random_mask(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"   
+  
+    test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
+      - [ 8, 1, 50 ]
+      - [ 8, 4, 200 ] 
+      - [ 8, "f2", 15 ]
+      - [ 64, 1, 11 ]
+      - [ 64, 2, 25 ] 
+      - [ 64, 8, 45 ]       
+      - [ 128, 1, 3 ]
+      - [ 128, 2, 10 ]
+      - [ 128, 4, 20 ]
+      - [ 256, 1, 2 ]
+      - [ 256, 4, 10 ]
+      - [ 256, 8, 25 ]
+      - [ 512, 2, 2 ]
+      - [ 512, 4, 5 ]
+      - [ 512, 8, 11 ]
+      - [ 1024, 1, 1 ]
+      - [ 1024, 4, 3 ]
+      - [ 1024, 8, 5 ]
+    test_exception_lmul_vreg_no_without_mask  @ ebits, lmul, vl, vs2_name, vd_name:
+      - [ 32, 1, 10, "v8", "v11" ]
+      - [ 16, 1, 6, "v25", "v21" ]
+      - [ 64, 1, 11, "v8", "v27" ]    
+      - [ 32, 2, 35, "v3", "v8" ]
+      - [ 64, 2, 15, "v18", "v11" ]
+      - [ 16, 4, 77, "v15", "v24" ]
+      - [ 32, 4, 37, "v28", "v27" ]
+    test_exception_wrong_lmul_without_mask:
+      matrix:
+        sew: [16, 32]
+        lmul: get_illegal_lmul_w(sew) 
+
+  random_cases:
+    test_vstart_not_eq_zero_without_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_float(ebits, vl)  
+        orig:  random_float(2*ebits, vl)
+        vstart:   np.random.randint(0, vl)
+    test_vstart_not_eq_zero_with_mask:
+      matrix:
+        ebits: [16, 32 ]
+        ebits_vd: 2*ebits
+        lmul: 1
+        lmul_vd: 2
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        vs2: random_float(ebits, vl) 
+        orig:  random_float(2*ebits, vl)
+        mask: random_mask(vl)
+        vstart:   np.random.randint(0, vl)
+   
+  basic_check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+
+  check:
+    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
+    test_special_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)   
+    test_vta_eq_tu_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_rounding_mode_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_basic_with_mask_mu: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+  
+  random_check:
+    test_vstart_not_eq_zero_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)
+    test_vstart_not_eq_zero_with_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True)

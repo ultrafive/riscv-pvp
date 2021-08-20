@@ -134,6 +134,8 @@ def f16_rsqrt7( vs2 ):
         num = rsqrt7( num, 5, 10, IsSubnoraml )
         num = np.array([num]).astype(np.int16)
         num.dtype= np.float16
+        if num[0] < 0:
+            num[0] = np.nan        
         vd[no] = num[0]
     return vd
 
@@ -162,6 +164,8 @@ def f32_rsqrt7( vs2 ):
         num = rsqrt7( num, 8, 23, IsSubnoraml )
         num = np.array([num]).astype(np.int32)
         num.dtype= np.float32
+        if num[0] < 0:
+            num[0] = np.nan
         vd[no] = num[0]
     return vd        
 
@@ -190,22 +194,58 @@ def f64_rsqrt7( vs2 ):
         num = rsqrt7( num, 11, 52, IsSubnoraml )
         num = np.array([num]).astype(np.int64)
         num.dtype= np.float64
+        if num[0] < 0:
+            num[0] = np.nan        
         vd[no] = num[0] 
     return vd   
 
+import ctypes
+FE_TONEAREST = 0x0000
+FE_DOWNWARD = 0x0400
+FE_UPWARD = 0x0800
+FE_TOWARDZERO = 0x0c00
+libm = ctypes.CDLL('libm.so.6')
+round_dict = { 0:FE_TONEAREST , 1:FE_TOWARDZERO , 2:FE_DOWNWARD , 3:FE_UPWARD  }
 
+def f_rsqrt7( vs2 ):
+
+    if vs2.dtype == np.float16:
+        vd = f16_rsqrt7( vs2 )
+    elif vs2.dtype == np.float32:
+        vd = f32_rsqrt7( vs2 )
+    elif vs2.dtype == np.float64:
+        vd = f64_rsqrt7( vs2 )
+    
+    return vd
 
 class Vfrsqrt7_v(Inst):
     name = 'vfrsqrt7.v'
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.float16:
-            vd = f16_rsqrt7( self['vs2'] )
-        elif self['vs2'].dtype == np.float32:
-            vd = f32_rsqrt7( self['vs2'] )
-        elif self['vs2'].dtype == np.float64:
-            vd = f64_rsqrt7( self['vs2'] )
+            if 'frm' in self:
+                libm.fesetround(round_dict[self['frm']]) 
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = self['vs2'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vl']] = self.masked( f_rsqrt7( self['vs2'][vstart:self['vl']] ), self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+            
+            if 'frm' in self:
+                libm.fesetround( 0 )        
+
+            return result
+        else:
+            return 0
 

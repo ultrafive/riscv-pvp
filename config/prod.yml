@@ -7,7 +7,7 @@ processor:
 
 compile:
   path: clang
-  cc: f'{path} --target=riscv{xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{xlen}gv0p10 -menable-experimental-extensions'
+  cc: f'{path} --target=riscv{xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{xlen}gv0p10zfh0p1 -menable-experimental-extensions'
   defines: f'-DXLEN={xlen} -DVLEN={vlen}'
   cflags: -g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
   incs: -Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc
@@ -43,7 +43,7 @@ gem5:
       --l2_size=512kB' \
 
 vcs:
-  path: ../../../sims/vcs/simv-chipyard-StcBoomConfig-debug
+  path: ./../../sims/vcs/simv-chipyard-StcBoomConfig-debug
   cmd: f'{path}'
   vcstimeout: 1000000
   fsdb: True

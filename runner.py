@@ -314,8 +314,8 @@ def runner(test):
                 golden = test_case["golden"]
                 #because many cases in one signature file, so we need the spike_start to know where to find the result
                 [ result, spike_start ] = from_txt( res_file, golden,  spike_start )
-                #save the python golden result and spike result into check.data file of each case         
-                os.makedirs(f'build/{test_case["name"]}', exist_ok=True)            
+                #save the python golden result and spike result into check.data file of each case        
+                os.makedirs(f'build/{test_case["name"]}', exist_ok=True)                            
                 diff_to_txt( golden, result, f'build/{test_case["name"]}/check.data' )
                 if not eval(test_case["check_str"]):
                     # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition

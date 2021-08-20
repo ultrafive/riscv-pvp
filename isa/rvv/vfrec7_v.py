@@ -215,17 +215,55 @@ def f64_rec7( vs2, frm ):
         vd[no] = num[0]
     return vd 
 
+import ctypes
+FE_TONEAREST = 0x0000
+FE_DOWNWARD = 0x0400
+FE_UPWARD = 0x0800
+FE_TOWARDZERO = 0x0c00
+libm = ctypes.CDLL('libm.so.6')
+round_dict = { 0:FE_TONEAREST , 1:FE_TOWARDZERO , 2:FE_DOWNWARD , 3:FE_UPWARD  }
+
+def f_rec7( vs2, frm ):
+
+    if vs2.dtype == np.float16:
+        vd = f16_rec7( vs2, frm )
+    elif vs2.dtype == np.float32:
+        vd = f32_rec7( vs2, frm )
+    elif vs2.dtype == np.float64:
+        vd = f64_rec7( vs2, frm )
+    
+    return vd
 
 class Vfrec7_v(Inst):
     name = 'vfrec7.v'
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.float16:
-            vd = f16_rec7( self['vs2'], self['frm'] )
-        elif self['vs2'].dtype == np.float32:
-            vd = f32_rec7( self['vs2'], self['frm'] )
-        elif self['vs2'].dtype == np.float64:
-            vd = f64_rec7( self['vs2'], self['frm'] )
+            if 'frm' in self:
+                libm.fesetround(round_dict[self['frm']]) 
+                frm = self['frm']
+            else:
+                frm = 4
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = self['vs2'].dtype )
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+
+            result[vstart:self['vl']] = self.masked( f_rec7( self['vs2'][vstart:self['vl']], frm ), self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+            
+            if 'frm' in self:
+                libm.fesetround( 0 )        
+
+            return result
+        else:
+            return 0

@@ -15,6 +15,7 @@ import shutil
 import types
 import inspect
 import time
+import traceback
 from rich.progress import (
     Progress,
     TextColumn,
@@ -89,19 +90,21 @@ def search(arg_names, vals, no, params, **kwargs):
 
     # define the arguments in kwargs to help compute next param
     for key, val in kwargs.items():
-        if isinstance(val,str):
-            exec(f'{key}="{val}"')
-        elif isinstance(val, np.ndarray):
-            val_str = ''
-            for el in val:
-                if np.isnan(el):
-                    el = "np.nan"
-                elif np.isinf(el):
-                    el = "np.inf"
-                val_str += str(el) + ','
-            exec(f'{key}=np.array([{val_str}], dtype=np.{val.dtype})')
-        else:
-            exec(f'{key}={val}')
+        # if isinstance(val,str):
+        #     exec(f'{key}="{val}"')
+        # elif isinstance(val, np.ndarray):
+        #     if 
+        #     val_str = ''
+        #     for el in val:
+        #         if np.isnan(el):
+        #             el = "np.nan"
+        #         elif np.isinf(el):
+        #             el = "np.inf"
+        #         val_str += str(el) + ','
+        #     exec(f'{key}=np.array([{val_str}], dtype=np.{val.dtype})')
+        # else:
+        #     exec(f'{key}={val}')
+        globals()[str(key)] = val
 
     # just to unify the handle process
     if not isinstance(vals[no], list):
@@ -224,7 +227,7 @@ for spec in specs:
 
                 if param_mode == 'common':
                     # test_type @ xx,xx,xx@ xx=xx
-                    if 'matrix' in params:
+                    if isinstance(params, dict) and 'matrix' in params:
                         print(f"@ argument list can't be used with matrix in params.-{test_type} of {inst} in {filename}")
                         continue
 
@@ -414,8 +417,30 @@ def run_test( case ):
 
         return output
     
-    except KeyboardInterrupt:
-        output = io.StringIO()
+    except:
+        if output in locals().keys():
+            sys.stdout = stdout
+            sys.stderr = stderr
+
+            result_dict[case] = 'python failed'
+            
+            error_output = io.StringIO()
+            traceback.print_tb(sys.exc_info()[2], file=error_output)
+            error_str = error_output.getvalue()
+            error_str += "\nUnexpected error: " + str(sys.exc_info()[0]) + " " + str(sys.exc_info()[1])
+            result_detail_dict[case] = error_str
+
+        else:
+            output = io.StringIO()
+
+            result_dict[case] = 'python failed'
+
+            error_output = io.StringIO()
+            traceback.print_tb(sys.exc_info()[2], file=error_output)
+            error_str = error_output.getvalue()
+            error_str += "\nUnexpected error: " + str(sys.exc_info()[0]) + " " + str(sys.exc_info()[1])
+            result_detail_dict[case] = error_str 
+
         return output
     
     

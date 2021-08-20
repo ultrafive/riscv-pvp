@@ -2,178 +2,334 @@ from isa.inst import *
 import numpy as np
 import math
 
+import ctypes
+FE_TONEAREST = 0x0000
+FE_DOWNWARD = 0x0400
+FE_UPWARD = 0x0800
+FE_TOWARDZERO = 0x0c00
+libm = ctypes.CDLL('libm.so.6')
+round_dict = { 0:FE_TONEAREST , 1:FE_TOWARDZERO , 2:FE_DOWNWARD , 3:FE_UPWARD  }
+
 class Vfncvt_xu_f_w(Inst):
     name = 'vfncvt.xu.f.w'
+    type_dict = { 8:np.uint8, 16:np.uint16, 32:np.uint32 }
+    max_dict = { 8:255, 16:65535, 32:4294967295 }
+
+    def convert( self, a ):
+        b = np.where( a < 0, 0, a )
+        target_dtype = Vfncvt_xu_f_w.type_dict[self['ebits']]        
+
+        if 'frm' in self:
+            frm = self['frm']
+        else:
+            frm = 4
+
+        if frm == 0:
+            #rne
+            b = np.rint( b )
+            b = b.astype( target_dtype )
+        elif frm == 1:
+            #rtz
+            b = np.trunc( b )
+            b = b.astype( target_dtype )
+        elif frm == 2:
+            #rdn
+            b = np.floor( b )
+            b = b.astype( target_dtype )
+        elif frm == 3:
+            #rup
+            b = np.ceil( b )
+            b = b.astype( target_dtype )
+        elif frm == 4:
+            #rmm
+            b = np.where( b - np.trunc( b ) == 0.5, b + 0.3, b )
+            b = np.rint( b )
+            b = b.astype( target_dtype )
+
+        b = np.where( np.isnan(a), Vfncvt_xu_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( np.isposinf(a), Vfncvt_xu_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( a > Vfncvt_xu_f_w.max_dict[self['ebits']], Vfncvt_xu_f_w.max_dict[self['ebits']], b )        
+
+        return b
 
     def golden(self):
+        if 'vs2' in self:
 
-        vd = np.where( self['vs2'] < 0, 0, self['vs2'] )
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_xu_f_w.type_dict[self['ebits']] )
 
-        if self['vs2'].dtype == np.float16:
-            target_dtype = np.uint8
-            vd = np.where( vd > 255, 255, vd )
-        elif self['vs2'].dtype == np.float32:
-            target_dtype = np.uint16
-            vd = np.where( vd > 65535, 65535, vd )
-        elif self['vs2'].dtype == np.float64:
-            target_dtype = np.uint32
-            vd = np.where( vd > 4294967295, 4294967295, vd )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        if self['frm'] == 0:
-            #rne
-            vd = np.rint( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 1:
-            #rtz
-            vd = np.trunc( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 2:
-            #rdn
-            vd = np.floor( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 3:
-            #rup
-            vd = np.ceil( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 4:
-            #rmm
-            vd = np.where( vd - np.trunc( vd ) == 0.5, vd + 0.1, vd )
-            vd = np.rint( vd )
-            vd = vd.astype( target_dtype )
+            result[ vstart: self['vl'] ] = self.masked( self.convert( self['vs2'][vstart:self['vl']] ),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            return result
+        else:
+            return 0
 
 class Vfncvt_x_f_w(Inst):
     name = 'vfncvt.x.f.w'
+    type_dict = { 8:np.int8, 16:np.int16, 32:np.int32 }
+    max_dict = { 8:127, 16:32767, 32:2147483647 }
+    min_dict = { 8:-128, 16:-32768, 32:-2147483648 }
+
+    def convert( self, a ):
+        b = a
+        target_dtype = Vfncvt_x_f_w.type_dict[self['ebits']]        
+
+        if 'frm' in self:
+            frm = self['frm']
+        else:
+            frm = 4
+
+        if frm == 0:
+            #rne
+            b = np.rint( b )
+            b = b.astype( target_dtype )
+        elif frm == 1:
+            #rtz
+            b = np.trunc( b )
+            b = b.astype( target_dtype )
+        elif frm == 2:
+            #rdn
+            b = np.floor( b )
+            b = b.astype( target_dtype )
+        elif frm == 3:
+            #rup
+            b = np.ceil( b )
+            b = b.astype( target_dtype )
+        elif frm == 4:
+            #rmm
+            b = np.where( b - np.trunc( b ) == 0.5, b + 0.3, b )
+            b = np.where( b - np.trunc( b ) == -0.5, b -0.5, b )
+            b = np.rint( b )
+            b = b.astype( target_dtype )
+
+        b = np.where( np.isnan(a), Vfncvt_x_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( np.isposinf(a), Vfncvt_x_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( np.isneginf(a), Vfncvt_x_f_w.min_dict[self['ebits']], b )
+
+        b = np.where( a > Vfncvt_x_f_w.max_dict[self['ebits']], Vfncvt_x_f_w.max_dict[self['ebits']], b ) 
+        b = np.where( a < Vfncvt_x_f_w.min_dict[self['ebits']], Vfncvt_x_f_w.min_dict[self['ebits']], b )       
+
+        return b
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.float16:
-            target_dtype = np.int8
-            vd = np.where( self['vs2'] > 127, 127, self['vs2'] )   
-            vd = np.where( vd < -128, -128, vd )            
-        elif self['vs2'].dtype == np.float32:
-            target_dtype = np.int16
-            vd = np.where( self['vs2'] > 32767, 32767, self['vs2'] )   
-            vd = np.where( vd < -32768, -32768, vd )           
-        elif self['vs2'].dtype == np.float64:
-            target_dtype = np.int32
-            vd = np.where( self['vs2'] > 2147483647, 2147483647, self['vs2'] )   
-            vd = np.where( vd < -2147483648, -2147483648, vd )            
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_x_f_w.type_dict[self['ebits']] )
 
-        if self['frm'] == 0:
-            #rne
-            vd = np.rint( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 1:
-            #rtz
-            vd = np.trunc( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 2:
-            #rdn
-            vd = np.floor( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 3:
-            #rup
-            vd = np.ceil( vd )
-            vd = vd.astype( target_dtype )
-        elif self['frm'] == 4:
-            #rmm
-            vd = np.where( vd - np.trunc( vd ) == 0.5, vd + 0.3, vd )
-            vd = np.where( vd - np.trunc( vd ) == -0.5, vd -0.5, vd )
-            vd = np.rint( vd )
-            vd = vd.astype( target_dtype )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            result[ vstart: self['vl'] ] = self.masked( self.convert( self['vs2'][vstart:self['vl']] ),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
 
 class Vfncvt_rtz_xu_f_w(Inst):
     name = 'vfncvt.rtz.xu.f.w'
+    type_dict = { 8:np.uint8, 16:np.uint16, 32:np.uint32 }
+    max_dict = { 8:255, 16:65535, 32:4294967295 }
+
+    def convert( self, a ):
+        b = np.where( a < 0, 0, a )
+        target_dtype = Vfncvt_rtz_xu_f_w.type_dict[self['ebits']]        
+
+        #rtz
+        b = np.trunc( b )
+        b = b.astype( target_dtype )
+
+
+        b = np.where( np.isnan(a), Vfncvt_rtz_xu_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( np.isposinf(a), Vfncvt_rtz_xu_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( a > Vfncvt_rtz_xu_f_w.max_dict[self['ebits']], Vfncvt_rtz_xu_f_w.max_dict[self['ebits']], b )        
+
+        return b
 
     def golden(self):
+        if 'vs2' in self:
 
-        vd = np.where( self['vs2'] < 0, 0, self['vs2'] )
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_rtz_xu_f_w.type_dict[self['ebits']] )
 
-        if self['vs2'].dtype == np.float16:
-            target_dtype = np.uint8
-            vd = np.where( vd > 255, 255, vd )
-        elif self['vs2'].dtype == np.float32:
-            target_dtype = np.uint16
-            vd = np.where( vd > 65535, 65535, vd )
-        elif self['vs2'].dtype == np.float64:
-            target_dtype = np.uint32
-            vd = np.where( vd > 4294967295, 4294967295, vd )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        vd = np.trunc( vd )
-        vd = vd.astype( target_dtype )
-        
+            result[ vstart: self['vl'] ] = self.masked( self.convert( self['vs2'][vstart:self['vl']] ),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            return result
+        else:
+            return 0
 
 class Vfncvt_rtz_x_f_w(Inst):
     name = 'vfncvt.rtz.x.f.w'
+    type_dict = { 8:np.int8, 16:np.int16, 32:np.int32 }
+    max_dict = { 8:127, 16:32767, 32:2147483647 }
+    min_dict = { 8:-128, 16:-32768, 32:-2147483648 }
+
+    def convert( self, a ):
+        b = a
+        target_dtype = Vfncvt_rtz_x_f_w.type_dict[self['ebits']]        
+
+        #rtz
+        b = np.trunc( b )
+        b = b.astype( target_dtype )
+
+
+        b = np.where( np.isnan(a), Vfncvt_rtz_x_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( np.isposinf(a), Vfncvt_rtz_x_f_w.max_dict[self['ebits']], b )
+
+        b = np.where( np.isneginf(a), Vfncvt_rtz_x_f_w.min_dict[self['ebits']], b )
+
+        b = np.where( a > Vfncvt_rtz_x_f_w.max_dict[self['ebits']], Vfncvt_rtz_x_f_w.max_dict[self['ebits']], b ) 
+        b = np.where( a < Vfncvt_rtz_x_f_w.min_dict[self['ebits']], Vfncvt_rtz_x_f_w.min_dict[self['ebits']], b )       
+
+        return b
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.float16:
-            target_dtype = np.int8
-            vd = np.where( self['vs2'] > 127, 127, self['vs2'] )   
-            vd = np.where( vd < -128, -128, vd )            
-        elif self['vs2'].dtype == np.float32:
-            target_dtype = np.int16
-            vd = np.where( self['vs2'] > 32767, 32767, self['vs2'] )   
-            vd = np.where( vd < -32768, -32768, vd )          
-        elif self['vs2'].dtype == np.float64:
-            target_dtype = np.int32
-            vd = np.where( self['vs2'] > 2147483647, 2147483647, self['vs2'] )   
-            vd = np.where( vd < -2147483648, -2147483648, vd ) 
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_rtz_x_f_w.type_dict[self['ebits']] )
 
-        vd = np.trunc( vd )
-        vd = vd.astype( target_dtype )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )            
+            result[ vstart: self['vl'] ] = self.masked( self.convert( self['vs2'][vstart:self['vl']] ),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
 
 class Vfncvt_f_xu_w(Inst):
     name = 'vfncvt.f.xu.w'
+    type_dict = { 16:np.float16, 32:np.float32 }
 
     def golden(self):
+        if 'vs2' in self:
+            if 'frm' in self:
+                libm.fesetround(round_dict[self['frm']])              
 
-        if self['vs2'].dtype == np.uint32:
-            target_dtype = np.float16
-        elif self['vs2'].dtype == np.uint64:
-            target_dtype = np.float32
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_f_xu_w.type_dict[self['ebits']] )
 
-        vd = self['vs2'].astype( target_dtype )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            result[ vstart: self['vl'] ] = self.masked( self['vs2'][vstart:self['vl']].astype(Vfncvt_f_xu_w.type_dict[self['ebits']]),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+
+            if 'frm' in self:
+                if ( self['frm'] == 1 or self['frm'] == 2 )and result.dtype == np.float16:
+                    result[vstart:self['vl']] = np.where( np.isposinf( result[vstart:self['vl']] ), 65504, result[vstart:self['vl']] )   
+                if ( self['frm'] == 1 or self['frm'] == 3 )and result.dtype == np.float16:
+                    result[vstart:self['vl']] = np.where( np.isneginf( result[vstart:self['vl']] ), -65504, result[vstart:self['vl']] )    
+                                 
+                libm.fesetround( 0 )               
+
+            return result
+        else:
+            return 0
+
 
 class Vfncvt_f_x_w(Inst):
     name = 'vfncvt.f.x.w'
+    type_dict = { 16:np.float16, 32:np.float32 }
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.int32:
-            target_dtype = np.float16
-        elif self['vs2'].dtype == np.int64:
-            target_dtype = np.float32
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_f_x_w.type_dict[self['ebits']] )
 
-        vd = self['vs2'].astype( target_dtype )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            result[ vstart: self['vl'] ] = self.masked( self['vs2'][vstart:self['vl']].astype(Vfncvt_f_x_w.type_dict[self['ebits']]),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0  
+
+
 
 
 class Vfncvt_f_f_w(Inst):
     name = 'vfncvt.f.f.w'
+    type_dict = { 16:np.float16, 32:np.float32 }
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.float32:
-            target_dtype = np.float16
-        elif self['vs2'].dtype == np.float64:
-            target_dtype = np.float32
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_f_f_w.type_dict[self['ebits']] )
 
-        vd = self['vs2'].astype( target_dtype )
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0            
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )            
+            result[ vstart: self['vl'] ] = self.masked( self['vs2'][vstart:self['vl']].astype(Vfncvt_f_f_w.type_dict[self['ebits']]),
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0            
 
 def f32_to_f16( x ):
     num = int( np.array( [x], dtype=np.float32 ).byteswap().tobytes().hex(), 16 )
@@ -280,22 +436,39 @@ def f64_to_f32( x ):
 
 class Vfncvt_rod_f_f_w(Inst):
     name = 'vfncvt.rod.f.f.w'
+    type_dict = { 16:np.float16, 32:np.float32 }
 
     def golden(self):
+        if 'vs2' in self:
 
-        if self['vs2'].dtype == np.float32:
-            vd = self['vs2'].astype( np.float16 ) 
-            for no in range( vd.size ):
-                num = f32_to_f16( self['vs2'][no] )                
-                vd[no] = num
+            if 'orig' in self:
+                result = self['orig'].copy()
+            else:
+                result = np.zeros( self['vl'], dtype = Vfncvt_rod_f_f_w.type_dict[self['ebits']] )
 
-        elif self['vs2'].dtype == np.float64:
-            vd = self['vs2'].astype( np.float32 ) 
-            for no in range( vd.size ):
-                num = f64_to_f32( self['vs2'][no] )                
-                vd[no] = num
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0 
 
+            if self['vs2'].dtype == np.float32:
+                vd = self['vs2'].astype( np.float16 ) 
+                for no in range( vd.size ):
+                    num = f32_to_f16( self['vs2'][no] )                
+                    vd[no] = num
 
+            elif self['vs2'].dtype == np.float64:
+                vd = self['vs2'].astype( np.float32 ) 
+                for no in range( vd.size ):
+                    num = f64_to_f32( self['vs2'][no] )                
+                    vd[no] = num                           
 
-        return self.masked( vd, self['orig'] if 'orig' in self else 0 )
+            result[ vstart: self['vl'] ] = self.masked( vd[vstart:self['vl']],
+             self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
+
+            return result
+        else:
+            return 0
 

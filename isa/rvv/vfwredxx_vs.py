@@ -1,26 +1,60 @@
 from isa.inst import *
 import numpy as np
 
-class Vfwredsum_vs(Inst):
-    name = 'vfwredsum.vs'
+import ctypes
+FE_TONEAREST = 0x0000
+FE_DOWNWARD = 0x0400
+FE_UPWARD = 0x0800
+FE_TOWARDZERO = 0x0c00
+libm = ctypes.CDLL('libm.so.6')
+round_dict = { 0:FE_TONEAREST , 1:FE_TOWARDZERO , 2:FE_DOWNWARD , 3:FE_UPWARD  }
+
+class Vfwredosum_vs(Inst):
+    name = 'vfwredosum.vs'
 
     def golden(self):
-        vd = self['orig'].copy()
-        vs2 = self['vs2'].copy()
-        vs2 = vs2.astype( vd.dtype )
-        if 'mask' in self:
-            mask = []
-            for no in range(0, self['vs2'].size):
-                mask.append( 1 - (( self['mask'][np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 ) )
-            mask = np.array(mask).astype( bool )
-            if mask.all() == True:
-                vd[0] = self['vs1'][0]
+
+        if 'vs1' in self:
+
+            if 'frm' in self:
+                libm.fesetround(round_dict[self['frm']]) 
+
+            if 'orig' in self:
+                result = self['orig'].copy()
             else:
-                vd[0] = self['vs1'][0] + np.ma.array( vs2, mask=mask ).sum()
+                result = np.zeros( 1, self['vs1'].dtype )
+
+            if self['vl'] == 0:
+                return result                
+
+            if 'vstart' in self:
+                if self['vstart'] >= self['vl']:
+                    return result
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+            if 'mask' in self:
+                mask = np.unpackbits( self['mask'], bitorder='little' )[vstart:self['vl']]
+                mask = 1- mask
+            else:
+                mask = np.zeros( self['vl'] - vstart, dtype=np.uint8 )
+
+            if mask.all() == True:
+                result[0] = self['vs1'][0]
+            else:
+                result[0] = self['vs1'][0]
+                vs2 = self['vs2'].astype(self['vs1'].dtype)
+                for no in range( vstart, self['vl'] ):
+                    if mask[no-vstart] == 0:
+                        result[0] = result[0] + vs2[no]
+            
+            if 'frm' in self:
+                libm.fesetround( 0 )        
+
+            return result
         else:
-            vd[0] = self['vs1'][0] + vs2.sum()
+            return 0
 
-        return vd
-
-class Vfwredosum_vs(Vfwredsum_vs):
-    name = 'vfwredosum.vs'       
+class Vfwredusum_vs(Vfwredosum_vs):
+    name = 'vfwredsum.vs'      

@@ -1,0 +1,230 @@
+_: &default
+  head: |
+    #include "exception.h"
+  env: RVTEST_RV64UV
+  templates:
+    test_basic: |
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, 4;
+        fsrm t1, t0;         // set rounding mode as RMM
+        li a0, {vl} ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a1, {rs1_data} ;  // rs1 data label
+        {fldins} fa1, (a1) ; 
+        li t0, 0;
+        csrw vstart, t0;      // set vstart as 0
+        {name} v24, fa1;  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:li a0, 1 ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits}/8)        
+      test_{num}_data:
+        .fill 1, ({ebits}/8), 0;  // there are 1 sets of ({ebits}/8) bytes 0
+        .popsection
+   
+    test_vta_eq_tu: |   
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically            
+        li t0, 4;
+        fsrm t1, t0;      //set rounding mode as RMM            
+        li a0, {orig_shape[0]} ; // vl of source data = (vlmax, VLEN/SEW)
+        vsetvli t0, a0, e{ebits},m{lmul_orig},ta,ma;
+        la a1, {rs1_data} ; // rs1 data label
+        la a3, {orig_data}; // original data label of target register
+        {fldins} fa1, (a1) ; 
+        vle{ebits}.v v24, (a3);
+        li a0, {vl} ;       // set vl of test instruction
+        vsetvli t0, a0, e{ebits},m{lmul},tu,ma;
+        li t0, 0;
+        csrw vstart, t0;    // set vstart as 0
+        {name} v24, fa1 ; // {name} is the test instruction            
+      1:li a0, {orig_shape[0]} ;
+        vsetvli t0, a0, e{ebits},m{lmul_orig},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits}.v v24, (a3);  // save the result data into test_{num}_data memory
+        .pushsection .data, 1; 
+        .balign  ({ebits}/8)
+      test_{num}_data:
+        .fill {orig_shape[0]}, ({ebits}/8), 0;// there are {orig_shape[0]} sets of ({ebits}/8) bytes 0
+        .popsection   
+               
+    test_vstart_not_eq_zero: |   
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, 4;
+        fsrm t1, t0;         // set rounding mode as RMM
+        li a0, {vl} ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a1, {rs1_data} ;  // rs1 data label
+        {fldins} fa1, (a1) ;  
+        vmv.v.i v24, 0;
+        li t0, {vstart};
+        csrw vstart, t0;      // set vstart
+        {name} v24, fa1;  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:li a0, 1 ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits}/8)        
+      test_{num}_data:
+        .fill 1, ({ebits}/8), 0;  // there are 1 sets of ({ebits}/8) bytes 0
+        .popsection
+
+    test_vl_eq_zero: |
+      test_{num}: 
+        li TESTNUM, {num};   // {num} set automatically
+        li t0, 4;
+        fsrm t1, t0;         // set rounding mode as RMM
+        li a0, 1 ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        vmv.v.i v24, 0;
+        la a1, {rs1_data} ;  // rs1 data label
+        {fldins} fa1, (a1) ;
+        li a0, 0 ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;         
+        li t0, 0;
+        csrw vstart, t0;      // set vstart as 0
+        {name} v24, fa1;  // {name} is the test instruction
+        csrr t0, vstart;
+        beqz t0, 1f;          // test if vstart==0 after the instruction
+        j fail;
+      1:li a0, 1 ; 
+        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+        la a3, test_{num}_data; 
+        vse{ebits}.v v24, (a3);    // save the result data into test_{num}_data memory
+        .pushsection .data, 1;
+        .balign  ({ebits}/8)        
+      test_{num}_data:
+        .fill 1, ({ebits}/8), 0;  // there are 1 sets of ({ebits}/8) bytes 0
+        .popsection
+    test_exception_wrong_sew_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically            
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);          
+        li a0, {vl} ;     //vl
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        {name} v24, fa1; // {name} is the test instruction
+        j fail;
+      test_{num}_end:
+    test_exception_wrong_lmul_without_mask: |
+      test_{num}: 
+        li TESTNUM, {num}; // {num} set automatically            
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);          
+        li a0, 1 ;     //vl
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        {name} v24, fa1; // {name} is the test instruction
+        j fail;
+      test_{num}_end: 
+
+  basic_cases:
+    test_basic:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: get_lmul(ebits)
+        vl: get_vl(lmul, ebits, vlen)
+        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
+        fldins: get_fldins(ebits)  
+
+  cases:
+    test_basic:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: get_lmul(ebits)
+        vl: get_vl(lmul, ebits, vlen)
+        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
+        fldins: get_fldins(ebits)       
+
+    test_vta_eq_tu:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: get_lmul(ebits)
+        lmul_orig: 1
+        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
+        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
+        orig: np.linspace(-400, 400, get_vlmax(1, ebits, vlen)).astype(get_floatdtype(ebits))  
+        fldins: get_fldins(ebits)        
+     
+      
+    test_vstart_not_eq_zero:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: get_lmul(ebits)
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits)) 
+        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+        fldins: get_fldins(ebits)   
+
+    test_vl_eq_zero:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: get_lmul(ebits)
+        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
+        fldins: get_fldins(ebits)  
+
+    test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
+      - [ 8, 1, 50 ]
+      - [ 8, 4, 200 ] 
+      - [ 8, "f2", 15 ]
+      - [ 128, 1, 3 ]
+      - [ 128, 2, 10 ]
+      - [ 128, 4, 20 ]
+      - [ 256, 1, 2 ]
+      - [ 256, 4, 10 ]
+      - [ 256, 8, 25 ]
+      - [ 512, 2, 2 ]
+      - [ 512, 4, 5 ]
+      - [ 512, 8, 11 ]
+      - [ 1024, 1, 1 ]
+      - [ 1024, 4, 3 ]
+      - [ 1024, 8, 5 ]
+    test_exception_wrong_lmul_without_mask:
+      matrix:
+        sew: [16, 32, 64]
+        lmul: get_illegal_lmul(sew)
+
+  random_cases:
+    test_vstart_not_eq_zero:
+      matrix:
+        ebits: [16, 32, 64]
+        lmul: 1
+        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
+        rs1: random_float(ebits, 1) 
+        vstart:   np.random.randint(0, vl)
+        fldins: get_fldins(ebits)      
+
+  basic_check:
+    test_basic: np.allclose( result, golden, rtol=1e-3, atol=1e-5, equal_nan=True)
+
+  check:
+    test_basic: np.allclose( result, golden, rtol=1e-3, atol=1e-5, equal_nan=True)     
+    test_vta_eq_tu: np.allclose( result, golden, rtol=1e-3, atol=1e-5, equal_nan=True) 
+    test_vstart_not_eq_zero: np.allclose( result, golden, rtol=1e-3, atol=1e-5, equal_nan=True)
+    test_vl_eq_zero: np.allclose( result, golden, rtol=1e-3, atol=1e-5, equal_nan=True)
+  
+  random_check:
+    test_vstart_not_eq_zero: np.allclose( result, golden, rtol=1e-3, atol=1e-5, equal_nan=True)
+
+
+
+vfmv_s_f:
+  <<: *default

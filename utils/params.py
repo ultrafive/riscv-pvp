@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import pytest
+import re
 
 def linspace_mm(type, w, h):
     return [
@@ -826,7 +827,7 @@ def linspace_rvv_m_v(type, vl):
 
 def linspace_rvv_vf(type, vl):
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-127, 128, vl, dtype=type)
     ]
 
@@ -837,7 +838,7 @@ def linspace_rvv_m_vf_w(type, vl):
         type_vd = np.float64
     return [
         np.linspace(-5, 5, vl, dtype=type_vd),
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type)
     ]
 
@@ -847,7 +848,7 @@ def linspace_rvv_wf(type, vl):
     elif type == np.float32:
         type_vs2 = np.float64
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-127, 128, vl, dtype=type_vs2)
     ]
 
@@ -893,11 +894,30 @@ def linspace_rvv_vv_wred(type, vl):
 def linspace_rvv_m_vf(type, vl):
     return [
         np.linspace(-127, 128, vl, dtype=type),
-        np.array(random.random(), dtype=type),
+        np.array(np.random.random(), dtype=type),
         np.linspace(-120, 135, vl, dtype=type)
     ]
 def random_mask( vl ):
-    return np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int16)), dtype=np.uint8)
+    mask =  np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int16)), dtype=np.uint8)
+    mask = np.unpackbits( mask, bitorder='little' )[0:vl]
+    mask = np.packbits( mask, bitorder='little' )
+    return mask
+
+def zero_mask( vl ):
+    mask =  np.zeros( int(np.ceil(vl/8)), dtype=np.uint8 )
+    return mask  
+
+def mask_first( vl ):
+    mask =  np.ones( vl, dtype=np.uint8 )
+    mask[0] = 0
+    mask = np.packbits( mask, bitorder='little' )
+    return mask   
+
+def mask_last( vl ):
+    mask =  np.ones( vl, dtype=np.uint8 )
+    mask[vl-1] = 0
+    mask = np.packbits( mask, bitorder='little' )
+    return mask   
 
 def random_e1( vl ):
     return np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.uint8)), dtype=np.uint8)
@@ -918,7 +938,7 @@ def linspace_rvv_vv_with_mask(type, vl):
 
 def linspace_rvv_vf_with_mask(type, vl):
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vl, dtype=type),
@@ -932,7 +952,7 @@ def linspace_rvv_slide1up_vf_with_mask(type, vl, fmask):
     else:
         mask[0] = mask[0] & 0xFE
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type),
         mask,
         np.linspace(-1, 1, vl, dtype=type), 
@@ -949,7 +969,7 @@ def linspace_rvv_slide1down_vf_with_mask(type, vl, fmask):
         mask[idx] = mask[idx] & ( 0xFF - ( 1<<bitx ) )
 
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type),
         mask,
         np.linspace(-1, 1, vl, dtype=type),
@@ -962,7 +982,7 @@ def linspace_rvv_wf_with_mask(type, vl):
     elif type == np.float32:
         type_vs2 = np.float64
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type_vs2),
         np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vl, dtype=type_vs2),
@@ -980,7 +1000,7 @@ def linspace_rvv_m_vv_with_mask(type, vl):
 def linspace_rvv_m_vf_with_mask(type, vl):
     return [
         np.linspace(-127, 128, vl, dtype=type),
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
         vl
@@ -1029,7 +1049,7 @@ def linspace_rvv_m_vf_w_with_mask(type, vl):
         type_vd = np.float64
     return [
         np.linspace(-1, 1, vl, dtype=type_vd),        
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
         vl
@@ -1041,7 +1061,7 @@ def linspace_rvv_vf_w_with_mask(type, vl):
     elif type == np.float32:
         type_vd = np.float64
     return [
-        np.array(random.random(), dtype=np.float32),
+        np.array(np.random.random(), dtype=np.float32),
         np.linspace(-120, 135, vl, dtype=type),
         np.array( np.random.randint( 0, 255, np.ceil(vl/8).astype(np.int8)), dtype=np.uint8),
         np.linspace(-1, 1, vl, dtype=type_vd),
@@ -1134,9 +1154,101 @@ def special_vv_fp64():
 
     return [ fpt_data[0], fpt_data[1] ] 
 
-factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+factor_lmul = { 1:1, "1":1, 2:2, "2":2, 4:4, "4":4, 8:8, "8":8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
 ld_ins = { 8: 'lbu', 16: 'lhu', 32: 'lwu', 64: 'ld'}
 st_ins = { 8: 'sbu', 16: 'shu', 32: 'swu', 64: 'sd'}
+def special_fp16():
+    # 0   ,  inf  ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
+    fpt0 = np.array([0x0000], dtype=np.int16)
+    fpt1 = np.array([0x7c00], dtype=np.int16)
+    fpt2 = np.array([0x7e00], dtype=np.int16)
+    fpt3 = np.array([0x2e66], dtype=np.int16)
+    fpt4 = np.array([0x4900], dtype=np.int16)
+    fpt5 = np.array([0x7bff], dtype=np.int16)
+    fpt6 = np.array([0x0400], dtype=np.int16)
+    fpt7 = np.array([0x0001], dtype=np.int16)   
+
+    fpt = [ fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7 ]
+    for fpt_data in fpt:
+        fpt_data.dtype = np.float16
+
+    return fpt  
+
+def special_fp32():
+    # 0   ,       inf  ,       nan  ,      0.1  ,      10  , 3.40282e+38,  1.1755e-38,      1e-45
+    fpt0 = np.array([0x00000000], dtype=np.int32)
+    fpt1 = np.array([0x7f800000], dtype=np.int32)
+    fpt2 = np.array([0x7fc00000], dtype=np.int32)
+    fpt3 = np.array([0x3dcccccd], dtype=np.int32)
+    fpt4 = np.array([0x41200000], dtype=np.int32)
+    fpt5 = np.array([0x7f7fffff], dtype=np.int32)
+    fpt6 = np.array([0x00800000], dtype=np.int32)
+    fpt7 = np.array([0x00000001], dtype=np.int32)
+
+    fpt = [ fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7 ]
+    for fpt_data in fpt:
+        fpt_data.dtype = np.float32
+
+    return fpt 
+
+def special_fp64():
+    #0   ,               inf  ,               nan  ,              0.1  ,               10  ,    1.79769313e+308,     2.22507386e-308,         5.e-324
+    fpt0 = np.array([0x0000000000000000], dtype=np.uint64)
+    fpt1 = np.array([0x7ff0000000000000], dtype=np.uint64)
+    fpt2 = np.array([0x7ff8000000000000], dtype=np.uint64)
+    fpt3 = np.array([0x3fb999999999999a], dtype=np.uint64)
+    fpt4 = np.array([0x4024000000000000], dtype=np.uint64)
+    fpt5 = np.array([0x7fefffffffffffff], dtype=np.uint64)
+    fpt6 = np.array([0x0010000000000000], dtype=np.uint64)
+    fpt7 = np.array([0x0000000000000001], dtype=np.uint64)     
+
+    fpt = [ fpt0, fpt1, fpt2, fpt3, fpt4, fpt5, fpt6, fpt7 ]
+    for fpt_data in fpt:
+        fpt_data.dtype = np.float64
+
+    return fpt 
+
+def special_float(sew):
+    if sew == 16:
+        return special_fp16()
+    if sew == 32:
+        return special_fp32()
+    if sew == 64:
+        return special_fp64()                
+
+def special_v_fp16():
+    # special float table          -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
+    fpt_data = np.array([ 0x0000, 0x8000, 0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001], dtype=np.int16) 
+
+    fpt_data.dtype = np.float16
+
+    return fpt_data
+
+def special_v_fp32():
+    # special float table                  -0   ,       inf  ,       -inf ,       nan  ,      0.1  ,      10  , 3.40282e+38,  1.1755e-38,      1e-45
+    fpt_data = np.array([ 0x00000000, 0x80000000,  0x7f800000,  0xff800000,  0x7fc00000, 0x3dcccccd, 0x41200000, 0x7f7fffff,  0x00800000, 0x00000001], dtype=np.int32)
+ 
+    fpt_data.dtype = np.float32
+
+    return fpt_data
+
+def special_v_fp64():
+    # special float table                                  -0   ,               inf  ,               -inf ,               nan  ,              0.1  ,               10  ,    1.79769313e+308,     2.22507386e-308,         5.e-324
+    fpt_data = np.array([ 0x0000000000000000, 0x8000000000000000,  0x7ff0000000000000,  0xfff0000000000000,  0x7ff8000000000000, 0x3fb999999999999a, 0x4024000000000000, 0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001], dtype=np.uint64)   
+
+    fpt_data.dtype = np.float64
+
+    return fpt_data
+
+def special_v_float(sew):
+    if sew == 16:
+        return special_v_fp16()
+    if sew == 32:
+        return special_v_fp32()
+    if sew == 64:
+        return special_v_fp64() 
+
+
 
 def get_vl(lmul, ebits, vlen):
     max = int( vlen * factor_lmul[lmul] / ebits )
@@ -1252,13 +1364,15 @@ def get_seg_lmul(eew, sew, nf):
         tmp = [1,2,4,8,'f2']
     if 64 == sew:
         tmp = [1,2,4,8]
+def get_tail_end(lmul, ebits, vlen):
 
-    lmul_list = []
-    for i in tmp:
-        if (eew/sew*factor_lmul[i]) <= 8 and (eew/factor_lmul[i]) <= 64 and (nf*eew/sew*factor_lmul[i]) <= 8:
-            lmul_list.append(i)
+    if factor_lmul[lmul] >= 1:
+        max = int( vlen * factor_lmul[lmul] / ebits )
+    else:
+        max = int( vlen / ebits )
+    
+    return max
 
-    return lmul_list
 
 def get_segi_lmul(eew, sew, nf):
     if 8 == sew:
@@ -1303,6 +1417,41 @@ def get_max_num(mask, eew):
     mask.dtype = get_uintdtype(eew)
     return np.max(mask)
 
+def get_illegal_lmul(sew):
+    if 8 == sew:
+        return None
+    if 16 == sew:
+        return ['f8']
+    if 32 == sew:
+        return ['f4', 'f8']
+    if 64 == sew:
+        return ['f2', 'f4', 'f8']    
+
+def get_illegal_lmul_w(sew):
+    if 8 == sew:
+        return [ 8 ]
+    if 16 == sew:
+        return ['f8', 8 ]
+    if 32 == sew:
+        return ['f4', 'f8', 8 ]
+    if 64 == sew:
+        return ['f2', 'f4', 'f8', 8 ]         
+
+def get_lmul_w(sew):
+    if 8 == sew:
+        return [1,2,4,'f2','f4','f8']
+    if 16 == sew:
+        return [1,2,4,'f2','f4']
+    if 32 == sew:
+        return [1,2,4,'f2']
+    if 64 == sew:
+        return [1,2,4] 
+
+double_lmul_dict = {1:2, "1":2, 2:4, "2":4, 4:8, "4":8, 'f2':1, 'f4':'f2', 'f8':'f4'}
+
+def double_lmul(lmul):
+    return double_lmul_dict[lmul]
+
 def get_lmul_seg(sew):
     if 8 == sew:
         return [1,2,4,'f2','f4','f8']
@@ -1328,6 +1477,10 @@ def get_nfields(lmul):
 def get_intdtype(sew):
     int_dtype_dict = { 8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64 }
     return int_dtype_dict[sew]
+
+def get_uintdtype(sew):
+    uint_dtype_dict = { 8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64 }
+    return uint_dtype_dict[sew]    
 
 def get_floatdtype(sew):
     float_dtype_dict = { 16: np.float16, 32: np.float32, 64: np.float64 }
@@ -1381,10 +1534,6 @@ def random_float(sew, vl):
 
     return num
 
-def get_uintdtype(sew):
-    int_dtype_dict = { 8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64 }
-    return int_dtype_dict[sew]
-
 def get_vreg(prev=()):
     vreg = 'v' + str(np.random.randint(0, 31))
 
@@ -1393,3 +1542,91 @@ def get_vreg(prev=()):
 
     return vreg
     
+def random_int( sew, vl ):
+    if sew == 8:
+        num = np.random.randint( 0, 0x100, size=vl, dtype=np.uint8 )
+        num.dtype = np.int8
+    elif sew == 16:
+        num = np.random.randint( 0, 0x10000, size=vl, dtype=np.uint16 )
+        num.dtype = np.int16
+    elif sew == 32:
+        num = np.random.randint( 0, 0x100000000, size=vl, dtype=np.uint32 )
+        num.dtype = np.int32
+    elif sew == 64:
+        num = np.random.randint( 0, 1 << 64, size=vl, dtype=np.uint64 )
+        num.dtype = np.int64        
+    else:
+        raise ValueError(f'{sew} is not a good option for sew.')
+
+    return num    
+
+def random_uint( sew, vl ):
+    if sew == 8:
+        num = np.random.randint( 0, 0x100, size=vl, dtype=np.uint8 )
+    elif sew == 16:
+        num = np.random.randint( 0, 0x10000, size=vl, dtype=np.uint16 )
+    elif sew == 32:
+        num = np.random.randint( 0, 0x100000000, size=vl, dtype=np.uint32 )
+    elif sew == 64:
+        num = np.random.randint( 0, 1 << 64, size=vl, dtype=np.uint64 )       
+    else:
+        raise ValueError(f'{sew} is not a good option for sew.')
+
+    return num  
+
+def get_vregister_name( lmul, neq = 'v33', lmul_neq = 0 ):
+
+    if lmul_neq == 0:
+        lmul_neq = lmul
+    no_neq = int( re.sub( 'v', '', neq ) )
+
+    if isinstance( lmul, str ):
+        lmul = 1
+    if isinstance( lmul_neq, str):
+        lmul_neq = 1
+
+    while True:
+        if isinstance(lmul, int) and lmul >= 2:
+            no = factor_lmul[lmul] * np.random.randint(0,32/factor_lmul[lmul])            
+        else:
+            no = np.random.randint(0,32)
+        if no != no_neq:
+            if ( no > no_neq and no < ( no_neq + lmul_neq) ) or ( no_neq > no and no_neq < (no + lmul) ) :
+                continue
+            else:
+                break
+    
+    return 'v'+str(no)
+
+fldins_dict = { 16: "flh", 32: "flw", 64: "fld" }
+
+def get_fldins(ebits):
+    return fldins_dict[ebits]
+
+fstins_dict = { 16: "fsh", 32: "fsw", 64: "fsd" }
+
+def get_fstins(ebits):
+    return fstins_dict[ebits]
+
+def trans_dtype( input, dtype ):
+    output = input.copy()
+    output.dtype = dtype
+    return output
+
+def Bitsl2Bytesl( num ):
+    return int(np.ceil(num/8))
+
+def hex2fp16( num ):
+    num = np.array([num], dtype = np.uint16  )
+    num.dtype = np.float16
+    return num
+
+def hex2fp32( num ):
+    num = np.array([num], dtype = np.uint32  )
+    num.dtype = np.float32
+    return num
+
+def hex2fp64( num ):
+    num = np.array([num], dtype = np.uint64  )
+    num.dtype = np.float64
+    return num        

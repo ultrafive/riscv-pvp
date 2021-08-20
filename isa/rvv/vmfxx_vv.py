@@ -1,91 +1,128 @@
 from isa.inst import *
 import numpy as np
 
+
 class Vmfeq_vv(Inst):
     name = 'vmfeq.vv'
 
     def golden(self):
-        if 'orig' in self:
-            orig = []
-            orig_data = self["orig"].copy()
-            orig_data.dtype = np.uint8
-            for no in range(0, self['vs1'].size):
-                orig.append( ( orig_data[np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 )
-            orig = np.array(orig).astype(np.bool_)
+        if 'vs2' in self:
 
-        return self.masked( ( self['vs1'] == self['vs2'] ).astype( np.bool_ ), orig if 'orig' in self else 0 )
+            result = np.unpackbits( self['orig'], bitorder='little' )
+
+
+            if 'vstart' in self:
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+            if 'mask' in self:
+                mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vl']]
+            else:
+                if self['vl'] >= vstart:
+                    mask = np.ones( self['vl'] - vstart, dtype = np.uint8 )
+
+            for no in range(vstart, self['vl']):
+                if mask[ no - vstart ] == 1:
+                    result[ no ] = self['vs1'][no] == self['vs2'][no]
+            
+            result = np.packbits( result, bitorder='little' )
+
+            return result
+
+        else:
+            return 0
 
 
 class Vmfne_vv(Inst):
     name = 'vmfne.vv'
 
     def golden(self):
-        if 'orig' in self:
-            orig = []
-            orig_data = self["orig"].copy()
-            orig_data.dtype = np.uint8
-            for no in range(0, self['vs1'].size):
-                orig.append( ( orig_data[np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 )
-            orig = np.array(orig).astype(np.bool_)
+        if 'vs2' in self:
 
-        return self.masked( ( self['vs1'] != self['vs2'] ).astype( np.bool_ ), orig if 'orig' in self else 0 )
+            result = np.unpackbits( self['orig'], bitorder='little' )
+
+            if 'vstart' in self:
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+            if 'mask' in self:
+                mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vl']]
+            else:
+                if self['vl'] >= vstart:
+                    mask = np.ones( self['vl'] - vstart, dtype = np.uint8 )
+
+            for no in range(vstart, self['vl']):
+                if mask[ no - vstart ] == 1:
+                    result[ no ] = self['vs1'][no] != self['vs2'][no]
+            
+            result = np.packbits( result, bitorder='little' )
+
+            return result
+
+        else:
+            return 0
     
 
 class Vmflt_vv(Inst):
     name = 'vmflt.vv'
 
     def golden(self):
-        if 'orig' in self:
-            orig = []
-            orig_data = self["orig"].copy()
-            orig_data.dtype = np.uint8
-            for no in range(0, self['vs1'].size):
-                orig.append( ( orig_data[np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 )
-            orig = np.array(orig).astype(np.bool_)
+        if 'vs2' in self:
+            
+            result = np.unpackbits( self['orig'], bitorder='little' )
 
-        return self.masked( ( self['vs2'] < self['vs1'] ).astype( np.bool_ ), orig if 'orig' in self else 0 )
+            if 'vstart' in self:
+                vstart = self['vstart']
+            else:
+                vstart = 0
+
+            if 'mask' in self:
+                mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vl']]
+            else:
+                if self['vl'] >= vstart:
+                    mask = np.ones( self['vl'] - vstart, dtype = np.uint8 )
+
+            for no in range(vstart, self['vl']):
+                if mask[ no - vstart ] == 1:
+                    result[ no ] = self['vs2'][no] < self['vs1'][no]
+            
+            result = np.packbits( result, bitorder='little' )
+
+            return result
+
+        else:
+            return 0
         
 
 class Vmfle_vv(Inst):
     name = 'vmfle.vv'
 
     def golden(self):
-        if 'orig' in self:
-            orig = []
-            orig_data = self["orig"].copy()
-            orig_data.dtype = np.uint8
-            for no in range(0, self['vs1'].size):
-                orig.append( ( orig_data[np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 )
-            orig = np.array(orig).astype(np.bool_)
+        if 'vs2' in self:
+            
+            result = np.unpackbits( self['orig'], bitorder='little' )
 
-        return self.masked( ( self['vs2'] <= self['vs1'] ).astype( np.bool_ ), orig if 'orig' in self else 0 )
+            if 'vstart' in self:
+                vstart = self['vstart']
+            else:
+                vstart = 0
 
-class Vmfgt_vv(Inst):
-    name = 'vmfgt.vv'
+            if 'mask' in self:
+                mask = np.unpackbits(self['mask'], bitorder='little')[vstart: self['vl']]
+            else:
+                if self['vl'] >= vstart:
+                    mask = np.ones( self['vl'] - vstart, dtype = np.uint8 )
 
-    def golden(self):
-        if 'orig' in self:
-            orig = []
-            orig_data = self["orig"].copy()
-            orig_data.dtype = np.uint8
-            for no in range(0, self['vs1'].size):
-                orig.append( ( orig_data[np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 )
-            orig = np.array(orig).astype(np.bool_)
+            for no in range(vstart, self['vl']):
+                if mask[ no - vstart ] == 1:
+                    result[ no ] = self['vs2'][no] <= self['vs1'][no]
+            
+            result = np.packbits( result, bitorder='little' )
 
-        return self.masked( ( self['vs2'] > self['vs1'] ).astype( np.bool_ ), orig if 'orig' in self else 0 )
-         
+            return result
 
-class Vmfge_vv(Inst):
-    name = 'vmfge.vv'
-
-    def golden(self):
-        if 'orig' in self:
-            orig = []
-            orig_data = self["orig"].copy()
-            orig_data.dtype = np.uint8
-            for no in range(0, self['vs1'].size):
-                orig.append( ( orig_data[np.floor(no/8).astype(np.int8)] >> (no % 8) ) & 1 )
-            orig = np.array(orig).astype(np.bool_)
-
-        return self.masked( ( self['vs2'] >= self['vs1'] ).astype( np.bool_ ), orig if 'orig' in self else 0 )
+        else:
+            return 0
                                      
