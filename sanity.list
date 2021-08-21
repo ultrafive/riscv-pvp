@@ -1,193 +1,193 @@
 # 6
-Test_vset
+vset
 # 7.4
-Test_vle8_v
-Test_vle16_v
-Test_vle32_v
-Test_vle64_v
-Test_vse8_v
-Test_vse16_v
-Test_vse32_v
-Test_vse64_v
+vle8_v
+vle16_v
+vle32_v
+vle64_v
+vse8_v
+vse16_v
+vse32_v
+vse64_v
 # 7.5
-Test_vlse8_v
-Test_vlse16_v
-Test_vlse32_v
-Test_vlse64_v
-Test_vsse8_v
-Test_vsse16_v
-Test_vsse32_v
-Test_vsse64_v
+vlse8_v
+vlse16_v
+vlse32_v
+vlse64_v
+vsse8_v
+vsse16_v
+vsse32_v
+vsse64_v
 # 7.6
-Test_vluxei8_v
-Test_vluxei16_v
-Test_vluxei32_v
-Test_vluxei64_v
-Test_vsuxei8_v
-Test_vsuxei16_v
-Test_vsuxei32_v
-Test_vsuxei64_v
-Test_vloxei8_v
-Test_vloxei16_v
-Test_vloxei32_v
-Test_vloxei64_v
-Test_vsoxei8_v
-Test_vsoxei16_v
-Test_vsoxei32_v
-Test_vsoxei64_v
+vluxei8_v
+vluxei16_v
+vluxei32_v
+vluxei64_v
+vsuxei8_v
+vsuxei16_v
+vsuxei32_v
+vsuxei64_v
+vloxei8_v
+vloxei16_v
+vloxei32_v
+vloxei64_v
+vsoxei8_v
+vsoxei16_v
+vsoxei32_v
+vsoxei64_v
 # 7.7
 # 7.8
-Test_vlsegxex_v
-Test_vssegxex_v
-Test_vlssegxex_v
-Test_vsssegxex_v
-Test_vluxsegxeix_v
-Test_vsuxsegxeix_v
-Test_vloxsegxeix_v
-Test_vsoxsegxeix_v
+vlsegxex_v
+vssegxex_v
+vlssegxex_v
+vsssegxex_v
+vluxsegxeix_v
+vsuxsegxeix_v
+vloxsegxeix_v
+vsoxsegxeix_v
 # 7.9
 # 8
 # 12.1
-Test_vadd
-Test_vsub
-Test_vrsub
+vadd
+vsub
+vrsub
 # 12.2 (missing _wv versions)
-Test_vwaddu_v
-Test_vwsubu_v
-Test_vwadd_v
-Test_vwsub_v
+vwaddu_v
+vwsubu_v
+vwadd_v
+vwsub_v
 # 12.3
 # 12.4
-Test_vadc_v
-Test_vmadc_v
-Test_vsbc_v
-Test_vmsbc_v
+vadc_v
+vmadc_v
+vsbc_v
+vmsbc_v
 # 12.5
-Test_vand_v
-Test_vor_v
-Test_vxor_v
+vand_v
+vor_v
+vxor_v
 # 12.6
-Test_vsll_v
-Test_vsrl_v
-Test_vsra_v
+vsll_v
+vsrl_v
+vsra_v
 # 12.7
-Test_vnsrl
-Test_vnsra
+vnsrl
+vnsra
 # 12.8
-Test_vmseq_v
-Test_vmsne_v
-Test_vmsltu_v
-Test_vmslt_v
-Test_vmsleu_v
-Test_vmsle_v
-Test_vmsgtu_v
-Test_vmsgt_v
+vmseq_v
+vmsne_v
+vmsltu_v
+vmslt_v
+vmsleu_v
+vmsle_v
+vmsgtu_v
+vmsgt_v
 # 12.9
-Test_vminu_
-Test_vmaxu_
-Test_vmin_
-Test_vmax_
+vminu_
+vmaxu_
+vmin_
+vmax_
 # 12.10
-Test_vmul_
-Test_vmulh_
-Test_vmulhu_
-Test_vmulhsu_
+vmul_
+vmulh_
+vmulhu_
+vmulhsu_
 # 12.11
 # 12.12
-Test_vwmul_
-Test_vwmulu_
-Test_vwmulsu_
+vwmul_
+vwmulu_
+vwmulsu_
 # 12.13
-Test_vmacc_
-Test_vnmsac_
-Test_vmadd_
-Test_vnmsub_
+vmacc_
+vnmsac_
+vmadd_
+vnmsub_
 # 12.14
-Test_vwmaccu_
-Test_vwmacc_
-Test_vwmaccsu_
-Test_vwmaccus_
+vwmaccu_
+vwmacc_
+vwmaccsu_
+vwmaccus_
 # 12.15
-Test_vmerge
+vmerge
 # 12.16
-Test_vmv_v
+vmv_v
 # 13.1
 # 13.2
-Test_vaaddu_v
-Test_vaadd_v
-Test_vasubu_v
-Test_vasub_v
+vaaddu_v
+vaadd_v
+vasubu_v
+vasub_v
 # 13.3
 # 13.4
 # 13.5
 # 14.2
-Test_vfadd
-Test_vfsub
-Test_vfrsub
+vfadd
+vfsub
+vfrsub
 # 14.3
-Test_vfwadd
-Test_vfwsub
+vfwadd
+vfwsub
 # 14.4 (missing vf(r)div)
-Test_vfmul
-Test_vfdiv
-Test_vfrdiv
+vfmul
+vfdiv
+vfrdiv
 # 14.5
-Test_vfwmul
+vfwmul
 # 14.6
-Test_vfmacc
-Test_vfnmacc
-Test_vfmsac
-Test_vfnmsac
-Test_vfmadd
-Test_vfnmadd
-Test_vfmsub
-Test_vfnmsub
+vfmacc
+vfnmacc
+vfmsac
+vfnmsac
+vfmadd
+vfnmadd
+vfmsub
+vfnmsub
 # 14.7
-Test_vfwmacc
-Test_vfwnmacc
-Test_vfwmsac
-Test_vfwnmsac
+vfwmacc
+vfwnmacc
+vfwmsac
+vfwnmsac
 # 14.8, 14.9 and 14.10
-Test_vfsqrt
-Test_vfrsqrt7
-Test_vfrec7
+vfsqrt
+vfrsqrt7
+vfrec7
 # 14.11
-Test_vfmin
-Test_vfmax
+vfmin
+vfmax
 # 14.12
-Test_vfsgnj
+vfsgnj
 # 14.13
-Test_vmfeq
-Test_vmfne
-Test_vmflt
-Test_vmfle
-Test_vmfgt
-Test_vmfge
+vmfeq
+vmfne
+vmflt
+vmfle
+vmfgt
+vmfge
 # 14.14
-Test_vfclass
+vfclass
 # 14.15
 # 14.16
-Test_vfmv_v_f
+vfmv_v_f
 # 14.17
-Test_vfcvt
+vfcvt
 # 14.18
-Test_vfwcvt
+vfwcvt
 # 14.19
-Test_vfncvt
+vfncvt
 # 15.1
 # 15.2
 # 15.3
 # 15.4
 # 16.1
 # 16.2
-Test_vmand_mm
-Test_vmnand_mm
-Test_vmandnot_mm
-Test_vmxor_mm
-Test_vmor_mm
-Test_vmnor_mm
-Test_vmornot_mm
-Test_vmxnor_mm
+vmand_mm
+vmnand_mm
+vmandnot_mm
+vmxor_mm
+vmor_mm
+vmnor_mm
+vmornot_mm
+vmxnor_mm
 # 16.3
 # 16.4
 # 16.5
@@ -195,8 +195,8 @@ Test_vmxnor_mm
 # 16.8
 # 17.1
 # 17.2
-Test_vfmv_s_f
-Test_vfmv_f_s
+vfmv_s_f
+vfmv_f_s
 # 17.3
 # 17.4
 # 17.5
