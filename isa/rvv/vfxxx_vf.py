@@ -254,7 +254,7 @@ class Vfmax_vf(Inst):
         else:
             return 0 
 
-def min( a, b ):
+def min_vf( a, b ):
     result = np.zeros( b.size, dtype=b.dtype )
     for no in range(0, b.size):
         if np.isnan( a ):
@@ -290,7 +290,7 @@ class Vfmin_vf(Inst):
                 vstart = 0
 
 
-            result[vstart:self['vl']] = self.masked( min( self['rs1'], self['vs2'][vstart:self['vl']] ),
+            result[vstart:self['vl']] = self.masked( min_vf( self['rs1'], self['vs2'][vstart:self['vl']] ),
              self['orig'][vstart:self['vl']] if 'orig' in self else 0, vstart )
             
             if 'frm' in self:
