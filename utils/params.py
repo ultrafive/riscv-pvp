@@ -1364,6 +1364,14 @@ def get_seg_lmul(eew, sew, nf):
         tmp = [1,2,4,8,'f2']
     if 64 == sew:
         tmp = [1,2,4,8]
+
+    lmul_list = []
+    for i in tmp:
+        if (eew/sew*factor_lmul[i]) <= 8 and (eew/factor_lmul[i]) <= 64 and (nf*eew/sew*factor_lmul[i]) <= 8:
+            lmul_list.append(i)
+
+    return lmul_list
+    
 def get_tail_end(lmul, ebits, vlen):
 
     if factor_lmul[lmul] >= 1:
