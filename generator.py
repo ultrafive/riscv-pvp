@@ -137,6 +137,7 @@ else:
 
 print("collecting the tests...")
 collected_case_list = [] # for --collect and generator use this list to generate files
+collected_case_num_list = []
 all_case_list = [] # take all cases in specs, used to compute the sum of cases which will be generated
 if args.param_info:
     param_dict = dict()
@@ -316,6 +317,7 @@ for spec in specs:
             if args.level == "inst":
                 # just collect the instruction
                 collected_case_list.append(inst)
+                collected_case_num_list.append(0)
 
             # collect the instruction, test_type and test_param
             for test_type in attrs['test'].keys():
@@ -323,7 +325,9 @@ for spec in specs:
                     param_dict[inst][test_type] = dict()
                 if args.level == "type":
                     # collect the instruction and test_type
-                    collected_case_list.append(inst+'/'+test_type)                    
+                    collected_case_list.append(inst+'/'+test_type)
+                    collected_case_num_list.append(0)
+
                 test_info = attrs['test'][test_type]
                                     
                 attrs['test'][test_type]["case_param"] = dict()
@@ -343,6 +347,9 @@ for spec in specs:
                         attrs['test'][test_type]["case_param"][case_name] = param
                         if args.level == "case":
                             collected_case_list.append(inst+'/'+test_type+'/'+case_name)
+                            collected_case_num_list.append(1)
+                        else:
+                            collected_case_num_list[-1] += 1
                         num += 1
                         if args.param_info:
                             param_dict[inst][test_type][case_name] = str(param)
@@ -366,8 +373,10 @@ os.makedirs("log", exist_ok=True)
 
 # log file to tell user what cases there are in the yaml files in this level
 with open("log/collected_case.log", 'w') as case_log:
-    for case in collected_case_list:
-        case_log.write(case)
+    for no in range(len(collected_case_list)):
+        case_log.write(collected_case_list[no])
+        case_log.write(',')
+        case_log.write(str(collected_case_num_list[no]))
         case_log.write('\n')
 
 # log file to use in the runner.py to know the cases number it will run
@@ -873,16 +882,17 @@ if __name__ == "__main__":
 
             # find the sum of all cases generator will generate to display
             testcase_num = 0
-            for testcase in all_case_list:
+            for no in range( len(collected_case_list) ):
+                testcase = collected_case_list[no]
                 if cases and len(cases) > 0:
                     for case in cases:
-                        if not testcase.startswith(case):                        
+                        if not case in testcase:                       
                             continue
                         
-                        testcase_num += 1
+                        testcase_num += collected_case_num_list[no]
                         break                 
                 else:          
-                    testcase_num += 1
+                    testcase_num += collected_case_num_list[no]
 
             # progress bar configuration
             progress = Progress(
@@ -904,7 +914,7 @@ if __name__ == "__main__":
             for collect_case in collected_case_list:
                 if cases and len(cases) > 0:
                     for case in cases:
-                        if not collect_case.startswith(case):                        
+                        if not case in collect_case:                     
                             continue
                         
                         res = pool.apply_async(run_test, [ collect_case ], 
@@ -924,7 +934,7 @@ if __name__ == "__main__":
 
             # write the test results into log/generator_report.log
             report = open(f'log/generator_report.log', 'w')
-            runner_case = []  
+            generator_case = []  
             for case, p in ps:
                 ok = True
 
@@ -947,17 +957,19 @@ if __name__ == "__main__":
                     print(f'FAIL {case} - {reason}', file=report)
                 else:
                     print(f'PASS {case}', file=report)
-                    runner_case.append(case)                                                        
+                    generator_case.append(case)                                                        
 
 
 
             report.close()
 
-            # write the successfully case into the runner_case.log to let the runner to know which cases need to run
-            with open("log/runner_case.log", 'w') as runner_log:
-                for case in runner_case:
-                    runner_log.write(case)
-                    runner_log.write('\n')
+            # write the successfully case into the generator_case.log to let the runner to know which cases need to run
+            with open("log/generator_case.log", 'w') as generator_log:
+                for case in generator_case:
+                    generator_log.write(case)
+                    generator_log.write(',')
+                    generator_log.write(str(collected_case_num_list[collected_case_list.index(case)]))
+                    generator_log.write('\n')
 
             if failed == 0:
                 print(f'{len(ps)} files generation finish, all pass.( {tests.value} tests )')

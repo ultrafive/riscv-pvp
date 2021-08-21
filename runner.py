@@ -10,6 +10,7 @@ import io
 import argparse
 import time
 import yaml
+import re
 from rich.progress import (
     Progress,
     TextColumn,
@@ -22,12 +23,11 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 # options to configure the test frame
 parser.add_argument('--config', help='config yaml file', default='config/prod.yml')
 parser.add_argument('--retry', help='retry last failed cases', action="store_true")
-parser.add_argument('--runner_process', help='runner process number for run cases', type=int, default=1)
+parser.add_argument('--nproc', help='runner process number for run cases', type=int, default=1)
 parser.add_argument('--cases', help=textwrap.dedent('''\
                                     test case list string or file, for example:
                                     - vsub_vv,addi/test_imm_op/
-                                    - cases.list
-                                    default = log/runner_case.log'''), default='log/runner_case.log')
+                                    - cases.list'''), default='')
 parser.add_argument('--no-failing-info', help="don't print the failing info into the screen, rather than log/runner_report.log.", action="store_true")                                     
 
 
@@ -418,28 +418,37 @@ if __name__ == "__main__":
         elif args.cases != '':
             cases = list(filter(f, map(s, args.cases.split(','))))
         else:
-            print('could not find case to run, please check.')
-            sys.exit(-1)
+            cases = []
 
     try:
-        with Pool(processes=args.runner_process) as pool:
+        with Pool(processes=args.nproc) as pool:
         
             ps = []   
 
-            # read the all_case.log file and find the cases about the args.case option, so we know the amount of test cases we will run
+            # read the generator_case.log file and find the cases about the args.case option, so we know the amount of test cases we will run
             testcase_num = 0
-            with open("log/all_case.log") as fp:
+            with open("log/generator_case.log") as fp:
                 s = lambda l: l.strip()
                 f = lambda l: l != '' and not l.startswith('#')
-                testcase_list = list(filter(f, map(s, fp.read().splitlines())))
+                generator_info_list = list(filter(f, map(s, fp.read().splitlines())))
+                generator_case_list = []
+                generator_num_list = []
+                for no in range(len(generator_info_list)):
+                    [case_name, case_num] = re.split(r'\s*,\s*', generator_info_list[no])
+                    generator_case_list.append(case_name)
+                    generator_num_list.append(int(case_num))
 
-            for testcase in testcase_list:
-                for case in cases:
-                    if not testcase.startswith(case):                        
-                        continue
+            for no in range(len(generator_case_list)):
+                testcase = generator_case_list[no]
+                if len(cases) > 0: 
+                    for case in cases:
+                        if not case in testcase:                        
+                            continue
 
-                    testcase_num += 1
-                    break
+                        testcase_num += generator_num_list[no]
+                        break
+                else:
+                    testcase_num += generator_num_list[no]
 
             # progress bar configurations
             progress = Progress(
@@ -457,13 +466,23 @@ if __name__ == "__main__":
             progress.start()
             task_id = progress.add_task("runner", name = "runner", total=testcase_num, start=True)     
 
-            
+            for no in range(len(generator_case_list)):
+                testcase = generator_case_list[no]
+                if len(cases) > 0: 
+                    for case in cases:
+                        if not case in testcase:                        
+                            continue
 
-            for case in cases:
-                res = pool.apply_async(runner, [ case ], 
-                callback=lambda _: runner_callback( progress, task_id, tests.value, testcase_num ), 
-                error_callback=lambda _: runner_error(case)  )
-                ps.append((case, res))   
+                        res = pool.apply_async(runner, [ testcase ], 
+                        callback=lambda _: runner_callback( progress, task_id, tests.value, testcase_num ), 
+                        error_callback=lambda _: runner_error(testcase)  )
+                        ps.append((testcase, res))
+                        break
+                else:
+                    res = pool.apply_async(runner, [ testcase ], 
+                    callback=lambda _: runner_callback( progress, task_id, tests.value, testcase_num ), 
+                    error_callback=lambda _: runner_error(testcase)  )
+                    ps.append((testcase, res))
 
 
             failed = 0
