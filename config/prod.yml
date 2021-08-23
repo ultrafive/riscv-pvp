@@ -43,7 +43,7 @@ gem5:
       --l2_size=512kB' \
 
 vcs:
-  path: ./../../sims/vcs/simv-chipyard-StcBoomConfig-debug
+  path: ../../../sims/vcs/simv-chipyard-StcBoomConfig-debug
   cmd: f'{path}'
   vcstimeout: 1000000
   fsdb: True
