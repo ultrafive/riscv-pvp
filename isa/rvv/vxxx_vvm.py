@@ -3,21 +3,41 @@ import numpy as np
 
 class Vadc_vvm(Inst):
     name = 'vadc.vvm'
+    # vadc.vvm vd, vs2, vs1, v0  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
+        for ii in range(vstart, self['vl']): 
+            result[ii] = self['vs2'][ii].astype(object) + self['vs1'][ii] + mask[ii]
+        return result 
 
-    def golden(self):
-        mask = np.unpackbits(self['v0'], bitorder='little')[0: self['vl']]
-        return self['vs1'] + self['vs2'] + mask
 
 class Vsbc_vvm(Inst):
     name = 'vsbc.vvm'
+    # vsbc.vvm vd, vs2, vs1, v0  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
+        for ii in range(vstart, self['vl']): 
+            result[ii] = self['vs2'][ii].astype(object) - self['vs1'][ii] - mask[ii]
+        return result 
 
-    def golden(self):
-        mask = np.unpackbits(self['v0'], bitorder='little')[0: self['vl']]
-        return self['vs2'] - self['vs1'] - mask
 
 class Vmerge_vvm(Inst):
     name = 'vmerge.vvm'
-
-    def golden(self):
-        mask = np.unpackbits(self['v0'], bitorder='little')[0: self['vl']]
-        return np.where(mask & 1 == 1, self['vs1'], self['vs2'])
+    # vmerge.vvm vd, vs2, vs1, v0  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        mask = np.unpackbits(self['mask'], bitorder='little')[0: self['vl']]
+        for ii in range(vstart, self['vl']): 
+            result[ii] = self['vs1'][ii] if mask[ii] else self['vs2'][ii]
+        return result 

@@ -3,13 +3,12 @@ import numpy as np
 
 class Vmv_v_i(Inst):
     name = 'vmv.v.i'
-
-    def golden(self):
-        if self['ebits'] == 32:
-            return np.array(self['imm']).astype(np.int32)
-        elif self['ebits'] == 16:
-            return np.array(self['imm']).astype(np.int16)
-        elif self['ebits'] == 8:
-            return np.array(self['imm']).astype(np.int8)
-        else:
-            return np.array(self['imm']).astype(np.int64)
+    # vmv.v.i vd, imm   
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        vstart   = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            result[ii] = self['imm']
+        return result 

@@ -1,0 +1,497 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_base_without_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a6, {ori_data}; 
+        vle8.v v24, (a6);
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vs2_data};        
+        vle{sew}.v v16, (a2);
+        {name} v24, v16, a1;
+        li a0, {bvl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a3, test_{num}_data;
+        vse8.v v24, (a3);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection 
+
+    test_base_with_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a6, {ori_data}; 
+        vle8.v v24, (a6);
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a0, {mask_data};
+        li a1, {rs1};
+        la a2, {vs2_data};        
+        vle1.v      v0, (a0);
+        vle{sew}.v v16, (a2);
+        {name} v24, v16, a1, v0.t;
+        li a0, {bvl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,{vma};
+        la a3, test_{num}_data;
+        vse8.v v24, (a3);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection 
+
+    test_regression_without_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a6, {ori_data}; 
+        vle8.v v24, (a6);
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vs2_data};        
+        vle{sew}.v v16, (a2);
+        li t0, {vstart};
+        csrw vstart, t0;
+        {name} v24, v16, a1;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:li a0, {bvl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a3, test_{num}_data;
+        vse8.v v24, (a3);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection  
+
+    test_agnostic_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;
+        la a3, {ori_data}; 
+        vle8.v v24, (a3);
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},tu,ma;
+        li a1, {rs1};
+        la a2, {vs2_data};    
+        vle{sew}.v v16, (a2);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},tu,ma;
+        {name} v24, v16, a1;
+        li a0, {bvl}; 
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;
+        la a6, test_{num}_data;
+        vse8.v v24, (a6);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection  
+
+    test_vstart_not_equal_zero_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a3, {ori_data}; 
+        vle8.v v24, (a3);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vs2_data};         
+        vle{sew}.v v16, (a2);
+        li t0, {vstart};
+        csrw vstart, t0;
+        {name} v24, v16, a1;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la  a6, test_{num}_data;
+        vse8.v v24, (a6);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection 
+
+    test_vstart_not_equal_zero_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a3, {ori_data}; 
+        vle8.v v24, (a3);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a0, {mask_data};
+        li a1, {rs1};
+        la a2, {vs2_data};     
+        vle1.v  v0, (a0);    
+        vle{sew}.v v16, (a2);
+        li t0, {vstart};
+        csrw vstart, t0;
+        {name} v24, v16, a1, v0.t;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:li a0, {bvl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la  a6, test_{num}_data;
+        vse8.v v24, (a6);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection 
+
+    test_register_vd_equ_vs2_without_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vs2_data};        
+        vle{sew}.v v16, (a2);
+        {name} v16, v16, a1;
+        li a0, {bvl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a3, test_{num}_data;
+        vse8.v v16, (a3);
+        .pushsection .data, 1;
+        .balign (1)
+      test_{num}_data:
+        .fill ({bvl}), (1), 0;
+        .popsection 
+
+
+  check:
+    test_base_without_mask: np.array_equal(result, golden)
+    test_base_with_mask   : np.array_equal(result, golden)
+    test_regression_without_mask: np.array_equal(result, golden)
+    test_agnostic_without_mask: np.array_equal(result, golden)
+    test_vstart_not_equal_zero_without_mask: np.array_equal(result, golden)
+    test_vstart_not_equal_zero_with_mask   : np.array_equal(result, golden)
+    test_register_vd_equ_vs2_without_mask: np.array_equal(result, golden)
+    
+
+  basic_cases:
+    test_base_without_mask @ ori, rs1, vs2, sew, vl, lmul, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              rs1 = get_intmin(sew)
+              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              bvl = Bitsl2Bytesl(vl)
+              ori = random_mask(8*bvl)
+              params_yml.append([ori, rs1, vs2, sew, vl, lmul, bvl])
+
+    test_base_with_mask @ ori, rs1, vs2, sew, vl, lmul, vma, mask, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vma in ["ma", "mu"]:
+                rs1 = get_intmin(sew)
+                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+                mask= random_mask(vl)
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, vma, mask, bvl])
+
+  random_cases:
+    test_regression_without_mask @ ori, rs1, vs2, sew, vl, lmul, vma, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vma in ["ma", "mu"]:
+                for vstart in [vl//2,np.random.randint(vl+2)]:
+                  rs1 = get_intmax(sew)
+                  vs2 = np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+                  bvl = Bitsl2Bytesl(vl)
+                  ori = random_mask(8*bvl) 
+                  params_yml.append([ori, rs1, vs2, sew, vl, lmul, vma, vstart, bvl])  
+
+
+  cases:
+    test_agnostic_without_mask @ ori, vs2, rs1, sew, lmul, lmul_tu, vl, tail, bvl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              tail= get_tailmax(lmul, sew)
+              rs1 = get_intmax(sew)
+              vs2 = np.linspace( 1, get_intmax(sew), tail, dtype=get_intdtype(sew))
+              bvl = Bitsl2Bytesl(tail)
+              ori = random_mask(8*tail) 
+              lmul_tu = 1 if isinstance(lmul,str) else lmul
+              params_yml.append([ori, vs2, rs1, sew, lmul, lmul_tu, vl, tail, bvl])
+
+    test_vstart_not_equal_zero_without_mask @ ori, rs1, vs2, sew, vl, lmul, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//2,sew//2]:
+                rs1 = 0
+                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)                 
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, vstart, bvl])  
+
+    test_vstart_not_equal_zero_with_mask @ ori, rs1, vs2, sew, vl, lmul, mask, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//2]:
+                rs1 = get_intmax(sew)//2
+                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+                mask= random_mask(vl) 
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)                 
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, mask, vstart, bvl])  
+
+    test_register_vd_equ_vs2_without_mask @ ori, rs1, vs2, sew, vl, lmul, bvl, flag:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              rs1 = get_intmax(sew)
+              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              bvl = Bitsl2Bytesl(vl)
+              ori = vs2.copy()
+              flag= 1
+              params_yml.append([ori, rs1, vs2, sew, vl, lmul, bvl, flag])               
+
+vmseq_vx:
+  <<: *default
+
+vmsne_vx:
+  <<: *default
+
+vmslt_vx:
+  <<: *default
+
+vmsle_vx:
+  <<: *default
+
+vmsgt_vx:
+  <<: *default
+
+
+_: &unsigned
+  <<: *default
+  basic_cases:
+    test_base_without_mask @ ori, rs1, vs2, sew, vl, lmul, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              rs1 = get_uintmax(sew)
+              vs2 = np.linspace(1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              bvl = Bitsl2Bytesl(vl)
+              ori = random_mask(8*bvl)
+              params_yml.append([ori, rs1, vs2, sew, vl, lmul, bvl])
+
+    test_base_with_mask @ ori, rs1, vs2, sew, vl, lmul, vma, mask, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vma in ["ma", "mu"]:
+                rs1 = get_uintmax(sew)
+                vs2 = np.linspace(0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+                mask= random_mask(vl)
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, vma, mask, bvl])
+
+  random_cases:
+    test_regression_without_mask @ ori, rs1, vs2, sew, vl, lmul, vma, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vma in ["ma", "mu"]:
+                for vstart in [vl//2,np.random.randint(vl+2)]:
+                  rs1 = get_uintmax(sew)
+                  vs2 = np.random.uniform(0, get_uintmax(sew), vl).astype(get_uintdtype(sew))
+                  bvl = Bitsl2Bytesl(vl)
+                  ori = random_mask(8*bvl) 
+                  params_yml.append([ori, rs1, vs2, sew, vl, lmul, vma, vstart, bvl])              
+
+  cases:
+    test_agnostic_without_mask @ ori, vs2, rs1, sew, lmul, lmul_tu, vl, tail, bvl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              tail= get_tailmax(lmul, sew)
+              rs1 = get_uintmax(sew)
+              vs2 = np.linspace( 1, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
+              bvl = Bitsl2Bytesl(tail)
+              ori = random_mask(8*tail) 
+              lmul_tu = 1 if isinstance(lmul,str) else lmul
+              params_yml.append([ori, vs2, rs1, sew, lmul, lmul_tu, vl, tail, bvl])
+
+    test_vstart_not_equal_zero_without_mask @ ori, rs1, vs2, sew, vl, lmul, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//2,sew//2]:
+                rs1 = 1
+                vs2 = np.linspace(1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)                 
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, vstart, bvl])  
+
+    test_vstart_not_equal_zero_with_mask @ ori, rs1, vs2, sew, vl, lmul, mask, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 32 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//2]:
+                rs1 = get_uintmax(sew)//2
+                vs2 = np.linspace(0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+                mask= random_mask(vl) 
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)                 
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, mask, vstart, bvl]) 
+
+    test_register_vd_equ_vs2_without_mask @ ori, rs1, vs2, sew, vl, lmul, bvl, flag:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              rs1 = get_uintmax(sew)
+              vs2 = np.linspace(0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              bvl = Bitsl2Bytesl(vl)
+              ori = vs2.copy()
+              flag= 1
+              params_yml.append([ori, rs1, vs2, sew, vl, lmul, bvl, flag]) 
+
+vmsltu_vx:
+  <<: *unsigned
+
+vmsleu_vx:
+  <<: *unsigned
+
+vmsgtu_vx:
+  <<: *unsigned
+
+
+_: &addsub
+  <<: *default
+  basic_cases:
+    test_base_without_mask @ ori, rs1, vs2, sew, vl, lmul, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              rs1 = get_intmin(sew)
+              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              bvl = Bitsl2Bytesl(vl)
+              ori = random_mask(8*bvl)
+              params_yml.append([ori, rs1, vs2, sew, vl, lmul, bvl])
+
+  random_cases:
+    test_regression_without_mask @ ori, rs1, vs2, sew, vl, lmul, vma, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vma in ["ma", "mu"]:
+                for vstart in [vl//2,np.random.randint(vl+2)]:
+                  rs1 = get_uintmax(sew)
+                  vs2 = np.random.uniform(0, get_uintmax(sew), vl).astype(get_uintdtype(sew))
+                  bvl = Bitsl2Bytesl(vl)
+                  ori = random_mask(8*bvl) 
+                  params_yml.append([ori, rs1, vs2, sew, vl, lmul, vma, vstart, bvl]) 
+
+
+  cases:
+    test_agnostic_without_mask @ ori, vs2, rs1, sew, lmul, lmul_tu, vl, tail, bvl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              tail= get_tailmax(lmul, sew)
+              rs1 = get_uintmax(sew)
+              vs2 = np.linspace( 1, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
+              bvl = Bitsl2Bytesl(tail)
+              ori = random_mask(8*tail) 
+              lmul_tu = 1 if isinstance(lmul,str) else lmul
+              params_yml.append([ori, vs2, rs1, sew, lmul, lmul_tu, vl, tail, bvl])
+ 
+    test_vstart_not_equal_zero_without_mask @ ori, rs1, vs2, sew, vl, lmul, vstart, bvl:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//2,sew//2]:
+                rs1 = 1
+                vs2 = np.linspace(1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+                bvl = Bitsl2Bytesl(vl)
+                ori = random_mask(8*bvl)                 
+                params_yml.append([ori, rs1, vs2, sew, vl, lmul, vstart, bvl])  
+ 
+    test_register_vd_equ_vs2_without_mask @ ori, rs1, vs2, sew, vl, lmul, bvl, flag:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              rs1 = get_uintmax(sew)
+              vs2 = np.linspace(0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              bvl = Bitsl2Bytesl(vl)
+              ori = vs2.copy()
+              flag= 1
+              params_yml.append([ori, rs1, vs2, sew, vl, lmul, bvl, flag]) 
+              
+vmadc_vx: 
+  <<: *addsub
+
+vmsbc_vx:
+  <<: *addsub
+

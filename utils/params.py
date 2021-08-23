@@ -1155,6 +1155,7 @@ def special_vv_fp64():
     return [ fpt_data[0], fpt_data[1] ] 
 
 factor_lmul = { 1:1, "1":1, 2:2, "2":2, 4:4, "4":4, 8:8, "8":8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
+string_lmul = { 1:1, 2:2, 4:4, 8:8, 0.5:'f2', 0.25:'f4', 0.125:'f8'}
 ld_ins = { 8: 'lbu', 16: 'lhu', 32: 'lwu', 64: 'ld'}
 st_ins = { 8: 'sbu', 16: 'shu', 32: 'swu', 64: 'sd'}
 def special_fp16():
@@ -1267,6 +1268,10 @@ def get_vl(lmul, ebits, vlen):
 def get_vlmax(lmul, ebits, vlen):
     max = int( vlen * factor_lmul[lmul] / ebits )
     return max
+
+def get_tailmax(lmul, ebits, vlen=1024):
+    tail = max( vlen*factor_lmul[lmul]//ebits, vlen//ebits )
+    return tail
 
 def get_vstart(vlen):
     return list(np.unique(np.linspace(0, vlen-1, vlen//10).astype(int)))    
@@ -1482,6 +1487,9 @@ def get_nfields(lmul):
     else:
         return [ 2, 3, 4, 5, 6, 7, 8]
 
+def get_emul(eew, sew, lmul):
+    return string_lmul[ (eew/sew)*factor_lmul[lmul] ]
+
 def get_intdtype(sew):
     int_dtype_dict = { 8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64 }
     return int_dtype_dict[sew]
@@ -1493,6 +1501,15 @@ def get_uintdtype(sew):
 def get_floatdtype(sew):
     float_dtype_dict = { 16: np.float16, 32: np.float32, 64: np.float64 }
     return float_dtype_dict[sew]
+
+def get_intmin(sew):
+    return -(2**(sew-1))
+
+def get_intmax(sew):
+    return 2**(sew-1)-1
+
+def get_uintmax(sew):
+    return 2**sew-1
 
 def get_float_pos_min(sew):
 

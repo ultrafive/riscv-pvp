@@ -3,9 +3,18 @@ import numpy as np
 
 class Vmadc_vim(Inst):
     name = 'vmadc.vim'
-
-    def golden(self):
-        mask = np.unpackbits(self['v0'], bitorder='little')[0: self['vl']]
-        vd = self['vs2'].astype(np.uint64) + self['imm'] + mask
-        vd = np.where(vd > 0xffffffff, 1, 0)
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
+    # vmadc.vim vd, vs2, imm, v0  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit    = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        mask   = np.unpackbits(self['mask'],bitorder='little')
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            carry = self['vs2'][ii].astype(object) + self['imm'].astype(object)  + mask[ii].astype(object) 
+            bit[ii] = 1 if ((carry>>self['sew']) & 1) else 0    
+        result = np.packbits(bit, bitorder='little')   
+        return result 
+        

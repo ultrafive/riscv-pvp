@@ -1,0 +1,192 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_base_vmv: |
+      test_{num}:
+        li TESTNUM, {num};       
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;       
+        la a1, {vs1_data};
+        la a2, {ori_data};
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2);
+        {name} v16, v8;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:la a4, test_{num}_data;
+        vse{sew}.v  v16, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection
+
+    test_regression_vmv: |
+      test_{num}:
+        li TESTNUM, {num};       
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},{vta},ma;       
+        la a1, {vs1_data};
+        la a2, {ori_data};
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2);
+        {name} v16, v8;
+        la a4, test_{num}_data;
+        vse{sew}.v  v16, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection
+    
+    test_agnostic_vmv: |
+      test_{num}:
+        li TESTNUM, {num};       
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;       
+        la a1, {vs1_data};
+        la a2, {ori_data};
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},{vta},ma; 
+        {name} v16, v8;
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma; 
+        la a2, test_{num}_data;
+        vse{sew}.v  v16, (a2);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {tail}, ({sew}/8), 0;
+        .popsection
+
+    test_vstart_not_eq_zero_vmv: |
+      test_{num}:
+        li TESTNUM, {num};       
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;       
+        la a1, {ori_data};
+        la a2, {vs1_data};
+        vle{sew}.v v16, (a1);
+        vle{sew}.v  v8, (a2);
+        li t2, {vstart};
+        csrw vstart, t2;
+        {name} v16, v8;
+        la a4, test_{num}_data;
+        vse{sew}.v  v16, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection
+        
+    test_dest_eq_vs1_vmv: |
+      test_{num}:
+        li TESTNUM, {num};       
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;       
+        la a1, {vs1_data};
+        vle{sew}.v  v8, (a1);
+        {name} v8, v8;
+        la a2, test_{num}_data;
+        vse{sew}.v  v8, (a2);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill {vl}, ({sew}/8), 0;
+        .popsection
+
+    test_exception_misaligned_vmv: |
+      test_{num}:
+        li TESTNUM, {num};  
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);     
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;       
+        la a1, {ori_data};
+        la a2, {vs1_data};
+        vle{sew}.v  v2, (a1);
+        vle{sew}.v  v1, (a2);
+        {name} v2, v1;
+        j fail;
+      test_{num}_end:
+
+  check:
+    test_base_vmv:               np.array_equal(result, golden)
+    test_regression_vmv:         np.array_equal(result, golden)
+    test_agnostic_vmv:           np.array_equal(result, golden)
+    test_vstart_not_eq_zero_vmv: np.array_equal(result, golden)
+    test_dest_eq_vs1_vmv:        np.array_equal(result, golden)
+    
+vmv_v_v:
+  <<: *default
+  basic_cases:
+    test_base_vmv @ ori, vs1, vl, sew, lmul:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              vs1 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              params_yml.append([ori, vs1, vl, sew, lmul])
+  
+  random_cases:
+    test_regression_vmv : 
+      matrix: 
+        sew : [8, 16, 32, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vta : ["tu"]
+        vs1 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+        ori : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+
+  cases:
+    test_agnostic_vmv @ori, vs1, sew, lmul, lmul_tu, vl, vta, tail:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vta in ["ta", "tu"]:
+                tail= get_tailmax(lmul, sew)
+                ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                vs1 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+                lmul_tu = 1 if isinstance(lmul,str) else lmul
+                params_yml.append([ori, vs1, sew, lmul, lmul_tu, vl, vta, tail])
+
+    test_vstart_not_eq_zero_vmv : 
+      matrix: 
+        sew : [8, 16, 32, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vta : ["tu"]
+        ori : np.linspace(  0,  96, vl, dtype=get_intdtype(sew))
+        vs1 : np.linspace( 32, 127, vl, dtype=get_intdtype(sew))
+        vstart: [vl//2] 
+
+    test_dest_eq_vs1_vmv : 
+      matrix: 
+        sew : [8, 16, 32]
+        lmul: [1, 'f2']
+        vl  : get_vl(lmul, sew, vlen)
+        vs1 : np.linspace( 32, 127, vl, dtype=get_intdtype(sew))
+        ori : vs1
+
+    test_exception_misaligned_vmv : 
+      matrix: 
+        sew : [8, 32]
+        lmul: [2, 4]
+        vl  : get_vl(lmul, sew, vlen)
+        vs1 : np.linspace( 5, get_intmax(sew), vl, dtype=get_intdtype(sew))
+        ori : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))

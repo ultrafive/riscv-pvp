@@ -1,93 +1,59 @@
 from isa.inst import *
 import numpy as np
 
-class Vwaddu_vv(Inst):
-    name = 'vwaddu.vv'
-
-    def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.uint64) + self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.uint32) + self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.uint16) + self['vs1']
-        
-        return self.masked(vd)
-
 class Vwadd_vv(Inst):
     name = 'vwadd.vv'
+    # vwadd.vv vd, vs2, vs1, vm 
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        maskflag = 1 if 'mask' in self else 0 
+        vstart   = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result[ii] = self['vs2'][ii]+self['vs1'][ii].astype(object)
+        return result 
 
-    def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.int64) + self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.int32) + self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.int16) + self['vs1']
+class Vwaddu_vv(Vwadd_vv):
+    name = 'vwaddu.vv'
 
-        return self.masked(vd)
-
-class Vwsubu_vv(Inst):
-    name = 'vwsubu.vv'
-
-    def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.uint64) - self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.uint32) - self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.uint16) - self['vs1']
-        
-        return self.masked(vd)
 
 class Vwsub_vv(Inst):
     name = 'vwsub.vv'
-
+    # vwsub.vv vd, vs2, vs1, vm 
     def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.int64) - self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.int32) - self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.int16) - self['vs1']
-        
-        return self.masked(vd)
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        maskflag = 1 if 'mask' in self else 0 
+        vstart   = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result[ii] = self['vs2'][ii]-self['vs1'][ii].astype(object)
+        return result 
+
+class Vwsubu_vv(Vwsub_vv):
+    name = 'vwsubu.vv'
+
 
 class Vwmul_vv(Inst):
     name = 'vwmul.vv'
-
+    # vwmul.vv vd, vs2, vs1, vm  
     def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.int64) * self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.int32) * self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.int16) * self['vs1']
-        
-        return self.masked(vd)
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        maskflag = 1 if 'mask' in self else 0 
+        vstart   = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result[ii] = self['vs2'][ii]*self['vs1'][ii].astype(object)
+        return result 
 
-class Vwmulu_vv(Inst):
+
+class Vwmulu_vv(Vwmul_vv):
     name = 'vwmulu.vv'
 
-    def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.uint64) * self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.uint32) * self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.uint16) * self['vs1']
-        
-        return self.masked(vd)
-
-class Vwmulsu_vv(Inst):
+class Vwmulsu_vv(Vwmul_vv):
     name = 'vwmulsu.vv'
-
-    def golden(self):
-        if self['ebits'] == 32:
-            vd = self['vs2'].astype(np.int64) * self['vs1']
-        elif self['ebits'] == 16:
-            vd = self['vs2'].astype(np.int32) * self['vs1']
-        elif  self['ebits'] == 8:
-            vd = self['vs2'].astype(np.int16) * self['vs1']
-        
-        return self.masked(vd)

@@ -1,0 +1,205 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_base_with_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,{vma};
+        la a0, {mask_data};
+        la a2, {vs2_data};        
+        la a6, {ori_data};
+        vle1.v      v0, (a0);
+        vle{sew}.v v16, (a2);
+        vle{sew}.v v24, (a6);
+        {name} v24, v16, {imm}, v0;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:la a3, test_{num}_data;
+        vse{sew}.v v24, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection  
+
+    test_regression_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a0, {mask_data};
+        la a2, {vs2_data}; 
+        la a3, {ori_data};  
+        vle1.v      v0, (a0);    
+        vle{sew}.v v16, (a2);
+        vle{sew}.v v24, (a3);
+        li t0, {vstart};
+        csrw vstart, t0;
+        {name} v24, v16, {imm}, v0;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:la a4, test_{num}_data;
+        vse{sew}.v v24, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+    test_agnostic_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};        
+        li a0, {tail}; 
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;        
+        la a3, {ori_data};
+        la a2, {vs2_data};
+        la a0, {mask_data};
+        vle{sew}.v v24, (a3);
+        vle{sew}.v v16, (a2);
+        vle{sew}.v  v0, (a0);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        {name} v24, v16, {imm}, v0;
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;
+        la a6, test_{num}_data;
+        vse{sew}.v v24, (a6);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({tail}), ({sew}/8), 0;
+        .popsection 
+
+    test_vstart_not_equal_zero_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a4, {mask_data};
+        la a3, {ori_data};
+        la a2, {vs2_data};
+        vle{sew}.v v24, (a3);
+        vle{sew}.v v16, (a2);
+        vle1.v      v0, (a4);
+        li t0, {vstart};
+        csrw vstart, t0;
+        {name} v24, v16, {imm}, v0;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:la  a6, test_{num}_data;
+        vse{sew}.v v24, (a6);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection 
+
+    test_register_vd_equ_vs2_with_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a2, {vs2_data};  
+        la a4, {mask_data};    
+        vle{sew}.v  v16, (a2);
+        vle1.v       v0, (a4);
+        {name} v16, v16, {imm}, v0;
+        la a4, test_{num}_data;
+        vse{sew}.v v16, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+   
+  check:
+    test_base_with_mask   : np.array_equal(result, golden)
+    test_regression_with_mask: np.array_equal(result, golden)
+    test_agnostic_with_mask: np.array_equal(result, golden)
+    test_vstart_not_equal_zero_with_mask: np.array_equal(result, golden)
+    test_register_vd_equ_vs2_with_mask: np.array_equal(result, golden)
+    
+
+  basic_cases:
+    test_base_with_mask @ ori, imm, vs2, sew, vl, lmul, vma, mask:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vma in ["ma", "mu"]:
+                for imm in np.array([min(sew//3,7),min(np.random.uniform(16),15)],dtype=get_intdtype(sew)):
+                  vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+                  ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                  mask= random_mask(vl)
+                  params_yml.append([ori, imm, vs2, sew, vl, lmul, vma, mask])
+
+  random_cases:
+    test_regression_with_mask @ ori, imm, vs2, sew, vl, lmul, vstart, mask:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//3, sew//2]:
+                for imm in np.array([min(sew//3,7),min(np.random.uniform(16),15)],dtype=get_intdtype(sew)):
+                  vs2 = np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+                  ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
+                  mask= random_mask(vl)
+                  params_yml.append([ori, imm, vs2, sew, vl, lmul, vstart, mask])
+
+  cases:
+    test_agnostic_with_mask @ ori, vs2, imm, sew, lmul, lmul_tu, vl, mask, tail:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for imm in np.array([min(sew//3,7),min(np.random.uniform(16),15)],dtype=get_intdtype(sew)):
+                tail= get_tailmax(lmul, sew)
+                vs2 = np.linspace( 1, get_intmax(sew), tail, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                mask= random_mask(tail)
+                lmul_tu = 1 if isinstance(lmul,str) else lmul
+                params_yml.append([ori, vs2, imm, sew, lmul, lmul_tu, vl, mask, tail])
+
+    test_vstart_not_equal_zero_with_mask @ ori, imm, vs2, sew, vl, lmul, vstart, mask:
+      setup: |
+        params_yml = []
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for vstart in [vl//3,sew//2]:
+                for imm in np.array([7, 15],dtype=get_intdtype(sew)):
+                  vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+                  ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                  mask= random_mask(vl)
+                  params_yml.append([ori, imm, vs2, sew, vl, lmul, vstart, mask])
+
+    test_register_vd_equ_vs2_with_mask @ ori, vs2, imm, sew, lmul, vl, mask:
+      setup: |
+        params_yml = []
+        for sew in [8, 32]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for imm in np.array([min(np.random.uniform(16),15)],dtype=get_intdtype(sew)):
+                vs2 = np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+                ori = vs2
+                mask= random_mask(vl)
+                params_yml.append([ori, vs2, imm, sew, lmul, vl, mask]) 
+              
+vadc_vim:
+  <<: *default
+
+vmerge_vim:
+  <<: *default
+

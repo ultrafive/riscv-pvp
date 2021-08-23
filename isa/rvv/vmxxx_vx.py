@@ -1,77 +1,135 @@
 from isa.inst import *
 import numpy as np
-import math
-
-class Vmadc_vx(Inst):
-    name = 'vmadc.vx'
-
-    def golden(self):
-        vd = self['vs2'].astype(np.int64) + self['rs1']
-        vd = np.where(vd > 0xffffffff, 1, 0)
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
-
-class Vmsbc_vx(Inst):
-    name = 'vmsbc.vx'
-
-    def golden(self):
-        vd = self['vs2'].astype(np.int64) - self['rs1']
-        vd = np.where(vd < 0, 1, 0)
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
 
 class Vmseq_vx(Inst):
     name = 'vmseq.vx'
+    # vmseq.vx vd, vs2, rs1, vm  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        maskflag = 1 if 'mask' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                bit[ii] = 1 if self['vs2'][ii] == self['rs1'] else 0
+        result = np.packbits(bit, bitorder='little')
+        return result  
 
-    def golden(self):
-        vd = self.masked(self['vs2'] == self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
 
 class Vmsne_vx(Inst):
     name = 'vmsne.vx'
+    # vmsne.vx vd, vs2, rs1, vm  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        maskflag = 1 if 'mask' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                bit[ii] = 1 if self['vs2'][ii] != self['rs1'] else 0
+        result = np.packbits(bit, bitorder='little')
+        return result 
 
-    def golden(self):
-        vd = self.masked(self['vs2'] != self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
-
-class Vmsltu_vx(Inst):
-    name = 'vmsltu.vx'
-
-    def golden(self):
-        vd = self.masked(self['vs2'] < self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
 
 class Vmslt_vx(Inst):
     name = 'vmslt.vx'
+    # vmslt.vx vd, vs2, rs1, vm  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        maskflag = 1 if 'mask' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                bit[ii] = 1 if self['vs2'][ii] < self['rs1'] else 0
+        result = np.packbits(bit, bitorder='little')
+        return result    
 
-    def golden(self):
-        vd = self.masked(self['vs2'] < self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
-
-class Vmsleu_vx(Inst):
-    name = 'vmsleu.vx'
-
-    def golden(self):
-        vd = self.masked(self['vs2'] <= self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
+class Vmsltu_vx(Vmslt_vx):
+    name = 'vmsltu.vx'
 
 
 class Vmsle_vx(Inst):
     name = 'vmsle.vx'
-
-    def golden(self):
-        vd = self.masked(self['vs2'] <= self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
-
-class Vmsgtu_vx(Inst):
-    name = 'vmsgtu.vx'
-
-    def golden(self):
-        vd = self.masked(self['vs2'] > self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
+    # vmsle.vx vd, vs2, rs1, vm  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        maskflag = 1 if 'mask' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                bit[ii] = 1 if self['vs2'][ii] <= self['rs1'] else 0
+        result = np.packbits(bit, bitorder='little')
+        return result 
+ 
+class Vmsleu_vx(Vmsle_vx):
+    name = 'vmsleu.vx'
 
 
 class Vmsgt_vx(Inst):
     name = 'vmsgt.vx'
+    # vmsgt.vx vd, vs2, rs1, vm  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        maskflag = 1 if 'mask' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                bit[ii] = 1 if self['vs2'][ii] > self['rs1'] else 0
+        result = np.packbits(bit, bitorder='little')
+        return result 
 
-    def golden(self):
-        vd = self.masked(self['vs2'] > self['rs1'])
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
+class Vmsgtu_vx(Vmsgt_vx):
+    name = 'vmsgtu.vx'
+
+
+class Vmadc_vx(Inst):
+    name = 'vmadc.vx'
+    # vmsbc.vx vd, vs2, rs1  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            carry = self['vs2'][ii].astype(object) + self['rs1'] 
+            bit[ii] = 1 if ((carry>>self['sew']) & 1) else 0 
+        result = np.packbits(bit, bitorder='little')
+        return result 
+
+
+class Vmsbc_vx(Inst):
+    name = 'vmsbc.vx'
+    # vmsbc.vx vd, vs2, rs1  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            carry = self['vs2'][ii].astype(object) - self['rs1'] 
+            bit[ii] = 1 if ((carry>>self['sew']) & 1) else 0 
+        result = np.packbits(bit, bitorder='little')
+        return result 
+

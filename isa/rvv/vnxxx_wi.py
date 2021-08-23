@@ -1,32 +1,20 @@
 from isa.inst import *
 import numpy as np
 
-class _vnxxx_wi(Inst):
-    def golden(self):
-        vd = self['vs2'] >> self['imm']
-        if self['vs2'].dtype == 'uint64':
-            vd = vd.astype(np.uint32)
-            vd.dtype = 'uint32'
-        elif self['vs2'].dtype == 'int64':
-            vd = vd.astype(np.int32)
-            vd.dtype = 'int32'
-        elif self['vs2'].dtype == 'uint32':
-            vd = vd.astype(np.uint16)
-            vd.dtype = 'uint16'
-        elif self['vs2'].dtype == 'int32':
-            vd = vd.astype(np.int16)
-            vd.dtype = 'int16'
-        elif self['vs2'].dtype == 'uint16':
-            vd = vd.astype(np.uint8)
-            vd.dtype = 'uint8'
-        else:
-            vd = vd.astype(np.int8)
-            vd.dtype = 'int8'
-        
-        return self.masked(vd)
+class Vnsra_wi(Inst):
+    name = 'vnsra.wi'
+    # vnsra.wi vd, vs2, uimm, vm    
+    def golden(self):  
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        maskflag = 1 if 'mask' in self else 0 
+        vstart   = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result[ii] = self['vs2'][ii].astype(object) >> (self['uimm']%self['sew2']) 
+        return result
 
-class Vnsrl_wi(_vnxxx_wi):
+class Vnsrl_wi(Vnsra_wi):
     name = 'vnsrl.wi'
 
-class Vnsra_wi(_vnxxx_wi):
-    name = 'vnsra.wi'

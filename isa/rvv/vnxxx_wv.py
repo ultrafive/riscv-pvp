@@ -1,32 +1,26 @@
 from isa.inst import *
 import numpy as np
 
-class _vnxxx_wv(Inst):
-    def golden(self):
-        vd = self['vs2'] >> self['vs1']
-        if self['vs2'].dtype == 'uint64':
-            vd = vd.astype(np.uint32)
-            vd.dtype = 'uint32'
-        elif self['vs2'].dtype == 'int64':
-            vd = vd.astype(np.int32)
-            vd.dtype = 'int32'
-        elif self['vs2'].dtype == 'uint32':
-            vd = vd.astype(np.uint16)
-            vd.dtype = 'uint16'
-        elif self['vs2'].dtype == 'int32':
-            vd = vd.astype(np.int16)
-            vd.dtype = 'int16'
-        elif self['vs2'].dtype == 'uint16':
-            vd = vd.astype(np.uint8)
-            vd.dtype = 'uint8'
-        else:
-            vd = vd.astype(np.int8)
-            vd.dtype = 'int8'
+def get_intdtype(sew):
+    int_dtype_dict = { 8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64 }
+    return int_dtype_dict[sew]
 
-        return self.masked(vd)
+class Vnsra_wv(Inst):
+    name = 'vnsra.wv'
+    # vnsra.wv vd, vs2, vs1, vm  
+    def golden(self):  
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()
+        maskflag = 1 if 'mask' in self else 0 
+        vstart   = self['vstart'] if 'vstart' in self else 0 
+        if self['vs2'].dtype == self['vs1'].dtype:
+            self['vs1'].dtype = get_intdtype(self['sew'])
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result[ii] = self['vs2'][ii].astype(object) >> (self['vs1'][ii]%self['sew2']) 
+        return result
 
-class Vnsrl_wv(_vnxxx_wv):
+class Vnsrl_wv(Vnsra_wv):
     name = 'vnsrl.wv'
 
-class Vnsra_wv(_vnxxx_wv):
-    name = 'vnsra.wv'

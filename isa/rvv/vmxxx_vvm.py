@@ -1,21 +1,39 @@
 from isa.inst import *
 import numpy as np
-import math
 
 class Vmadc_vvm(Inst):
     name = 'vmadc.vvm'
+    # vmadc.vvm vd, vs2, vs1, v0  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            print("ori = "+str(self['ori']))
+            self['ori'].dtype = np.uint8
+        bit    = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
+        print("bit = "+str(bit))
+        mask   = np.unpackbits(self['mask'],bitorder='little')
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            carry = self['vs2'][ii].astype(object) + self['vs1'][ii].astype(object) + mask[ii].astype(object) 
+            bit[ii] = 1 if ((carry>>self['sew']) & 1) else 0  
+        result = np.packbits(bit, bitorder='little')
+        return result 
 
-    def golden(self):
-        mask = np.unpackbits(self['v0'], bitorder='little')[0: self['vl']]
-        vd = self['vs2'].astype(np.int64) + self['vs1'] + mask
-        vd=np.where(vd > 0xffffffff, 1, 0)
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
 
 class Vmsbc_vvm(Inst):
     name = 'vmsbc.vvm'
-
-    def golden(self):
-        mask = np.unpackbits(self['v0'], bitorder='little')[0: self['vl']]
-        vd = self['vs2'].astype(np.int64) - self['vs1'] - mask
-        vd=np.where(vd < 0, 1, 0)
-        return np.packbits(vd, bitorder='little')[0: self['vl']]
+    # vmsbc.vvm vd, vs2, vs1, v0  
+    def golden(self):     
+        if self['vl']==0:
+            return self['ori']
+        if 'flag' in self:
+            self['ori'].dtype = np.uint8
+        bit    = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']] 
+        mask   = np.unpackbits(self['mask'],bitorder='little')
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        for ii in range(vstart, self['vl']): 
+            carry = self['vs2'][ii].astype(object) - self['vs1'][ii].astype(object) - mask[ii].astype(object) 
+            bit[ii] = 1 if ((carry>>self['sew']) & 1) else 0  
+        result = np.packbits(bit, bitorder='little')   
+        return result 
