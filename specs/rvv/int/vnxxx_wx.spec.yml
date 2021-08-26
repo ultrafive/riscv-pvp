@@ -249,7 +249,7 @@ _: &default
         lmul: get_lmul_seg(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew2), vl, dtype=get_intdtype(sew2))
-        rs1 : [vl//3,tail+2]
+        rs1 : [vl//3,vl+2]
         ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
         vstart: [vl//3,sew//2]
 
@@ -260,7 +260,7 @@ _: &default
         lmul: get_lmul_seg(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew2), vl, dtype=get_intdtype(sew2))
-        rs1 : tail//3
+        rs1 : vl//3
         ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
         mask: random_mask(vl)
         vstart: [vl//2]
@@ -352,7 +352,7 @@ vnsrl_wx:
         lmul: get_lmul_seg(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_uintdtype(sew2))
-        rs1 : [vl//3,tail+2]
+        rs1 : [vl//3, vl+2]
         ori : np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
         vstart: [vl//3,sew//2]
 
@@ -363,7 +363,7 @@ vnsrl_wx:
         lmul: get_lmul_seg(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew2))
-        rs1 : tail//3
+        rs1 : vl//3
         ori : np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
         mask: random_mask(vl)
         vstart: [vl//2]

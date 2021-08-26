@@ -128,14 +128,14 @@ _: &default
         lmul: get_lmul(ebits)
         vl: get_vl(lmul, ebits, vlen)
         vs2: np.linspace(-400, 400, vl, dtype=get_floatdtype(ebits))
-        fstins: get_fstins(ebits)  
+        fstins: get_fstins(ebits)
         vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"                
 
     test_vl_eq_zero:
       matrix:
         ebits: [16, 32, 64]
         lmul: get_lmul(ebits)
-        vs2: np.linspace(-400, 400, vl, dtype=get_floatdtype(ebits))
+        vs2: np.linspace(-400, 400, 1, dtype=get_floatdtype(ebits))
         fstins: get_fstins(ebits)  
 
     test_exception_wrong_sew_without_mask  @ sew, lmul, vl:

@@ -188,7 +188,7 @@ _: &default
     
 
   basic_cases:
-    test_base_with_mask @ ori, imm, vs2, sew, vl, lmul, bvl:
+    test_base_without_mask @ ori, imm, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 32, 64 ]:

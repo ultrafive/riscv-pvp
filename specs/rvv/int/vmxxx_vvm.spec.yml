@@ -344,6 +344,7 @@ _: &default
               mask= random_mask(vl) 
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
+              flag = 1
               params_yml.append([ori, vs1, vs2, sew, vl, lmul, mask, bvl, flag])  
 
     test_register_vd_equ_vs1_vs2_with_mask @ ori, vs1, vs2, sew, vl, lmul, mask, bvl, flag:

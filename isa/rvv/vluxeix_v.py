@@ -31,7 +31,7 @@ class Vluxeix_v(Inst):
             mask = np.ones(vl, dtype=np.uint8)
         
         if 'origin' in self:
-            origin = self['origin']
+            origin = self['origin'].copy()
         else:
             origin = np.zeros(vl, dtype=self['rs1'].dtype)
         
@@ -43,6 +43,7 @@ class Vluxeix_v(Inst):
         for i in range(start, vl):
             curIdx = int(index[i] // self['rs1'].itemsize)
             if mask[i] != 0:
+                print(origin)
                 origin[i] = tmp[curIdx]
 
         return origin

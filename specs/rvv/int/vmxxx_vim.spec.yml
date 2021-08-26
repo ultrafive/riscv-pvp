@@ -249,6 +249,7 @@ _: &default
                 bvl = Bitsl2Bytesl(vl)
                 mask= random_mask(8*bvl)
                 ori = mask
+                flag = 1
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, bvl, flag]) 
 
 vmadc_vim:

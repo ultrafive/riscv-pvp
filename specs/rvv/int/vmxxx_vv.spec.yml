@@ -386,6 +386,7 @@ _: &default
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
+              flag = 1
               params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
 
     test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
@@ -537,6 +538,7 @@ _: &unsigned
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
+              flag = 1
               params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
 
     test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
@@ -654,6 +656,7 @@ _: &addsub
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
+              flag = 1
               params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
 
     test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
