@@ -14,6 +14,7 @@ compile:
   linkflags: -Tenv/p/link.ld
   objdump: riscv64-unknown-elf-objdump -S -D
   is_objdump: True
+  readelf: riscv64-unknown-elf-readelf
 
 lsf:
   cmd: bsub -n 1 -J simv -Ip

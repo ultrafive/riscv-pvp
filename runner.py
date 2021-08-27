@@ -3,6 +3,7 @@
 import os
 import textwrap
 import numpy as np
+import jax.numpy as jnp
 import allure
 from multiprocessing import Pool, Manager, Condition, Value, Process
 import sys
@@ -12,6 +13,8 @@ import time
 import yaml
 import re
 import traceback
+import subprocess
+from utils.params import trans_dtype
 from utils.simulator import spike_run, sims_run
 from utils.check import from_txt, diff_to_txt, check_to_txt
 from rich.progress import (
@@ -74,6 +77,8 @@ def get_config_info(args):
         args.vlen = vlen = env["processor"]['vlen']
         args.elen = elen = env["processor"]['elen']
         args.slen = slen = env["processor"]['slen']
+
+        args.readelf = env["compile"]['readelf']
 
         args.lsf_cmd = lsf_cmd = env["lsf"]["cmd"]
         if args.lsf == False:
@@ -273,29 +278,50 @@ def run_test(case, args):
 
         # check the golden result computed by python with the spike result
         spike_result = {}
-        spike_start = 0
+        start_dict = {}
+        read_elf_cmd = args.readelf + ' -s ' + binary
+        try:
+            addr_begin_sig_str =  str( subprocess.check_output( read_elf_cmd + ' | grep begin_signature ', shell=True ), encoding = 'utf-8' )
+            addr_begin_sig = int( addr_begin_sig_str.split()[1], 16 )
+            flag_begin_sig = True
+        except:
+            flag_begin_sig = False       
+
         for test_case in case_list:
             if test_case["check_str"] != '':
-
                 # when test["check_str"] == 0, no need to check
-                golden = test_case["golden"]
 
-                #because many subcases in one signature file, so we need the spike_start to know where to find the result
-                [ result, spike_start ] = from_txt( res_file, golden,  spike_start )
+                if flag_begin_sig:
+                    try:
+                        addr_testdata_str =  str( subprocess.check_output( read_elf_cmd + f' | grep test_{test_case["no"]}_data ', shell=True ), encoding = 'utf-8' )
+                        addr_testdata = int( addr_testdata_str.split()[1], 16 )
+                    except:
+                        test_result += test_case["name"]+f'_faild_find_{test_case["no"]}_test_data-'
+                        test_detail += f"Can't find symbol test_{test_case['no']}_data, please check build/{case}/test.map.\n"
+                        failed_case_list.append(test_case["name"])
+                        continue
 
-                #save the python golden result and spike result into check.data file of each case        
-                os.makedirs(f'build/{test_case["name"]}', exist_ok=True)
-                check_result = check_to_txt( golden, result, f'build/{test_case["name"]}/check.data', test_case["check_str"] )
+                    golden = test_case["golden"] = trans_dtype( test_case["golden_data"], eval(f'jnp.{test_case["golden_dtype"]}') )
 
-                if not check_result:
-                    # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition
-                    test_result += test_case["name"]+"_check failed-"
-                    test_detail += f'The python golden data and spike results of test case {test_case["no"]} in build/{case}/test.S check failed. You can find the data in build/{test_case["name"]}/check.data\n'
-                    failed_case_list.append(test_case["name"])
+                    #because many subcases in one signature file, so we need the spike_start to know where to find the result
+                    result = from_txt( res_file, golden,  addr_testdata - addr_begin_sig )
+                    start_dict[test_case["name"]] = addr_testdata - addr_begin_sig
+                    spike_result[test_case["name"]] = result
 
-                spike_result[test_case["name"]] = result
+                    #save the python golden result and spike result into check.data file of each case        
+                    os.makedirs(f'build/{test_case["name"]}', exist_ok=True)
+                    check_result = check_to_txt( golden, result, f'build/{test_case["name"]}/check.data', test_case["check_str"] )
 
+                    if not check_result:
+                        # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition
+                        test_result += test_case["name"]+"_check failed-"
+                        test_detail += f'The python golden data and spike results of test case {test_case["no"]} in build/{case}/test.S check failed. You can find the data in build/{test_case["name"]}/check.data\n'
+                        failed_case_list.append(test_case["name"])
 
+                else:
+                    test_result += test_case["name"]+"_faild_find_begin_signature"
+                    test_detail += f"Can't find symbol begin_signature, please check build/{case}/test.map.\n"
+                    failed_case_list.append(test_case["name"])                    
 
         # run case in more simulators and compare simulator results with spike results, which need to be same
         sims_result = sims_run( args, f'build/{case}', binary )
@@ -312,14 +338,21 @@ def run_test(case, args):
                 failed_case_list = case_list
 
             else:
-                # sim run successfully, so we compare the sim results with spike results
-                sim_start = 0                 
+                # sim run successfully, so we compare the sim results with spike results               
                 for test_case in case_list:
                     if test_case["check_str"] != '':
 
                         golden = test_case["golden"]
                         # get sim result, because many cases in one signature file, so we need the start to know where to find the result
-                        [ result, sim_start ] = from_txt( f'build/{case}/{sim}.sig', golden,  sim_start )
+                        if test_case["name"] in start_dict.keys():
+                            result = from_txt( f'build/{case}/{sim}.sig', golden,  start_dict[test_case["name"]] )
+                        else:
+                            test_result += test_case["name"] + '_' + sim + f"_failed_find_{test_case['no']}_start-"
+                            test_detail_dict = f"Can't find test case {test_case['no']} start addr computed when check golden and spike result in build/{case}/test.S, please verify that.\n"
+                            # maybe check failed or other sim failed either so we have this judge s                            
+                            if test_case["name"] not in failed_case_list:
+                                failed_case_list.append(test_case["name"]) 
+                            continue                           
 
                         # save the spike result and sim result into diff-sim.data
                         os.makedirs(f'build/{test_case["name"]}', exist_ok=True)  

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-
 from utils.params import *
 from utils.generate import generate, result_dict, result_detail_dict, result_condition, tests, fails
 from isa import *
+import jax.numpy as jnp
 import re
 import yaml
 import glob
@@ -99,10 +99,10 @@ def search_matrix(arg_names, vals, no, params, **kwargs):
             exec(f'{key}="{val}"')
         elif isinstance(val, np.ndarray):
             val_str = val.tobytes()
-            exec(f'{key}=np.reshape( np.frombuffer( val_str, dtype=np.{val.dtype}), {val.shape}) ')
+            exec(f'{key}=np.reshape( np.frombuffer( val_str, dtype=jnp.{val.dtype}), {val.shape}) ')
         else:
             exec(f'{key}={val}')
-        #globals()[str(key)] = val
+        globals()[str(key)] = val
 
     # just to unify the handle process
     if not isinstance(vals[no], list):

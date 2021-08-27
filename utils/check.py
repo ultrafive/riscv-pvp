@@ -1,6 +1,7 @@
 import numpy as np
+import jax.numpy as jnp
 
-# find the result from the start location of signature file 
+# find the result from the start location of signature file
 def from_txt(fpath, golden, start ):
     ebyte = golden.itemsize
     size = golden.size
@@ -81,7 +82,7 @@ def from_txt(fpath, golden, start ):
     data.dtype = dtype
     data = data.reshape( golden.shape )
 
-    return [data, start]
+    return data
 
 def diff_to_txt(a, b, filename, a_name, b_name):
     a = a.reshape(-1)
@@ -92,7 +93,7 @@ def diff_to_txt(a, b, filename, a_name, b_name):
     bh.dtype = f'uint{b.itemsize * 8}'
 
     w = a.itemsize * 2
-    if a.dtype == np.float16 or a.dtype == np.float32 or a.dtype == np.float64:
+    if a.dtype == np.float16 or a.dtype == np.float32 or a.dtype == np.float64 or a.dtype == jnp.bfloat16:
         t = 'f'
     else:
         t = 'd'
@@ -118,7 +119,7 @@ def check_to_txt(golden, result, filename, check_str):
     bh.dtype = f'uint{b.itemsize * 8}'
 
     w = a.itemsize * 2
-    if a.dtype == np.float16 or a.dtype == np.float32 or a.dtype == np.float64:
+    if a.dtype == np.float16 or a.dtype == np.float32 or a.dtype == np.float64 or a.dtype == jnp.bfloat16:
         t = 'f'
     else:
         t = 'd'

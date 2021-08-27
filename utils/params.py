@@ -1635,6 +1635,8 @@ def get_fstins(ebits):
 
 def trans_dtype( input, dtype ):
     output = input.copy()
+    if output.shape == ():
+        output = output.reshape(1,)
     output.dtype = dtype
     return output
 
