@@ -14,6 +14,7 @@ compile:
   linkflags: -Tenv/p/link.ld
   objdump: riscv64-unknown-elf-objdump -S -D
   is_objdump: True
+  readelf: riscv64-unknown-elf-readelf
 
 lsf:
   cmd: bsub -n 1 -J simv -Ip
@@ -40,7 +41,7 @@ gem5:
       --l1i_assoc=8 \
       --l1d_assoc=8 \
       --l2cache \
-      --l2_size=512kB' \
+      --l2_size=512kB \
 
 vcs:
   path: ~

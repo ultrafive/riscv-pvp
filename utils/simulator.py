@@ -36,7 +36,7 @@ def sims_run( args, workdir, binary ):
             options += f' +permissive {opt_fsdb} {opt_ldmem} +permissive-off'
         elif k == 'gem5':
             options += args.gem5_options
-            options += '--signature={workdir}/{k}.sig'                        
+            options += f'--signature={workdir}/{k}.sig'
 
         # set the cmd to run the sim and save the cmd
         if k == 'gem5':
@@ -52,4 +52,4 @@ def sims_run( args, workdir, binary ):
         ret = os.system(cmd)
         result[k] = ret
 
-    return result    
+    return result
