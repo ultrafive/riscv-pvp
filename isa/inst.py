@@ -50,21 +50,40 @@ class Inst(dict):
         # Suppose the pre-rounding result is v, and d bits of that result areto be rounded off. 
         # Then the rounded result is (v >> d) + r, where r depends on the rounding mode 
         # (result >> shift) + r
-        # uint64 dont't support
-        lsb = 1 << (shift)
-        lsb_half = lsb >> 1
 
+        if shift == 0:
+            return result
+
+        lsb  = 2**shift     # 1<<shift
+        half = lsb//2       # lsb>>1        
+        
         if xrm == 0:    #RNU:
-            result += lsb_half
+            result += half      #RuntimeWarning: overflow encountered in long_scalars
         elif xrm == 1:  #RNE:
-            if (result & lsb_half) and ((result & (lsb_half-1)) or (result & lsb)) :
+            #if (result & half) and ((result & (half-1)) or (result & lsb)) :
+            if (result//half%2 == 1) and (result%half != 0 or result//lsb%2 == 1):
                 result += lsb
         elif xrm == 2:  #RDN:
             pass
         elif xrm == 3:  #ROD:
-            if result & (lsb - 1):
-                result |= lsb
+            if result%lsb:                #result & (lsb - 1):                
+                if result//lsb%2 == 0:    #result |= lsb          #casting rule 'safe'
+                    result += lsb                
         else:
             print("error vrm para!")
 
-        return result
+        return result//(2**shift)
+
+
+    def get_VLMAX(self, sew, lmul, VLEN=1024):
+        factor_lmul = {'1': 1, '2': 2, '4': 4, '8': 8, 'f2': 1/2, 'f4': 1/4, 'f8': 1/8}
+        return int(factor_lmul[str(lmul)]*VLEN/sew)
+
+
+    def get_intdtype(self, sew):
+        int_dtype_dict  = { 8: np.int8,  16: np.int16,  32: np.int32,  64: np.int64 }
+        return int_dtype_dict[sew]
+
+    def get_uintdtype(self, sew):
+        uint_dtype_dict = { 8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64 }
+        return uint_dtype_dict[sew]       

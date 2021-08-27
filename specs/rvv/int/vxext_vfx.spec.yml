@@ -11,7 +11,7 @@ _: &default
         li a0, {vl};
         vsetvli t0, a0, e{eew},m{emul},ta,ma;       
         la a1, {vs2_data};
-        vle{sew}.v  v8, (a1);
+        vle{eew}.v  v8, (a1);
         vsetvli t0, a0, e{sew},m{lmul},ta,ma; 
         la a2, {ori_data};        
         vle{sew}.v v16, (a2);
@@ -33,7 +33,7 @@ _: &default
         li a0, {vl};
         vsetvli t0, a0, e{eew},m{emul},ta,ma;       
         la a1, {vs2_data};
-        vle{sew}.v  v8, (a1);
+        vle{eew}.v  v8, (a1);
         vsetvli t0, a0, e{sew},m{lmul},ta,ma; 
         la a2, {ori_data};  
         la a3, {mask_data};      
@@ -57,7 +57,7 @@ _: &default
         li a0, {vl};
         vsetvli t0, a0, e{eew},m{emul},ta,ma;       
         la a1, {vs2_data};
-        vle{sew}.v  v8, (a1);
+        vle{eew}.v  v8, (a1);
         vsetvli t0, a0, e{sew},m{lmul},ta,ma; 
         la a2, {ori_data};        
         vle{sew}.v v16, (a2);
@@ -81,7 +81,7 @@ _: &default
         li a0, {tail};
         vsetvli t0, a0, e{eew},m{emul},ta,ma;       
         la a1, {vs2_data};
-        vle{sew}.v  v8, (a1);
+        vle{eew}.v  v8, (a1);
         vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma; 
         la a2, {ori_data};       
         vle{sew}.v v16, (a2);
@@ -104,7 +104,7 @@ _: &default
         li a0, {vl};
         vsetvli t0, a0, e{eew},m{emul},ta,ma;       
         la a1, {vs2_data};
-        vle{sew}.v  v8, (a1);
+        vle{eew}.v  v8, (a1);
         vsetvli t0, a0, e{sew},m{lmul},ta,ma; 
         la a2, {ori_data};        
         vle{sew}.v v16, (a2);
@@ -128,7 +128,7 @@ _: &default
         li a0, {vl};
         vsetvli t0, a0, e{eew},m{emul},ta,ma;       
         la a1, {vs2_data};
-        vle{sew}.v  v8, (a1);
+        vle{eew}.v  v8, (a1);
         vsetvli t0, a0, e{sew},m{lmul},ta,{vma}; 
         la a2, {ori_data};  
         la a3, {mask_data};      
@@ -182,8 +182,8 @@ _: &default
   check:
     test_base_without_mask: np.array_equal(result, golden)
     test_base_with_mask   : np.array_equal(result, golden)
-    test_regression_without_mask:         np.array_equal(result, golden)
-    test_agnostic_without_mask:           np.array_equal(result, golden)
+    test_regression_without_mask: np.array_equal(result, golden)
+    test_agnostic_without_mask: np.array_equal(result, golden)
     test_vstart_not_equal_zero_without_mask: np.array_equal(result, golden)
     test_vstart_not_equal_zero_with_mask   : np.array_equal(result, golden)
 
@@ -225,7 +225,7 @@ vzext_vf2:
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(sew))
+              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(eew))
               ori = np.random.uniform(0, vl, vl).astype(get_uintdtype(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
@@ -333,7 +333,7 @@ vsext_vf2:
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(sew))
+              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(eew))
               ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
@@ -441,7 +441,7 @@ vzext_vf4:
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(sew))
+              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(eew))
               ori = np.random.uniform(0, vl, vl).astype(get_uintdtype(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
@@ -549,7 +549,7 @@ vsext_vf4:
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(sew))
+              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(eew))
               ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
@@ -658,7 +658,7 @@ vzext_vf8:
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(sew))
+              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(eew))
               ori = np.random.uniform(0, vl, vl).astype(get_uintdtype(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
@@ -766,7 +766,7 @@ vsext_vf8:
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(sew))
+              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(eew))
               ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])

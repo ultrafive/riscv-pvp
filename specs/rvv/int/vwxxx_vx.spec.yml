@@ -180,7 +180,7 @@ _: &default
           for lmul in get_lmul_seg(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [get_intmin(sew), get_intmax(sew)]:
-                sew2= min(2*sew, 64)
+                sew2= 2*sew
                 vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
                 ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew2))
                 params_yml.append([ori, rs1, vs2, sew, sew2, vl, lmul])

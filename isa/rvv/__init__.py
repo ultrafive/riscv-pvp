@@ -1,6 +1,4 @@
 from .vsetvl import *
-from .vsetvli import *
-from .vsetivli import *
 from .vlenn_v import *
 from .vsenn_v import *
 from .vlsenn_v import *
@@ -122,3 +120,5 @@ from .vsmul import *
 
 from .vlsegxexff_v import *
 
+from .vxexpi_v import *
+from .veadd_mm import *

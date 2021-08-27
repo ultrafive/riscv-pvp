@@ -7,7 +7,7 @@ class Vmseq_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 
@@ -25,7 +25,7 @@ class Vmsne_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 
@@ -43,7 +43,7 @@ class Vmslt_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 
@@ -64,7 +64,7 @@ class Vmsle_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 
@@ -85,7 +85,7 @@ class Vmsgt_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 
@@ -106,7 +106,7 @@ class Vmadc_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 
@@ -123,7 +123,7 @@ class Vmsbc_vx(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit  = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         vstart = self['vstart'] if 'vstart' in self else 0 

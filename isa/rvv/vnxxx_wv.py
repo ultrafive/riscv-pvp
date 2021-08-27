@@ -14,7 +14,7 @@ class Vnsra_wv(Inst):
         result = self['ori'].copy()
         maskflag = 1 if 'mask' in self else 0 
         vstart   = self['vstart'] if 'vstart' in self else 0 
-        if self['vs2'].dtype == self['vs1'].dtype:
+        if self['vs2'].dtype == self['vs1'].dtype: 
             self['vs1'].dtype = get_intdtype(self['sew'])
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):

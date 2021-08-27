@@ -1,0 +1,136 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_vset_normal: |
+      test_{num}:
+        li  TESTNUM, {num};
+        {name} x14, {imm}, e{sew},m{lmul},{vta},{vma}; 
+        li  x7, {test_vl};
+        bne x14, x7, fail_{num};
+        j pass_{num};
+      fail_{num}:
+        j fail;
+      pass_{num}:
+        csrr t1, vl;
+        bne  t1, x7, fail_{num};
+        li   x7, {test_vtype};
+        csrr x8, vtype;
+        bne  x8, x7, fail_{num};
+
+    test_vset_rd_zero: |
+      test_{num}:
+        li  TESTNUM, {num};
+        {name} x0, {imm}, e{sew},m{lmul},{vta},{vma};  
+        li  x7, {test_vl};
+        csrr t1, vl;
+        bne t1, x7, fail_{num};
+        j pass_{num};
+      fail_{num}:
+        j fail;
+      pass_{num}:
+        li   x7, {test_vtype};
+        csrr x8, vtype;
+        bne  x8, x7, fail_{num};
+
+
+vsetivli:
+  <<: *default
+  basic_cases:
+    test_vset_normal @ sew, lmul, vma, vta, test_vtype, imm, test_vl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:        
+          for lmul in get_lmul_seg(sew):   
+            for vta in ["ta", "tu"]:
+              for vma in ["ma", "mu"]:
+                # sew8 : 0<<3, sew16: 1<<3, sew32: 2<<3, sew64: 3<<3
+                sewD  = { 8:0, 16:8, 32:16, 64:24 }  
+                # lmul1: 0, lmul2: 1, lmul4: 2, lmul8: 3, lmulf8: 5, lmulf4: 6, lmulf2: 7
+                lmulD = { 1:0, 2:1, 4:2, 8:3, 'f8':5, 'f4':6, 'f2':7 }
+                vtaD  = {'ta': 1<<6, 'tu': 0<<6 }
+                vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
+                test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
+
+                vlmax = get_vlmax(lmul, sew, vlen)  
+                test_vl = 0
+                for imm in [ 0, 7, 15, 31 ]:                              
+                  if imm <= vlmax:
+                    test_vl = imm
+                  # elif imm < 2*vlmax:
+                  #   test_vl = (imm+1)//2
+                  else:
+                    test_vl = vlmax
+                  params_yml.append([sew, lmul, vma, vta, test_vtype, imm, test_vl])
+
+  random_cases: 
+    test_vset_normal @ sew, lmul, vma, vta, test_vtype, imm, test_vl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:        
+          for lmul in get_lmul_seg(sew):   
+            for vta in ["ta", "tu"]:
+              for vma in ["ma", "mu"]:
+                sewD  = { 8:0, 16:8, 32:16, 64:24 }  
+                lmulD = { 1:0, 2:1, 4:2, 8:3, 'f8':5, 'f4':6, 'f2':7 }
+                vtaD  = {'ta': 1<<6, 'tu': 0<<6 }
+                vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
+                test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
+
+                vlmax = get_vlmax(lmul, sew, vlen)  
+                test_vl = 0
+                for imm in [ 0, 7, 15, 31 ]:                              
+                  if imm <= vlmax:
+                    test_vl = imm
+                  else:
+                    test_vl = vlmax
+                  params_yml.append([sew, lmul, vma, vta, test_vtype, imm, test_vl])
+
+  cases:
+    test_vset_normal @ sew, lmul, vma, vta, test_vtype, imm, test_vl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:        
+          for lmul in get_lmul_seg(sew):   
+            for vta in ["ta", "tu"]:
+              for vma in ["ma", "mu"]:
+                sewD  = { 8:0, 16:8, 32:16, 64:24 }  
+                lmulD = { 1:0, 2:1, 4:2, 8:3, 'f8':5, 'f4':6, 'f2':7 }
+                vtaD  = {'ta': 1<<6, 'tu': 0<<6 }
+                vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
+                test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
+
+                vlmax = get_vlmax(lmul, sew, vlen)  
+                test_vl = 0
+                for imm in [ 0, 7, 15, 31 ]:                              
+                  if imm <= vlmax:
+                    test_vl = imm
+                  else:
+                    test_vl = vlmax
+                  params_yml.append([sew, lmul, vma, vta, test_vtype, imm, test_vl])
+
+    test_vset_rd_zero @ sew, lmul, vma, vta, test_vtype, imm, test_vl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:        
+          for lmul in get_lmul_seg(sew):   
+            for vta in ["ta", "tu"]:
+              for vma in ["ma", "mu"]:
+                sewD  = { 8:0, 16:8, 32:16, 64:24 }  
+                lmulD = { 1:0, 2:1, 4:2, 8:3, 'f8':5, 'f4':6, 'f2':7 }
+                vtaD  = {'ta': 1<<6, 'tu': 0<<6 }
+                vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
+                test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
+
+                vlmax = get_vlmax(lmul, sew, vlen)  
+                test_vl = 0
+                for imm in [ 0, 7, 15, 31 ]:                             
+                  if imm <= vlmax:
+                    test_vl = imm
+                  else:
+                    test_vl = vlmax
+                  params_yml.append([sew, lmul, vma, vta, test_vtype, imm, test_vl])
+

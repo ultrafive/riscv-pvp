@@ -350,7 +350,7 @@ _: &default
                 ori = random_mask(8*bvl)                 
                 params_yml.append([ori, vs1, vs2, sew, vl, lmul, mask, vstart, bvl])  
 
-    test_register_vd_equ_vs1_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs1_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
@@ -360,10 +360,9 @@ _: &default
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
               bvl = Bitsl2Bytesl(vl)
               ori = vs1.copy() #astype(get_uintdtype(8))
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])  
 
-    test_register_vd_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
@@ -373,10 +372,9 @@ _: &default
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
               bvl = Bitsl2Bytesl(vl)
               ori = vs2.copy() #astype(get_uintdtype(8))
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])              
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])              
 
-    test_register_vs1_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vs1_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 64 ]:
@@ -386,10 +384,9 @@ _: &default
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
-              flag = 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])  
 
-    test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 64 ]:
@@ -399,8 +396,7 @@ _: &default
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = vs1.copy()
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag]) 
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl]) 
 
 vmseq_vv:
   <<: *default
@@ -502,7 +498,7 @@ _: &unsigned
                 ori = random_mask(8*bvl)                 
                 params_yml.append([ori, vs1, vs2, sew, vl, lmul, mask, vstart, bvl])  
 
-    test_register_vd_equ_vs1_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs1_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
@@ -512,10 +508,9 @@ _: &unsigned
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
               bvl = Bitsl2Bytesl(vl)
               ori = vs1.copy() #astype(get_uintdtype(8))
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])  
 
-    test_register_vd_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
@@ -525,10 +520,9 @@ _: &unsigned
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
               bvl = Bitsl2Bytesl(vl)
               ori = vs2.copy() #astype(get_uintdtype(8))
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])               
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])               
 
-    test_register_vs1_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vs1_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 64 ]:
@@ -538,10 +532,9 @@ _: &unsigned
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
-              flag = 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])  
 
-    test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 64 ]:
@@ -551,8 +544,7 @@ _: &unsigned
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = vs1.copy()
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag]) 
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl]) 
 
 vmsleu_vv:
   <<: *unsigned   
@@ -620,7 +612,7 @@ _: &addsub
                 ori = random_mask(8*bvl)                 
                 params_yml.append([ori, vs1, vs2, sew, vl, lmul, vstart, bvl])  
 
-    test_register_vd_equ_vs1_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs1_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
@@ -630,10 +622,9 @@ _: &addsub
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
               bvl = Bitsl2Bytesl(vl)
               ori = vs1.copy()
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag]) 
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl]) 
 
-    test_register_vd_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
@@ -643,10 +634,9 @@ _: &addsub
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
               bvl = Bitsl2Bytesl(vl)
               ori = vs2.copy()
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])            
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])            
 
-    test_register_vs1_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vs1_equ_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 64 ]:
@@ -656,10 +646,9 @@ _: &addsub
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = random_mask(8*bvl)
-              flag = 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag])  
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl])  
 
-    test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl, flag:
+    test_register_vd_equ_vs1_vs2_without_mask @ ori, vs1, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 64 ]:
@@ -669,8 +658,7 @@ _: &addsub
               vs2 = vs1
               bvl = Bitsl2Bytesl(vl)
               ori = vs1.copy()
-              flag= 1
-              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl, flag]) 
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, bvl]) 
 
 vmadc_vv: 
   <<: *addsub

@@ -7,7 +7,7 @@ class Vmadc_vim(Inst):
     def golden(self):     
         if self['vl']==0:
             return self['ori']
-        if 'flag' in self:
+        if self['ori'].dtype != np.uint8:
             self['ori'].dtype = np.uint8
         bit    = np.unpackbits(self['ori'], bitorder='little')[0:8*self['bvl']]  
         mask   = np.unpackbits(self['mask'],bitorder='little')

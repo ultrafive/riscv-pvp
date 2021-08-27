@@ -1,67 +1,90 @@
 from isa.inst import *
-import math
-
+import numpy as np
 
 class Vaadd_vv(Inst):
     name = 'vaadd.vv'
+    # vaadd.vv vd, vs2, vs1, vm 
     def golden(self):
-        res = np.add(self['vs1'], self['vs2'], dtype='int')[0: self['vl']]
-        res = self.masked(res)
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs1'].dtype)
+        if self['vl']==0:
+            return self['ori']
 
-class Vaadd_vx(Inst):
-    name = 'vaadd.vx'
-    def golden(self):
-        res = self['rs1'] + self['vs2'].astype('int')
-        res = self.masked(res[0: self['vl']])
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs2'].dtype)
+        result = self['ori'].copy() 
+        vxrm   = self['vxrm'] if 'vxrm' in self else 0  
+        vstart = self['vstart'] if 'vstart' in self else 0
+        maskflag = 1 if 'mask' in self else 0 
+            
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                tmp = np.add(self['vs2'][ii],self['vs1'][ii],dtype='object')
+                result[ii] = self.rounding_xrm( tmp, vxrm, 1 )
+        return result 
+
+class Vaaddu_vv(Vaadd_vv):
+    name = 'vaaddu.vv'
+
 
 class Vasub_vv(Inst):
     name = 'vasub.vv'
+    # vasub.vv vd, vs2, vs1, vm  
     def golden(self):
-        res = np.subtract(self['vs2'], self['vs1'], dtype='int')[0: self['vl']]
-        res = self.masked(res)
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs1'].dtype)
+        if self['vl']==0:
+            return self['ori']
+
+        result = self['ori'].copy() 
+        vxrm   = self['vxrm'] if 'vxrm' in self else 0  
+        vstart = self['vstart'] if 'vstart' in self else 0
+        maskflag = 1 if 'mask' in self else 0 
+            
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                tmp = np.subtract(self['vs2'][ii],self['vs1'][ii],dtype='object')
+                result[ii] = self.rounding_xrm( tmp, vxrm, 1 )
+        return result       
+
+class Vasubu_vv(Vasub_vv):
+    name = 'vasubu.vv'
+
+
+class Vaadd_vx(Inst):
+    name = 'vaadd.vx'
+    # vaadd.vx vd, vs2, rs1, vm  
+    def golden(self):
+        if self['vl']==0:
+            return self['ori']
+
+        result = self['ori'].copy() 
+        vxrm   = self['vxrm'] if 'vxrm' in self else 0  
+        vstart = self['vstart'] if 'vstart' in self else 0
+        maskflag = 1 if 'mask' in self else 0 
+            
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                tmp = np.add(self['vs2'][ii],self['rs1'],dtype='object')
+                result[ii] = self.rounding_xrm( tmp, vxrm, 1 )
+        return result 
+
+class Vaaddu_vx(Vaadd_vx):
+    name = 'vaaddu.vx'
+
 
 class Vasub_vx(Inst):
     name = 'vasub.vx'
+    # vasub.vx vd, vs2, rs1, vm  
     def golden(self):
-        res = self['vs2'].astype('int') - self['rs1']
-        res = self.masked(res[0: self['vl']])
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs2'].dtype)
+        if self['vl']==0:
+            return self['ori']
 
-class Vaaddu_vv(Inst):
-    name = 'vaaddu.vv'
-    def golden(self):
-        res = np.add(self['vs1'], self['vs2'], dtype='uint')[0: self['vl']]
-        res = self.masked(res)
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs1'].dtype)
+        result = self['ori'].copy() 
+        vxrm   = self['vxrm'] if 'vxrm' in self else 0  
+        vstart = self['vstart'] if 'vstart' in self else 0
+        maskflag = 1 if 'mask' in self else 0 
+            
+        for ii in range(vstart, self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                tmp = np.subtract(self['vs2'][ii],self['rs1'],dtype='object')
+                result[ii] = self.rounding_xrm( tmp, vxrm, 1 )
+        return result     
 
-class Vaaddu_vx(Inst):
-    name = 'vaaddu.vx'
-    def golden(self):
-        res = self['rs1'] + self['vs2'].astype('uint')
-        res = self.masked(res[0: self['vl']])
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs2'].dtype)
 
-class Vasubu_vv(Inst):
-    name = 'vasubu.vv'
-    def golden(self):
-        res = np.subtract(self['vs2'], self['vs1'], dtype='long')[0: self['vl']]
-        res = self.masked(res)
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs1'].dtype)
-
-class Vasubu_vx(Inst):
+class Vasubu_vx(Vasub_vx):
     name = 'vasubu.vx'
-    def golden(self):
-        res = self['vs2'].astype('long') - self['rs1']
-        res = self.masked(res[0: self['vl']])
-        res = self.rounding(res)
-        return np.right_shift(res, 1).astype(self['vs2'].dtype)

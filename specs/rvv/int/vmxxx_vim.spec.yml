@@ -224,7 +224,7 @@ _: &default
                   ori = random_mask(8*bvl)
                   params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, vstart, bvl]) 
               
-    test_register_vd_equ_vs2_with_mask @ ori, imm, vs2, sew, vl, lmul, mask, bvl, flag:
+    test_register_vd_equ_vs2_with_mask @ ori, imm, vs2, sew, vl, lmul, mask, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]: 
@@ -235,10 +235,9 @@ _: &default
                 mask= random_mask(vl) 
                 bvl = Bitsl2Bytesl(vl)
                 ori = vs2.copy()
-                flag= 1
-                params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, bvl, flag])  
+                params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, bvl])  
 
-    test_register_vd_eq_vm_with_mask @ ori, imm, vs2, sew, vl, lmul, mask, bvl, flag:
+    test_register_vd_eq_vm_with_mask @ ori, imm, vs2, sew, vl, lmul, mask, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
@@ -249,8 +248,7 @@ _: &default
                 bvl = Bitsl2Bytesl(vl)
                 mask= random_mask(8*bvl)
                 ori = mask
-                flag = 1
-                params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, bvl, flag]) 
+                params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, bvl]) 
 
 vmadc_vim:
   <<: *default

@@ -11,11 +11,12 @@ class Vcompress_vm(Inst):
         1 2 3 4 8 7 5 2 0 v2
     '''
     def golden(self):
-        index = 0
-        for ii in range(self['vl']): 
-            if np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)):
-                self['ori'][index] = self['vs2'][ii] 
-                index += 1                      
-        return self['ori']
-
-
+        if self['vl']==0:
+            return self['ori']
+        result = self['ori'].copy()        
+        index  = 0
+        for ii in range (self['vl']): 
+            if np.unpackbits(self['mask'], bitorder='little')[ii]:
+                result[index] = self['vs2'][ii] 
+                index += 1   
+        return result

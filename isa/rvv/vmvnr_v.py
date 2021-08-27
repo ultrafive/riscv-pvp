@@ -11,7 +11,11 @@ class Vmvnr_v(Inst):
        vmv8r.v v0, v8  # Copy v0=v8; v1=v9; ...; v7=v15
     '''
     def golden(self):
-        return self['vs2']
+        result = self['ori'].copy()
+        vstart = self['vstart'] if 'vstart' in self else 0 
+        for ii in range( vstart,self['vl'],1 ):
+            result[ii] = self['vs2'][ii]
+        return result
 
 class Vmv1r_v(Vmvnr_v):
     name = 'vmv1r.v'

@@ -1,0 +1,147 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_base_vmv_s_x: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vd_data};
+        vle{sew}.v  v8, (a2);           
+        {name} v8, a1;
+        la a4, test_{num}_data;  
+        vse{sew}.v v8, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection
+
+    test_regression_vmv_s_x: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vd_data};
+        vle{sew}.v  v8, (a2);  
+        li t0, {vstart};
+        csrw vstart, t0;    
+        {name} v8, a1;
+        csrr t1, vstart;
+        beqz t1, 1f;
+        j fail
+      1:la a4, test_{num}_data; 
+        vse{sew}.v v8, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection
+
+    test_agnostic_vmv_s_x: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;
+        li a1, {rs1};
+        la a2, {vd_data};
+        vle{sew}.v  v8, (a2);  
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;         
+        {name} v8, a1;
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},ta,ma;
+        la a4, test_{num}_data;  
+        vse{sew}.v v8, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection
+
+    test_vstart_not_eq_zero_vmv_s_x: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rs1};
+        la a2, {vd_data};
+        vle{sew}.v  v8, (a2);  
+        li t0, {vstart};
+        csrw vstart, t0;    
+        {name} v8, a1;
+        csrr t1, vstart;
+        beqz t1, 1f;
+        j fail
+      1:la a4, test_{num}_data; 
+        vse{sew}.v v8, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection         
+
+
+  check:
+    test_base_vmv_s_x: np.array_equal(result, golden)
+    test_regression_vmv_s_x: np.array_equal(result, golden)
+    test_agnostic_vmv_s_x: np.array_equal(result, golden)
+    test_vstart_not_eq_zero_vmv_s_x: np.array_equal(result, golden)
+    #test_lmul_vmv_s_x: np.array_equal(result, golden)
+
+
+vmv_s_x:
+  <<: *default
+  basic_cases:
+    test_base_vmv_s_x @ rs1, vd, sew, lmul, vl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rs1 in np.array([vl//3, np.random.uniform(sew)],dtype=get_intdtype(sew)):
+                vd = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                params_yml.append([rs1, vd, sew, lmul, vl])
+
+  random_cases: 
+    test_regression_vmv_s_x @ rs1, vd, sew, lmul, vl, vstart:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rs1 in np.array([sew],dtype=get_intdtype(sew)):
+                vd = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                vstart = sew//15                
+                params_yml.append([rs1, vd, sew, lmul, vl, vstart])
+
+  cases:
+    test_agnostic_vmv_s_x @ rs1, vd, sew, lmul, lmul_tu, vl, tail:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rs1 in np.array([sew],dtype=get_intdtype(sew)):
+                tail= get_tailmax(lmul, sew)
+                vd = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                lmul_tu = 1 if isinstance(lmul,str) else lmul               
+                params_yml.append([rs1, vd, sew, lmul, lmul_tu, vl, tail])
+
+    test_vstart_not_eq_zero_vmv_s_x @ rs1, vd, sew, lmul, vl, vstart:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rs1 in np.array([sew],dtype=get_intdtype(sew)):
+                vd = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                vstart = sew//15                
+                params_yml.append([rs1, vd, sew, lmul, vl, vstart])
+

@@ -1,0 +1,457 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_base_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a1, {vs1_data};
+        la a2, {vs2_data}; 
+        la a3, {ori_data};      
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2);
+        vle{sew}.v v24, (a3);
+        {name} v24, v16, v8;
+        csrr t0, vstart;
+        beqz t0, 1f;                  
+        j fail;
+      1:la a4, test_{num}_data;
+        vse{sew}.v v24, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+    test_base_with_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a0, {mask_data};
+        la a1, {vs1_data};
+        la a2, {vs2_data};        
+        la a6, {ori_data};
+        vle1.v      v0, (a0);
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2);
+        vle{sew}.v v24, (a6);
+        {name} v24, v16, v8, v0.t;
+        la a3, test_{num}_data;
+        vse{sew}.v v24, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection  
+
+    test_regression_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a1, {vs1_data};
+        la a2, {vs2_data}; 
+        la a3, {ori_data};      
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2);
+        vle{sew}.v v24, (a3);
+        {name} v24, v16, v8;
+        la a4, test_{num}_data;
+        vse{sew}.v v24, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+    test_agnostic_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},tu,ma;
+        la a3, {ori_data};
+        la a2, {vs2_data};
+        la a1, {vs1_data};
+        vle{sew}.v v24, (a3);
+        vle{sew}.v v16, (a2);
+        vle{sew}.v  v8, (a1);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},tu,ma;
+        {name} v24, v16, v8;
+        li a0, {tail};
+        vsetvli t0, a0, e{sew},m{lmul_tu},tu,ma;
+        la a6, test_{num}_data;
+        vse{sew}.v v24, (a6);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({tail}), ({sew}/8), 0;
+        .popsection 
+
+    test_register_vd_equ_vs1_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a1, {vs1_data};
+        la a2, {vs2_data};      
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v  v16, (a2);
+        {name} v8, v16, v8;
+        la a4, test_{num}_data;
+        vse{sew}.v v8, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+    test_register_vd_equ_vs2_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a1, {vs1_data};
+        la a2, {vs2_data};      
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v  v16, (a2);
+        {name} v16, v16, v8;
+        la a4, test_{num}_data;
+        vse{sew}.v v16, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+    test_register_vs1_equ_vs2_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a2, {vs2_data}; 
+        la a3, {ori_data};      
+        vle{sew}.v v16, (a2);
+        vle{sew}.v v24, (a3);
+        {name} v24, v16, v16;
+        la a4, test_{num}_data;
+        vse{sew}.v v24, (a4);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection
+
+    test_register_vd_equ_vs1_vs2_without_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a2, {vs2_data};        
+        vle{sew}.v v16, (a2);
+        {name} v16, v16, v16;
+        la a3, test_{num}_data;
+        vse{sew}.v v16, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection  
+
+    test_register_vd_eq_vm_with_mask: |
+      test_{num}:
+        li TESTNUM, {num}; 
+        li a0, {vl}; 
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        la a0, {mask_data};
+        la a1, {vs1_data};
+        la a2, {vs2_data}; 
+        vle{sew}.v  v0, (a0); #note
+        vle{sew}.v  v8, (a1);
+        vle{sew}.v v16, (a2); 
+        {name} v0, v16, v8, v0.t;
+        la a3, test_{num}_data;
+        vse{sew}.v v0, (a3);
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill ({vl}), ({sew}/8), 0;
+        .popsection 
+
+    test_exception_vstart_not_eq_zero_without_mask: |
+      test_{num}:
+        li TESTNUM, {num};
+        li t0, CAUSE_ILLEGAL_INSTRUCTION;
+        la t1, _expected_cause;
+        sw t0, 0(t1);
+        la t0, test_{num}_end;
+        la t1, _restore_addr;
+        sw t0, 0(t1);
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li t0, {vstart};
+        csrw vstart, t0;
+        {name} v24, v16, v8;
+        j fail;
+      test_{num}_end:
+
+
+  check:
+    test_base_without_mask: np.array_equal(result, golden)
+    test_base_with_mask   : np.array_equal(result, golden)
+    test_regression_without_mask: np.array_equal(result, golden)
+    test_agnostic_without_mask: np.array_equal(result, golden)
+    test_register_vd_equ_vs1_without_mask: np.array_equal(result, golden)
+    test_register_vd_equ_vs2_without_mask: np.array_equal(result, golden)
+    test_register_vs1_equ_vs2_without_mask: np.array_equal(result, golden)
+    test_register_vd_equ_vs1_vs2_without_mask: np.array_equal(result, golden)
+    test_register_vd_eq_vm_with_mask: np.array_equal(result, golden)
+    
+
+  basic_cases:
+    test_base_without_mask @ ori, vs1, vs2, sew, vl, lmul:
+      setup: |
+        params_yml = []
+        #params_yml.append([np.array([7],dtype=np.int8), np.array([0x20],dtype=np.int8), np.array([0x10],dtype=np.int8 ), 8, 0, 1]) #note case combine
+        params_yml.append([np.array([7],dtype=np.int8), np.array([0x20],dtype=np.int8), np.array([0x10],dtype=np.int8 ), 8, 1, 1])
+        #params_yml.append([np.linspace(0x40,0x80,15,dtype=np.int8), np.linspace(1,0x40,15,dtype=np.int8), np.linspace(0x20,0xff,15,dtype=np.int8), 8,  0, 1])
+        params_yml.append([np.linspace(0x40,0x80,15,dtype=np.int8), np.linspace(1,0x40,15,dtype=np.int8), np.linspace(0x20,0xff,15,dtype=np.int8), 8, 15, 1])      
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              vs1 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul])
+
+    test_base_with_mask @ ori, vs1, vs2, sew, vl, lmul, mask:
+      setup: |
+        params_yml = []
+        params_yml.append([np.array([7],dtype=np.int8), np.array([0x20],dtype=np.int8), np.array([0x10],dtype=np.int8), 8, 1, 1, np.array([0x1],dtype=np.uint8)])
+        params_yml.append([np.linspace(0x40,0x80,15,dtype=np.int8), np.linspace(1,0x40,15,dtype=np.int8), np.linspace(0x20,0x00ff,15,dtype=np.uint8), 8, 15, 1, np.array([0xf,0x0,0xa,0x5],dtype=np.uint8)])
+        for sew in [ 8, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              vs1 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              mask= random_mask(vl)
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, mask])
+
+  random_cases:
+    test_regression_without_mask: 
+      matrix:
+        sew : [8, 16, 32, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs2 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+        vs1 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+        ori : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+
+  cases:
+    test_agnostic_without_mask @ ori, vs2, vs1, sew, lmul, lmul_tu, vl, tail:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+                tail= get_tailmax(lmul, sew)
+                vs1 = np.linspace( 2, get_intmax(sew), tail, dtype=get_intdtype(sew))
+                vs2 = np.linspace( 1, get_intmax(sew), tail, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                lmul_tu = 1 if isinstance(lmul,str) else lmul
+                params_yml.append([ori, vs2, vs1, sew, lmul, lmul_tu, vl, tail])
+
+    test_register_vd_equ_vs1_without_mask :
+      matrix:
+        sew : [16, 32]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs1 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+        vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+        ori : vs1
+    
+    test_register_vd_equ_vs2_without_mask :
+      matrix:
+        sew : [32, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs1 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+        vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+        ori : vs2
+
+    test_register_vs1_equ_vs2_without_mask :
+      matrix:
+        sew : [8, 32]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+        vs1 : vs2
+        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+
+    test_register_vd_equ_vs1_vs2_without_mask :
+      matrix:
+        sew : [16, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
+        vs1 : vs2
+        ori : vs2
+
+    test_register_vd_eq_vm_with_mask:
+      matrix: 
+        sew : [8]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        mask: random_mask(sew*vl) 
+        vs1 : np.linspace( 1, get_intmax(sew), vl, dtype=get_intdtype(sew))
+        vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
+        ori : mask 
+    
+    test_exception_vstart_not_eq_zero_without_mask @ ori, vs1, vs2, sew, vl, lmul, vstart:
+      - '[np.array([32],dtype=np.uint16), np.array([0x7f],dtype=np.uint16), np.array([0x10],dtype=np.uint8 ), 8, 0, 1, 2]'
+      - '[np.array([7,7,9,7],dtype=np.uint16), np.array([200,1,2,3],dtype=np.uint16), np.array([7,8,14,24],dtype=np.uint8 ),  8, 4,"f4", 3]'
+      - '[np.array([7,7,9,7],dtype=np.uint16), np.array([200,1,2,3],dtype=np.uint16), np.array([7,8,14,24],dtype=np.uint8 ),  8, 4,"f8", 1]'
+      - '[np.linspace(0x40,0x80,15,dtype=np.uint16), np.linspace(1,0x40,15,dtype=np.uint16), np.linspace(0x20,0x00ff,15,dtype=np.uint8 ),  8,  0, 1, 2]'
+      - '[np.linspace(0x40,0x80,15,dtype=np.uint16), np.linspace(0,0x40,15,dtype=np.uint16), np.linspace(0x20,0x00ff,15,dtype=np.uint8 ),  8, 15, 1, 4]'
+
+vredsum_vs:
+  <<: *default
+
+vredmax_vs:
+  <<: *default
+
+vredmin_vs:
+  <<: *default
+
+vredand_vs:
+  <<: *default
+
+vredor_vs:
+  <<: *default
+
+vredxor_vs:
+  <<: *default
+
+
+__: &u_default
+  <<: *default
+  basic_cases:
+    test_base_without_mask @ ori, vs1, vs2, sew, vl, lmul:
+      setup: |
+        params_yml = []
+        #params_yml.append([np.array([7],dtype=np.uint8), np.array([0x20],dtype=np.uint8), np.array([0x10],dtype=np.uint8 ), 8, 0, 1])
+        params_yml.append([np.array([7],dtype=np.uint8), np.array([0x20],dtype=np.uint8), np.array([0x10],dtype=np.uint8 ), 8, 1, 1])
+        #params_yml.append([np.linspace(0x40,0x80,15,dtype=np.uint8), np.linspace(1,0x40,15,dtype=np.uint8), np.linspace(0x20,0xff,15,dtype=np.uint8), 8,  0, 1])
+        params_yml.append([np.linspace(0x40,0x80,15,dtype=np.uint8), np.linspace(1,0x40,15,dtype=np.uint8), np.linspace(0x20,0xff,15,dtype=np.uint8), 8, 15, 1])      
+        for sew in [ 8, 16, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+              vs1 = np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              vs2 = np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul])
+
+    test_base_with_mask @ ori, vs1, vs2, sew, vl, lmul, mask:
+      setup: |
+        params_yml = []
+        params_yml.append([np.array([7],dtype=np.uint8), np.array([0x20],dtype=np.uint8), np.array([0x10],dtype=np.uint8), 8, 1, 1, np.array([0x1],dtype=np.uint8)])
+        params_yml.append([np.linspace(0x40,0x80,15,dtype=np.uint8), np.linspace(1,0x40,15,dtype=np.uint8), np.linspace(0x20,0x00ff,15,dtype=np.uint8), 8, 15, 1, np.array([0xf,0x0,0xa,0x5],dtype=np.uint8)])
+        for sew in [ 8, 32, 64 ]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              vs1 = np.linspace( 0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              vs2 = np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+              mask= random_mask(vl)
+              params_yml.append([ori, vs1, vs2, sew, vl, lmul, mask])
+
+  random_cases:
+    test_regression_without_mask: 
+      matrix:
+        sew : [8, 16, 32, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs2 : np.random.uniform(2, get_uintmax(sew), vl).astype(get_uintdtype(sew))
+        vs1 : np.random.uniform(3, get_uintmax(sew), vl).astype(get_uintdtype(sew))
+        ori : np.random.uniform(4, get_uintmax(sew), vl).astype(get_uintdtype(sew))
+
+  cases:
+    test_agnostic_without_mask @ ori, vs2, vs1, sew, lmul, lmul_tu, vl, tail:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              tail= get_tailmax(lmul, sew)
+              vs1 = np.linspace( 2, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
+              vs2 = np.linspace( 1, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=get_uintdtype(sew))
+              lmul_tu = 1 if isinstance(lmul,str) else lmul
+              params_yml.append([ori, vs2, vs1, sew, lmul, lmul_tu, vl, tail])
+    
+    test_register_vd_equ_vs1_without_mask :
+      matrix:
+        sew : [16, 32]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs1 : np.linspace( 4, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        vs2 : np.linspace( 8, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        ori : vs1
+    
+    test_register_vd_equ_vs2_without_mask :
+      matrix:
+        sew : [32, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs1 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        vs2 : np.linspace( 3, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        ori : vs2
+
+    test_register_vs1_equ_vs2_without_mask :
+      matrix:
+        sew : [8, 32]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs2 : np.linspace( 5, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        vs1 : vs2
+        ori : np.linspace( 0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+
+    test_register_vd_equ_vs1_vs2_without_mask :
+      matrix:
+        sew : [16, 64]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        vs2 : np.linspace( 6, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        vs1 : vs2
+        ori : vs2
+
+    test_register_vd_eq_vm_with_mask:
+      matrix: 
+        sew : [8]
+        lmul: get_lmul_seg(sew)
+        vl  : get_vl(lmul, sew, vlen)
+        mask: random_mask(sew*vl) 
+        vs1 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
+        ori : mask 
+
+    test_exception_vstart_not_eq_zero_without_mask @ ori, vs1, vs2, sew, vl, lmul, vstart:
+      - '[np.array([32],dtype=np.uint16), np.array([0x7f],dtype=np.uint16), np.array([0x10],dtype=np.uint8 ), 8, 0, 1, 2]'
+      - '[np.array([7,7,9,7],dtype=np.uint16), np.array([200,1,2,3],dtype=np.uint16), np.array([7,8,14,24],dtype=np.uint8 ),  8, 4,"f4", 3]'
+      - '[np.array([7,7,9,7],dtype=np.uint16), np.array([200,1,2,3],dtype=np.uint16), np.array([7,8,14,24],dtype=np.uint8 ),  8, 4,"f8", 1]'
+      - '[np.linspace(0x40,0x80,15,dtype=np.uint16), np.linspace(1,0x40,15,dtype=np.uint16), np.linspace(0x20,0x00ff,15,dtype=np.uint8 ),  8,  0, 1, 2]'
+      - '[np.linspace(0x40,0x80,15,dtype=np.uint16), np.linspace(0,0x40,15,dtype=np.uint16), np.linspace(0x20,0x00ff,15,dtype=np.uint8 ),  8, 15, 1, 4]'
+
+vredmaxu_vs:
+  <<: *u_default
+
+vredminu_vs:
+  <<: *u_default
+  

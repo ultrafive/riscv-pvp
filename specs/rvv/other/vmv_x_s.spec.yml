@@ -1,0 +1,114 @@
+_: &default
+  env: RVTEST_RV64UV
+  head: |
+    #include "exception.h"
+    #include "test_macros_v.h"
+
+  templates:
+    test_base_vmv_x_s: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rd};
+        la a2, {vs2_data}; 
+        vle{sew}.v  v8, (a2);       
+        {name} a1, v8;    
+        la a4, test_{num}_data;
+        vmv.s.x v16, a1; 
+        vle{sew}.v v16, (a4); 
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection
+
+    test_regression_vmv_x_s: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rd};
+        la a2, {vs2_data}; 
+        vle{sew}.v  v8, (a2); 
+        li t0, {vstart};
+        csrw vstart, t0;         
+        {name} a1, v8; 
+        csrr t1, vstart;
+        beqz t1, 1f;
+        j fail
+      1:la a4, test_{num}_data;
+        vmv.s.x v16, a1; 
+        vle{sew}.v v16, (a4); 
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection
+
+    test_vstart_not_eq_zero_vmv_x_s: |
+      test_{num}:
+        li TESTNUM, {num};
+        li a0, {vl};
+        vsetvli t0, a0, e{sew},m{lmul},ta,ma;
+        li a1, {rd};
+        la a2, {vs2_data}; 
+        vle{sew}.v  v8, (a2); 
+        li t0, {vstart};
+        csrw vstart, t0;         
+        {name} a1, v8; 
+        csrr t1, vstart;
+        beqz t1, 1f;
+        j fail
+      1:la a4, test_{num}_data;
+        vmv.s.x v16, a1; 
+        vle{sew}.v v16, (a4); 
+        .pushsection .data, 1;
+        .balign ({sew}/8)
+      test_{num}_data:
+        .fill (1), ({sew}/8), 0;
+        .popsection
+
+  check:
+    test_base_vmv_x_s: np.array_equal(result, golden)
+    test_regression_vmv_x_s: np.array_equal(result, golden)
+    test_vstart_not_eq_zero_vmv_x_s: np.array_equal(result, golden)
+
+        
+vmv_x_s:
+  <<: *default
+  basic_cases:
+    test_base_vmv_x_s @ rd, vs2, sew, lmul, vl:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rd in np.array([vl, sew],dtype=get_intdtype(sew)):
+                vs2 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                params_yml.append([rd, vs2, sew, lmul, vl])
+
+  random_cases: 
+    test_regression_vmv_x_s @ rd, vs2, sew, lmul, vl, vstart:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rd in np.array([vl, sew],dtype=get_intdtype(sew)):
+                vs2 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                vstart = sew//9
+                params_yml.append([rd, vs2, sew, lmul, vl, vstart])
+
+  cases:
+    test_vstart_not_eq_zero_vmv_x_s @ rd, vs2, sew, lmul, vl, vstart:
+      setup: |
+        params_yml = []
+        for sew in [8, 16, 32, 64]:
+          for lmul in get_lmul_seg(sew):
+            for vl in get_vl(lmul, sew, vlen):
+              for rd in np.array([vl, sew],dtype=get_intdtype(sew)):
+                vs2 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                vstart = sew//9
+                params_yml.append([rd, vs2, sew, lmul, vl, vstart])
+                

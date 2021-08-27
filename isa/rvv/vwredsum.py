@@ -1,17 +1,37 @@
 from isa.inst import *
 import numpy as np
 
+class Vwredsum_vs(Inst):
+    name = 'vwredsum.vs'
+    def golden(self):        
+        if self['vl'] == 0: 
+            return self['ori'][0]
+
+        if self['vs2'].dtype == self['vs1'].dtype: 
+            self['vs2'].dtype = self.get_intdtype(self['sew']) 
+        
+        result = self['vs1'][0]
+        maskflag = 1 if 'mask' in self else 0 
+
+        for ii in range(self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result += self['vs2'][ii]
+        return result  
+        
 class Vwredsumu_vs(Inst):
     name = 'vwredsumu.vs'
-    def golden(self):
-        maskflag = 1 if 'mask' in self else 0
-        self['ori'][0] = self['vs1'][0]
-        for ii in range(self['vl']):            
-            if (maskflag == 0) or (maskflag == 1 and np.bitwise_and(np.uint64(self['mask'][0]), np.uint64(2**ii)) ):
-                self['ori'][0] += self['vs2'][ii]
-        return self['ori']
+    def golden(self):        
+        if self['vl'] == 0: 
+            return self['ori'][0]
 
-class Vwredsum_vs(Vwredsumu_vs):
-    name = 'vwredsum.vs'
+        if self['vs2'].dtype == self['vs1'].dtype: 
+            self['vs2'].dtype = self.get_uintdtype(self['sew']) 
+        
+        result = self['vs1'][0] # extension
+        maskflag = 1 if 'mask' in self else 0 
 
-
+        for ii in range(self['vl']): 
+            if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
+                result += self['vs2'][ii]
+        return result
+  

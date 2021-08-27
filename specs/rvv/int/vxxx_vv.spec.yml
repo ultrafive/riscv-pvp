@@ -441,7 +441,7 @@ _: &unsigned
               tail= get_tailmax(lmul, sew)
               vs1 = np.linspace( 2, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
               vs2 = np.linspace( 1, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
-              ori = np.linspace( 0, 1024, tail, dtype=get_uintdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=get_uintdtype(sew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vs1, sew, lmul, lmul_tu, vl, tail])
 
