@@ -25,10 +25,11 @@ spike:
   cmd: f'{path} --isa=rv{xlen}gcv_zfh --varch=vlen:{vlen},elen:{elen},slen:{slen}'
 
 gem5:
-  path: ~
+  path: ~ #/work/gem5/gem5/build/RISCV/gem5.opt
   options: |
-      --debug-flags=Fetch,Exec \
-      configs/example/fs.py \
+      --debug-flags=Exec \
+      --listener-mode=off \
+      ~/work/gem5/gem5/configs/example/fs.py \
       --cpu-type=MinorCPU \
       --bp-type=LTAGE \
       --num-cpu=1 \

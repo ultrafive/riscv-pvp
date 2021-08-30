@@ -1,0 +1,40 @@
+rootdir := ../../../..
+
+include ../../../variables.mk
+
+all: diff
+
+# generate
+INCS = -I$(rootdir)/env/p -I$(rootdir)/macros/scalar -I$(rootdir)/macros/vector
+LIBS = -T$(rootdir)/env/p/link.ld
+
+elf: test.elf test.dump
+
+test.elf: test.S
+	$(CC) $(INCS) $(CFLAGS) $(LDFLAGS) $(LIBS) -Wl,-Map,test.map $< -o $@
+
+test.dump: test.elf
+	$(OBJDUMP) $< > $@
+
+# simulate
+include ../../../spike.mk
+-include ../../../gem5.mk
+sim: $(foreach SIM, $(SIMS), $(SIM).log)
+
+# diff
+diff: sim $(foreach SIM, $(filter-out spike,$(SIMS)), diff-$(SIM).data)
+
+diff-%.data: %.sig
+	../../../diff.py check_golden.npy $<
+
+# clean
+clean:
+	-rm -f *.elf *.dump *.sig *.log *.run *.tmp *.data *.map
+
+help:
+	@echo "make        \tRun all steps."
+	@echo "make elf    \tGenerate elf file."
+	@echo "make sim    \tRun simulators."
+	@for i in $(SIMS); do echo "make $$i\tRun simulators." ; done
+	@echo "make diff   \tDiff with spike golden data."
+	@echo "make clean  \tClean files."

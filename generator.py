@@ -85,6 +85,7 @@ def get_config_info(args):
         globals()["compile_cmd"] = f'{cc} {defines} {cflags} {incs} {linkflags}'
         globals()["objdump_cmd"] = config["compile"]["objdump"]
         globals()["is_objdump"] = config["compile"]["is_objdump"]
+        globals()["config"] = config
         args.compile_config = { "compile_cmd": compile_cmd, "objdump_cmd": objdump_cmd, "is_objdump": is_objdump }
 
 # find the params for matrix cases
@@ -651,7 +652,26 @@ def main():
         else:
             cases = get_arg_cases(args.cases) 
 
-        os.makedirs('build', exist_ok=True)  
+        os.makedirs('build', exist_ok=True)
+
+        vmap = {
+            'CC': cc, 'CFLAGS': f'{defines} {cflags}', 'LDFLAGS': '', 'OBJDUMP': objdump_cmd,
+            'SPIKE': eval(config['spike']['cmd'].format_map({
+                'path': config['spike']['path'],
+                'xlen': xlen, 'vlen': vlen, 'elen': elen, 'slen': slen,
+            })), 'SPIKE_OPTS': '',
+            'GEM5': config['gem5']['path'], 'GEM5_OPTS': config['gem5']['options'],
+        }
+
+        os.system('cp -rf utils/make/spike.mk utils/make/*.py utils/make/Makefile build/')
+        if vmap['GEM5']:
+            os.system('cp -rf utils/make/gem5.mk build/')
+
+        with open('utils/make/variables.mk.in', 'r') as f:
+            template = f.read()
+            vars = template.format_map(vmap)
+            with open('build/variables.mk', 'w') as fo:
+                fo.write(vars)
 
 
         with Pool(processes=args.nproc) as pool:
@@ -671,6 +691,9 @@ def main():
             failed_num = gen_report( ps, args.failing_info, collected_case_list, collected_case_num_list )
 
             progress.stop()
+
+            for case in selected_case_list:
+                os.system(f'cp -rf utils/make/Makefile.subdir build/{case}/Makefile')
 
             # print test result
             if failed_num == 0:
