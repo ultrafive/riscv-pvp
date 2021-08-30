@@ -119,6 +119,3 @@ from .vwredsum import *
 from .vsmul import *
 
 from .vlsegxexff_v import *
-
-from .vxexpi_v import *
-from .veadd_mm import *
