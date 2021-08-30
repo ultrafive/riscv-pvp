@@ -7,11 +7,11 @@ def f16_classify( vs2 ):
     
     infOrNaN = ( ( num >> 10 ) & 0x1F ) == 0x1F
     subnormalOrZero = ( ( num >> 10 ) & 0x1F ) == 0
-    sign = num >> 15
+    sign = ( ( num >> 15 ) != 0 )
     fracZero = ( num & 0x3FF ) == 0
-    isNaN = infOrNaN and ( not fracZero )
-    isSNaN =  ( ( num & 0x7E00 ) == 0x7C00 ) and ( num & 0x1FF )
-    res = ( 
+    isNaN = ( ( ( ~ num ) & 0x7C00 ) == 0 ) and ( ( num & 0x03FF ) != 0)
+    isSNaN =  ( ( num & 0x7E00 ) == 0x7C00 ) and ( ( num & 0x1FF ) != 0 )
+    vd = ( 
     (  sign and infOrNaN and fracZero ) << 0 | 
     (  sign and not infOrNaN and not subnormalOrZero ) << 1 |
     (  sign and subnormalOrZero and not fracZero )  << 2 |
@@ -23,7 +23,7 @@ def f16_classify( vs2 ):
     ( isNaN and  isSNaN )                       << 8 |
     ( isNaN and not isSNaN )                       << 9  )
 
-    return res
+    return vd
 
 def f32_classify( vs2 ):
 
@@ -31,11 +31,11 @@ def f32_classify( vs2 ):
     
     infOrNaN = ( ( num >> 23 ) & 0xFF ) == 0xFF
     subnormalOrZero = ( ( num >> 23 ) & 0xFF ) == 0
-    sign = num >> 31
+    sign = ( ( num >> 31 ) != 0 )
     fracZero = ( num & 0x7FFFFF ) == 0
-    isNaN = infOrNaN and ( not fracZero )
-    isSNaN =  ( ( num & 0x7FC00000 ) == 0x7F800000 ) and ( num & 0x3FFFFF )
-    res = ( 
+    isNaN = ( ( ( ~ num ) & 0x7F800000) == 0) and ( ( num & 0x007FFFFF) != 0 )
+    isSNaN =  ( ( num & 0x7FC00000 ) == 0x7F800000 ) and ( ( num & 0x3FFFFF ) != 0 )
+    vd = ( 
     (  sign and infOrNaN and fracZero ) << 0 | 
     (  sign and not infOrNaN and not subnormalOrZero ) << 1 |
     (  sign and subnormalOrZero and not fracZero )  << 2 |
@@ -47,19 +47,19 @@ def f32_classify( vs2 ):
     ( isNaN and  isSNaN )                       << 8 |
     ( isNaN and not isSNaN )                       << 9  )
 
-    return res
+    return vd
 
 def f64_classify( vs2 ):
 
     num = int( np.array( [vs2], dtype = np.float64 ).byteswap().tobytes().hex(), 16 )
-    
+
     infOrNaN = ( ( num >> 52 ) & 0x7FF ) == 0x7FF
     subnormalOrZero = ( ( num >> 52 ) & 0x7FF ) == 0
-    sign = num >> 63
+    sign = ( ( num >> 63 ) != 0 )
     fracZero = ( num & 0xFFFFFFFFFFFFF ) == 0
-    isNaN = infOrNaN and ( not fracZero )
-    isSNaN =  ( ( num & 0x7FF8000000000000 ) == 0x7FF0000000000000 ) and ( num & 0x7FFFFFFFFFFFF )
-    res = ( 
+    isNaN = ( ( ( ~num ) & 0x7FF0000000000000 ) == 0) and ( ( num & 0x000FFFFFFFFFFFFF ) != 0 )
+    isSNaN =  ( ( num & 0x7FF8000000000000 ) == 0x7FF0000000000000 ) and ( ( num & 0x7FFFFFFFFFFFF ) != 0 )
+    vd = ( 
     (  sign and infOrNaN and fracZero ) << 0 | 
     (  sign and not infOrNaN and not subnormalOrZero ) << 1 |
     (  sign and subnormalOrZero and not fracZero )  << 2 |
@@ -71,7 +71,7 @@ def f64_classify( vs2 ):
     ( isNaN and  isSNaN )                       << 8 |
     ( isNaN and not isSNaN )                       << 9  )
 
-    return res
+    return vd
 
 rsqrt_table = [ 
     52, 51, 50, 48, 47, 46, 44, 43,
@@ -133,9 +133,7 @@ def f16_rsqrt7( vs2 ):
         num = int( np.array( [vs2[no]], dtype = np.float16 ).byteswap().tobytes().hex(), 16 )
         num = rsqrt7( num, 5, 10, IsSubnoraml )
         num = np.array([num]).astype(np.int16)
-        num.dtype= np.float16
-        if num[0] < 0:
-            num[0] = np.nan        
+        num.dtype= np.float16       
         vd[no] = num[0]
     return vd
 
@@ -164,8 +162,6 @@ def f32_rsqrt7( vs2 ):
         num = rsqrt7( num, 8, 23, IsSubnoraml )
         num = np.array([num]).astype(np.int32)
         num.dtype= np.float32
-        if num[0] < 0:
-            num[0] = np.nan
         vd[no] = num[0]
     return vd        
 
@@ -193,9 +189,7 @@ def f64_rsqrt7( vs2 ):
         num = int( np.array( [vs2[no]], dtype = np.float64 ).byteswap().tobytes().hex(), 16 )
         num = rsqrt7( num, 11, 52, IsSubnoraml )
         num = np.array([num]).astype(np.int64)
-        num.dtype= np.float64
-        if num[0] < 0:
-            num[0] = np.nan        
+        num.dtype= np.float64      
         vd[no] = num[0] 
     return vd   
 

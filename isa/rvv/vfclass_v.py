@@ -9,10 +9,10 @@ def f16_classify( vs2 ):
         
         infOrNaN = ( ( num >> 10 ) & 0x1F ) == 0x1F
         subnormalOrZero = ( ( num >> 10 ) & 0x1F ) == 0
-        sign = num >> 15
+        sign = ( ( num >> 15 ) != 0 )
         fracZero = ( num & 0x3FF ) == 0
-        isNaN = infOrNaN and ( not fracZero )
-        isSNaN =  ( ( num & 0x7E00 ) == 0x7C00 ) and ( num & 0x1FF )
+        isNaN = ( ( ( ~ num ) & 0x7C00 ) == 0 ) and ( ( num & 0x03FF ) != 0)
+        isSNaN =  ( ( num & 0x7E00 ) == 0x7C00 ) and ( ( num & 0x1FF ) != 0 )
         vd[no] = ( 
         (  sign and infOrNaN and fracZero ) << 0 | 
         (  sign and not infOrNaN and not subnormalOrZero ) << 1 |
@@ -35,10 +35,10 @@ def f32_classify( vs2 ):
         
         infOrNaN = ( ( num >> 23 ) & 0xFF ) == 0xFF
         subnormalOrZero = ( ( num >> 23 ) & 0xFF ) == 0
-        sign = num >> 31
+        sign = ( ( num >> 31 ) != 0 )
         fracZero = ( num & 0x7FFFFF ) == 0
-        isNaN = infOrNaN and ( not fracZero )
-        isSNaN =  ( ( num & 0x7FC00000 ) == 0x7F800000 ) and ( num & 0x3FFFFF )
+        isNaN = ( ( ( ~ num ) & 0x7F800000) == 0) and ( ( num & 0x007FFFFF) != 0 )
+        isSNaN =  ( ( num & 0x7FC00000 ) == 0x7F800000 ) and ( ( num & 0x3FFFFF ) != 0 )
         vd[no] = ( 
         (  sign and infOrNaN and fracZero ) << 0 | 
         (  sign and not infOrNaN and not subnormalOrZero ) << 1 |
@@ -58,13 +58,13 @@ def f64_classify( vs2 ):
 
     for no in range( vs2.size ):
         num = int( np.array( [vs2[no]], dtype = np.float64 ).byteswap().tobytes().hex(), 16 )
-        
+
         infOrNaN = ( ( num >> 52 ) & 0x7FF ) == 0x7FF
         subnormalOrZero = ( ( num >> 52 ) & 0x7FF ) == 0
-        sign = num >> 63
+        sign = ( ( num >> 63 ) != 0 )
         fracZero = ( num & 0xFFFFFFFFFFFFF ) == 0
-        isNaN = infOrNaN and ( not fracZero )
-        isSNaN =  ( ( num & 0x7FF8000000000000 ) == 0x7FF0000000000000 ) and ( num & 0x7FFFFFFFFFFFF )
+        isNaN = ( ( ( ~num ) & 0x7FF0000000000000 ) == 0) and ( ( num & 0x000FFFFFFFFFFFFF ) != 0 )
+        isSNaN =  ( ( num & 0x7FF8000000000000 ) == 0x7FF0000000000000 ) and ( ( num & 0x7FFFFFFFFFFFF ) != 0 )
         vd[no] = ( 
         (  sign and infOrNaN and fracZero ) << 0 | 
         (  sign and not infOrNaN and not subnormalOrZero ) << 1 |
@@ -78,6 +78,7 @@ def f64_classify( vs2 ):
         ( isNaN and not isSNaN )                       << 9  )
 
     return vd
+
 import ctypes
 FE_TONEAREST = 0x0000
 FE_DOWNWARD = 0x0400

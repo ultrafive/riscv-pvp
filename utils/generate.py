@@ -193,6 +193,8 @@ def gen_inst_case( args, test_inst ):
         with result_condition:          
             result_dict[test_inst.name] = "compile failed."
             result_detail_dict[test_inst.name] = f'{source} compiled unsuccessfully, please check the compile log file {compile_log}'
+            with open(f'{workdir}/generator.log', 'w') as f:
+                f.write( result_dict[test_inst.name] + '\n' + result_detail_dict[test_inst.name] + '\n' )
         
         with fails.get_lock():
             fails.value += len(case_list)
@@ -203,6 +205,8 @@ def gen_inst_case( args, test_inst ):
         with result_condition:          
             result_dict[test_inst.name] = "ok"
             result_detail_dict[test_inst.name] = ""
+            with open(f'{workdir}/generator.log', 'w') as f:
+                f.write( result_dict[test_inst.name] + '\n' + result_detail_dict[test_inst.name] + '\n' )     
 
     with tests.get_lock():
         tests.value += len(case_list)    
@@ -294,6 +298,8 @@ def gen_type_case( args, test_inst, test_type ):
         with result_condition:    
             result_dict[f'{test_inst.name}/{test_type}'] = "compile failed."
             result_detail_dict[f'{test_inst.name}/{test_type}'] = f'{source} compiled unsuccessfully, please check the compile log file {compile_log}'
+            with open(f'{workdir}/generator.log', 'w') as f:
+                f.write( result_dict[f'{test_inst.name}/{test_type}'] + '\n' + result_detail_dict[f'{test_inst.name}/{test_type}'] + '\n' )
 
         with fails.get_lock():
             fails.value += len(case_list)
@@ -304,6 +310,8 @@ def gen_type_case( args, test_inst, test_type ):
         with result_condition:    
             result_dict[f'{test_inst.name}/{test_type}'] = "ok"
             result_detail_dict[f'{test_inst.name}/{test_type}'] = ''
+            with open(f'{workdir}/generator.log', 'w') as f:
+                f.write( result_dict[f'{test_inst.name}/{test_type}'] + '\n' + result_detail_dict[f'{test_inst.name}/{test_type}'] + '\n' )            
 
     with tests.get_lock():
         tests.value += len(case_list)
@@ -373,6 +381,8 @@ def gen_case( args, test_inst, test_type, test_case ):
         with result_condition:
             result_dict[f'{test_inst.name}/{test_type}/{test_case}'] = "compile failed."
             result_detail_dict[f'{test_inst.name}/{test_type}/{test_case}'] = f'{source} compiled unsuccessfully, please check the compile log file {compile_log}'
+            with open(f'{workdir}/generator.log', 'w') as f:
+                f.write( result_dict[f'{test_inst.name}/{test_type}/{test_case}'] + '\n' + result_detail_dict[f'{test_inst.name}/{test_type}/{test_case}'] + '\n' )
 
         with fails.get_lock():
             fails.value += 1
@@ -383,6 +393,8 @@ def gen_case( args, test_inst, test_type, test_case ):
         with result_condition:
             result_dict[f'{test_inst.name}/{test_type}/{test_case}'] = "ok"
             result_detail_dict[f'{test_inst.name}/{test_type}/{test_case}'] = ''
+            with open(f'{workdir}/generator.log', 'w') as f:
+                f.write( result_dict[f'{test_inst.name}/{test_type}/{test_case}'] + '\n' + result_detail_dict[f'{test_inst.name}/{test_type}/{test_case}'] + '\n' )            
 
     with tests.get_lock():
         tests.value += 1

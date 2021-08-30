@@ -54,7 +54,7 @@ def parse_argument():
     parser.add_argument('--rtimes', help="set random cases generation times", type=int, default=1)    
     parser.add_argument('--retry', help='retry last failed cases', action="store_true") 
 
-    parser.add_argument('--no-failing-info', '-nfi', help="don't print the failing info into the screen, rather than into the log/generator_report.log.", action="store_true")                                              
+    parser.add_argument('--failing-info', '-fi', help="print the failing info into the screen, rather than into the log/generator_report.log.", action="store_true")                                              
     parser.add_argument('--param-info', '-pi', help="print params information into log/params.yaml of cases collected.", action = "store_true")
 
     args, unknown_args = parser.parse_known_args()
@@ -88,21 +88,23 @@ def get_config_info(args):
         args.compile_config = { "compile_cmd": compile_cmd, "objdump_cmd": objdump_cmd, "is_objdump": is_objdump }
 
 # find the params for matrix cases
-def search_matrix(arg_names, vals, no, params, **kwargs):
+def search_matrix(arg_names, vals, no, params, locals_dict, **kwargs):
     if no == len(vals):#when all arguments in kwargs
         params.append(kwargs)
         return
 
+    merge_dict = { **locals_dict, **kwargs }
     # define the arguments in kwargs to help compute next param
-    for key, val in kwargs.items():
+    for key, val in merge_dict.items():
         if isinstance(val,str):
             exec(f'{key}="{val}"')
         elif isinstance(val, np.ndarray):
             val_str = val.tobytes()
             exec(f'{key}=np.reshape( np.frombuffer( val_str, dtype=jnp.{val.dtype}), {val.shape}) ')
+        elif inspect.isfunction( merge_dict[key] ):
+            exec(f'{key}=merge_dict["{key}"]')
         else:
             exec(f'{key}={val}')
-        globals()[str(key)] = val
 
     # just to unify the handle process
     if not isinstance(vals[no], list):
@@ -125,7 +127,7 @@ def search_matrix(arg_names, vals, no, params, **kwargs):
         for val_el in vals_next:
             # take this argument into kwargs and continue to search next argument 
             kwargs[arg_names[no]] = val_el
-            search_matrix(arg_names, vals, no+1, params, **kwargs)
+            search_matrix(arg_names, vals, no+1, params, locals_dict, **kwargs)
 
     # get the params list from dictionary
     if no == 0:
@@ -203,31 +205,53 @@ def cases_gen( args, filename, inst, cases_dict, templates, check_dict, collecte
                 if 'params_yml' in globals() or 'params_yml' in locals():
                     del params_yml
 
-                locals_dict = dict()
-                exec(params["setup"], globals(), locals_dict)
-                if not 'params_yml' in locals_dict:
-                    print(f"no params_yml in setup, please check.-{test_type} of {inst} in {filename}")
-                    continue
+                if args.random:
+                    rtimes = args.rtimes
                 else:
-                    params_yml = locals_dict['params_yml']
+                    rtimes = 1
+                params_yml = []
+                while rtimes >  0:
+                    rtimes -= 1
+                    locals_dict = dict()
+                    exec(params["setup"], globals(), locals_dict)
+                    if not 'params_yml' in locals_dict:
+                        print(f"no params_yml in setup, please check.-{test_type} of {inst} in {filename}")
+                        continue
+                    else:
+                        params_yml.extend( locals_dict['params_yml'] )
             
-            else:
-                params_yml = params
+            else:                
+                if args.random:
+                    rtimes = args.rtimes
+                else:
+                    rtimes = 1
+                params_yml = []
+                while rtimes >  0:
+                    rtimes -= 1
+                    params_yml.extend( params )
 
         elif param_mode == 'matrix':
-            # setup string is the preparatory work for matrix
-            if 'setup' in params:
-                exec(params['setup'])
-            
-
+            if args.random:
+                rtimes = args.rtimes
+            else:
+                rtimes = 1
+            params_yml = []
             # get argument names and params
             argnames = list(params['matrix'].keys())
             test_info["args"] = argnames
-            vals = list(params['matrix'].values())
-            
-            # compute the params values
-            params_dict_yml = []            
-            params_yml = search_matrix(argnames, vals, 0, params_dict_yml)
+            vals = list(params['matrix'].values())            
+            while rtimes >  0:
+                rtimes -= 1
+
+                locals_dict = {}
+                # setup string is the preparatory work for matrix
+                if 'setup' in params:
+                    exec(params['setup'], globals(), locals_dict)
+
+                                
+                # compute the params values
+                params_dict_yml = []            
+                params_yml.extend( search_matrix(argnames, vals, 0, params_dict_yml, locals_dict) )
 
         else:
             continue
@@ -256,19 +280,19 @@ def cases_gen( args, filename, inst, cases_dict, templates, check_dict, collecte
         # compute params and set the case name      
         test_info["case_param"] = dict()
         if test_info["params"]:
-            num = 0                  
+            num = 0         
             for param in test_info["params"]:
                 
                 # compute params value
                 param = eval(param) if isinstance(param, str) else param
 
                 # set the case name
-                case_name = ''
+                case_name = f'test{num}_'
                 for i in range(len(test_info["args"])):
                     if i != 0:
                         case_name += '-'
                     if isinstance(param[i], np.ndarray):
-                        case_name += test_info["args"][i] + "_" + str(num)
+                        case_name += test_info["args"][i]
                     else:
                         case_name += test_info["args"][i] + "_" + str( param[i] )
                 
@@ -282,15 +306,17 @@ def cases_gen( args, filename, inst, cases_dict, templates, check_dict, collecte
                 
                 num += 1
                 if args.param_info:
-                    param_dict[inst][test_type][case_name] = str(param)
+                    param_dict[inst][test_type][case_name] = str(param)                
             
         else:
-
             if args.param_info:
                 param_dict[inst][test_type] = None
             if args.level == "case":
                 # if no param, just one case
                 collected_case_list.append(inst+'/'+test_type)
+                collected_case_num_list.append(1)
+            else:
+                collected_case_num_list[-1] += 1
 
         test_dict[test_type] = test_info
     
@@ -383,7 +409,7 @@ def collect_tests( args ):
         specs = ['specs']
     else:
         # otherwise find the case from args.specs
-        specs = args.specs.split()
+        specs = args.specs.split(',')
 
     print("collecting the tests...")
 
@@ -505,13 +531,11 @@ def generator_error(case):
     with result_condition:
         result_dict[case] = "python run failed."
         result_detail_dict[case] = ''
+        with open(f'build/{case}/generator.log', 'w') as f:
+            f.write( result_dict[case] + '\n' + result_detail_dict[case] + '\n' )
 
 def generator_callback(progress, task_id, completed, total):
     progress.update( task_id, completed = completed )
-    if completed == total and getattr( generator_callback, 'x', 0) == 0 :  
-        generator_callback.x = 1      
-        progress.stop()
-        print("analyzing the results...")
 
 # call the test_function in the test class to generate the test
 def generate_test( case, args ):
@@ -563,50 +587,48 @@ def generate_test( case, args ):
         error_str = error_output.getvalue()
         error_str += "\nUnexpected error: " + str(sys.exc_info()[0]) + " " + str(sys.exc_info()[1])
         result_detail_dict[case] = error_str
-        print(error_str)
+        with open(f'build/{case}/generator.log', 'w') as f:
+            f.write( result_dict[case] + '\n' + result_detail_dict[case] + '\n' )
+
+        # print(error_str)
 
         return output
 
-def gen_report( ps, no_failing_info ):
+def gen_report( ps, failing_info, collected_case_list, collected_case_num_list ):
+
     failed_num = 0
     # write the test results into log/generator_report.log
     report = open(f'log/generator_report.log', 'w')
-    generator_case = []  
+    generator_case_log = open(f'log/generator_case.log', 'w')
     for case, p in ps:
         ok = True
+
+        case_num = collected_case_num_list[ collected_case_list.index( case ) ]
 
         p_value = p.get().getvalue()
         # find case result in result_dict
         if result_dict[case] != "ok":
             reason = result_dict[case]
             ok = False    
-        with open(f'build/{case}/generator.log', 'w') as f:
-            print(result_dict[case], file=f) 
-            print(result_detail_dict[case], file=f) 
-            print(p_value, file=f) 
+        if p_value != '':
+            with open(f'build/{case}/generator.log', 'w') as f:
+                f.write( p_value )
 
         if not ok:
             failed_num += 1
-            if not no_failing_info:
+            if failing_info:
                 # use the sleep to make that the main process can get the KeyboardInterrupt from ctrl C
                 time.sleep(0.5)
                 print(f'FAIL {case} - {reason}')
-            print(f'FAIL {case} - {reason}', file=report)
+            report.write( f'FAIL {case} - {reason}\n' )
         else:
-            print(f'PASS {case}', file=report)
-            generator_case.append(case)                                                        
+            report.write( f'PASS {case}\n' )
+            generator_case_log.write( case + ',' + str(case_num) + '\n' )
+                                                                    
+    report.close()
+    generator_case_log.close()
 
-    report.close()  
-    return [generator_case, failed_num]
-
-def gen_runner_case_log( generator_case, collected_case_list, collected_case_num_list ):
-    # write the successfully case into the generator_case.log to let the runner to know which cases need to run
-    with open("log/generator_case.log", 'w') as generator_log:
-        for case in generator_case:
-            generator_log.write(case)
-            generator_log.write(',')
-            generator_log.write(str(collected_case_num_list[collected_case_list.index(case)]))
-            generator_log.write('\n')   
+    return failed_num  
 
 def main():
     
@@ -646,19 +668,19 @@ def main():
                 error_callback=lambda _: generator_error(case) )
                 ps.append((case, res))
 
-            [generator_case, failed_num] = gen_report( ps, args.no_failing_info  )
+            failed_num = gen_report( ps, args.failing_info, collected_case_list, collected_case_num_list )
 
-            gen_runner_case_log( generator_case, collected_case_list, collected_case_num_list )
+            progress.stop()
 
             # print test result
             if failed_num == 0:
                 print(f'{len(ps)} files generation finish, all pass.( {tests.value} tests )')
                 sys.exit(0)
             else:
-                if args.no_failing_info:
-                    print(f'{len(ps)} files generation finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed, please look at the log/generator_report.log for the failing information. )')
+                if args.failing_info:
+                    print(f'{len(ps)} files generation finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed.)')                    
                 else:
-                    print(f'{len(ps)} files generation finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed.)')
+                    print(f'{len(ps)} files generation finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed, please look at the log/generator_report.log for the failing information. )')
 
                 sys.exit(-1)                        
 

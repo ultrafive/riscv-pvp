@@ -35,7 +35,7 @@ def parse_argument():
                                         test case list string or file, for example:
                                         - vsub_vv,addi/test_imm_op/
                                         - cases.list'''), default='')
-    parser.add_argument('--no-failing-info', '-nfi', help="don't print the failing info into the screen, but in the log/runner_report.log.", action="store_true")                                     
+    parser.add_argument('--failing-info', '-fi', help="print the failing info into the screen, rather than  in the log/runner_report.log.", action="store_true")                                     
 
 
     # options to configure the test CPU
@@ -193,15 +193,14 @@ def runner_error(case):
     with result_condition:
         result_dict[case] = "python run failed."
         result_detail_dict[case] = ''
+        with open(f'build/{case}/runner.log', 'w') as f:
+            f.write( result_dict[case] + '\n' + result_detail_dict[case] + '\n' )       
 
 def runner_callback(progress, task_id, completed, total):
     progress.update( task_id, completed = completed )
-    if completed == total and getattr( runner_callback, 'x', 0) == 0 :  
-        runner_callback.x = 1
-        progress.stop()
-        print("analyzing the results...")
 
-def gen_runner_report( ps, args ):
+def gen_runner_report( ps, args, generator_case_list, generator_num_list ):
+
     failed_num = 0
 
     # save the runner result into the log file
@@ -213,20 +212,20 @@ def gen_runner_report( ps, args ):
         # find case result in result_dict
         if result_dict[case] != "ok":
             reason = result_dict[case]
-            ok = False    
-        with open(f'build/{case}/runner.log', 'w') as f:
-            print(result_dict[case], file=f) 
-            print(result_detail_dict[case], file=f)
-            print(p_str, file=f)                         
+            ok = False
+        if p_str != '':    
+            with open(f'build/{case}/runner.log', 'w') as f:
+                f.write(p_str)                      
 
         if not ok:
             failed_num += 1
-            if not args.no_failing_info:                    
+            if args.failing_info:                    
                 time.sleep(0.5)
-                print(f'FAIL {case} - {reason}')                    
-            print(f'FAIL {case} - {reason}', file=report)
+                print(f'FAIL {case} - {reason}')
+            
+            report.write(f'FAIL {case} - {reason}')                  
         else:
-            print(f'PASS {case}', file=report)                                                      
+            report.write(f'PASS {case}')                                                             
 
     report.close()
 
@@ -262,6 +261,8 @@ def run_test(case, args):
                 result_detail_dict[case] = f'\nspike-run failed!!!\nPlease check the spike log in {run_log} '
                 fails.value += len(case_list)
                 tests.value += len(case_list)
+                with open(f'build/{case}/runner.log', 'w') as f:
+                    f.write( result_dict[case] + '\n' + result_detail_dict[case] + '\n' )
 
                 sys.stdout = stdout
                 sys.stderr = stderr
@@ -311,7 +312,6 @@ def run_test(case, args):
                     #save the python golden result and spike result into check.data file of each case        
                     os.makedirs(f'build/{test_case["name"]}', exist_ok=True)
                     check_result = check_to_txt( golden, result, f'build/{test_case["name"]}/check.data', test_case["check_str"] )
-
                     if not check_result:
                         # if check failed, set result as "check failed", because the elf can be run in more sims, so don't use result_dict and notify result_condition
                         test_result += test_case["name"]+"_check failed-"
@@ -376,6 +376,8 @@ def run_test(case, args):
                 result_detail_dict[case] = test_detail
                 fails.value += len(failed_case_list)
                 tests.value += len(case_list)
+            with open(f'build/{case}/runner.log', 'w') as f:
+                f.write( result_dict[case] + '\n' + result_detail_dict[case] + '\n' )                
     
 
         sys.stdout = stdout
@@ -396,7 +398,10 @@ def run_test(case, args):
         error_str = error_output.getvalue()
         error_str += "\nUnexpected error: " + str(sys.exc_info()[0]) + " " + str(sys.exc_info()[1])
         result_detail_dict[case] = error_str
-        print(error_str)
+        with open(f'build/{case}/runner.log', 'w') as f:
+            f.write( result_dict[case] + '\n' + result_detail_dict[case] + '\n' )
+        
+        # print(error_str)
 
         return output
 
@@ -435,7 +440,9 @@ def main():
                 ps.append((case, res))              
 
               
-            failed_num = gen_runner_report( ps, args )
+            failed_num = gen_runner_report( ps, args, generator_case_list, generator_num_list )
+
+            progress.stop()
 
             # spike may make that user can't input in command line, use stty echo to fix that.
             os.system("stty echo")
@@ -444,10 +451,11 @@ def main():
                 print(f'{len(ps)} files running finish, all pass.( {tests.value} tests )')
                 sys.exit(0)
             else:
-                if args.no_failing_info:
-                    print(f'{len(ps)} files running finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed, please look at the log/runner_report.log for the failing information. )')
+                if args.failing_info:
+                    print(f'{len(ps)} files running finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed.)')                     
                 else:
-                    print(f'{len(ps)} files running finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed.)')               
+                    print(f'{len(ps)} files running finish, {failed_num} failed.( {tests.value} tests, {fails.value} failed, please look at the log/runner_report.log for the failing information. )')             
+                
                 sys.exit(-1)
     
     except KeyboardInterrupt:
