@@ -1,6 +1,6 @@
-rootdir := ../../../..
+rootdir := {ROOTDIR}
 
-include ../../../variables.mk
+include $(rootdir)/build/variables.mk
 
 all: diff
 
@@ -17,17 +17,22 @@ test.dump: test.elf
 	$(OBJDUMP) $< > $@
 
 # simulate
-include ../../../spike.mk
--include ../../../gem5.mk
+include $(rootdir)/build/spike.mk
+-include $(rootdir)/build/gem5.mk
 sim: $(foreach SIM, $(SIMS), $(SIM).log)
 
+# check python golden data and spike result data
+check: spike check.data
+
+check.data: spike.sig
+	$(rootdir)/build/check.py check_golden.npy $< $(READELF)
+
 # diff
-diff: sim $(foreach SIM, $(filter-out spike,$(SIMS)), diff-$(SIM).data)
+diff: sim check $(foreach SIM, $(filter-out spike,$(SIMS)), diff-$(SIM).data)
 
 diff-%.data: %.sig
-	../../../diff.py check_golden.npy $<
+	$(rootdir)/build/diff.py spike.npy $<
 
-# clean
 clean:
 	-rm -f *.elf *.dump *.sig *.log *.run *.tmp *.data *.map
 

@@ -118,28 +118,34 @@ def diff_to_txt(a, b, filename, a_name, b_name):
 
     return diff_result
 
+def trans_dtype( input, dtype ):
+    output = input.copy()
+    if output.shape == ():
+        output = output.reshape(1,)
+    output.dtype = dtype
+    return output
 
 def main():
-    golden_file = sys.argv[1]
+    spike_res_file = sys.argv[1]
     sig_file = sys.argv[2]
     sig_name = sig_file.replace(".sig", "")
 
     # get the cases list, including test_num, name, check string, golden
-    case_list = np.load(golden_file, allow_pickle=True)
+    case_list = np.load(spike_res_file, allow_pickle=True)
 
     for test_case in case_list:
-        if not test_case["check_str"]:
-            continue
 
-        golden = test_case["golden_data"]
+        spike_result = trans_dtype( test_case["spike_result_data"], eval(f'jnp.{test_case["spike_result_dtype"]}') )
         # get sim result, because many cases in signature file, 
         # so we need the start to know where to find the result
-        offset = 0
-        result = from_txt(sig_file, golden,  offset)
+        offset = test_case['start_addr']
+        result = from_txt(sig_file, spike_result,  offset)
 
         # save the spike result and sim result into diff-sim.data
-        if not diff_to_txt(golden, result, f'diff-{sig_name}.data', "spike", sig_name):
-            sys.exit(-1)
+        if not diff_to_txt(spike_result, result, f'diff-{sig_name}.data', "spike", sig_name):
+            print( f'The results of spike and {sim} of test case {test_case["no"]} in test.S check failed. You can find the data in diff-{sim}.data\n' )
+
+    print(f'{sig_name} diff done.')
 
 
 if __name__ == "__main__":

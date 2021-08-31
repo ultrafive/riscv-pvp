@@ -85,6 +85,7 @@ def get_config_info(args):
         globals()["compile_cmd"] = f'{cc} {defines} {cflags} {incs} {linkflags}'
         globals()["objdump_cmd"] = config["compile"]["objdump"]
         globals()["is_objdump"] = config["compile"]["is_objdump"]
+        globals()["readelf"] = config["compile"]['readelf']
         globals()["config"] = config
         args.compile_config = { "compile_cmd": compile_cmd, "objdump_cmd": objdump_cmd, "is_objdump": is_objdump }
 
@@ -569,6 +570,9 @@ def generate_test( case, args ):
         tic = eval( f'{test_instruction_class}()' )
         tic.test_function( args, test_type, test_case )
 
+        if os.path.exists(f'build/{case}'):
+            os.system(f'cp -rf build/Makefile.subdir build/{case}/Makefile')
+
         sys.stdout = stdout
         sys.stderr = stderr
 
@@ -655,7 +659,7 @@ def main():
         os.makedirs('build', exist_ok=True)
 
         vmap = {
-            'CC': cc, 'CFLAGS': f'{defines} {cflags}', 'LDFLAGS': '', 'OBJDUMP': objdump_cmd,
+            'CC': cc, 'CFLAGS': f'{defines} {cflags}', 'LDFLAGS': '', 'OBJDUMP': objdump_cmd, 'READELF': readelf,
             'SPIKE': eval(config['spike']['cmd'].format_map({
                 'path': config['spike']['path'],
                 'xlen': xlen, 'vlen': vlen, 'elen': elen, 'slen': slen,
@@ -663,9 +667,21 @@ def main():
             'GEM5': config['gem5']['path'], 'GEM5_OPTS': config['gem5']['options'],
         }
 
+        rootdir_dict = {"case": '../../../..', 'type':'../../..', 'inst': '../..'}
+        vmap['ROOTDIR'] = rootdir_dict[args.level]
+
         os.system('cp -rf utils/make/spike.mk utils/make/*.py utils/make/Makefile build/')
         if vmap['GEM5']:
             os.system('cp -rf utils/make/gem5.mk build/')
+        else:
+            if os.path.exists(f'build/gem5.mk'):
+                os.system('rm build/gem5.mk')
+
+        with open('utils/make/Makefile.subdir', 'r' ) as f:
+            template = f.read()
+            makefile_str = template.format_map(vmap)
+            with open('build/Makefile.subdir', 'w') as f_ref:
+                f_ref.write(makefile_str)
 
         with open('utils/make/variables.mk.in', 'r') as f:
             template = f.read()
@@ -691,9 +707,6 @@ def main():
             failed_num = gen_report( ps, args.failing_info, collected_case_list, collected_case_num_list )
 
             progress.stop()
-
-            for case in selected_case_list:
-                os.system(f'cp -rf utils/make/Makefile.subdir build/{case}/Makefile')
 
             # print test result
             if failed_num == 0:
