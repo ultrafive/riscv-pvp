@@ -19,6 +19,7 @@ test.dump: test.elf
 # simulate
 include $(rootdir)/build/spike.mk
 -include $(rootdir)/build/gem5.mk
+-include $(rootdir)/build/vcs.mk
 sim: $(foreach SIM, $(SIMS), $(SIM).log)
 
 # check python golden data and spike result data

@@ -665,6 +665,10 @@ def main():
                 'xlen': xlen, 'vlen': vlen, 'elen': elen, 'slen': slen,
             })), 'SPIKE_OPTS': '',
             'GEM5': config['gem5']['path'], 'GEM5_OPTS': config['gem5']['options'],
+            'VCS': config['vcs']['path'], 'vcstimeout':config['vcs']['vcstimeout'],
+            'fsdb': config['vcs']['fsdb'], 'tsiloadmem': config['vcs']['tsiloadmem'],
+            'lsf': config['lsf']['is_flag'], 'LSF_CMD': config['lsf']['cmd']
+
         }
 
         rootdir_dict = {"case": '../../../..', 'type':'../../..', 'inst': '../..'}
@@ -676,6 +680,11 @@ def main():
         else:
             if os.path.exists(f'build/gem5.mk'):
                 os.system('rm build/gem5.mk')
+        if vmap['VCS']:
+            os.system('cp -rf utils/make/vcs.mk build/')
+        else:
+            if os.path.exists(f'build/vcs.mk'):
+                os.system('rm build/vcs.mk')
 
         with open('utils/make/Makefile.subdir', 'r' ) as f:
             template = f.read()

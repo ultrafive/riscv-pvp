@@ -11,3 +11,11 @@ SPIKE_OPTS = {SPIKE_OPTS}
 
 GEM5 = {GEM5}
 GEM5_OPTS = {GEM5_OPTS}
+
+VCS = {VCS}
+vcstimeout = {vcstimeout}
+fsdb = {fsdb}
+tsiloadmem = {tsiloadmem}
+
+lsf = {lsf}
+LSF_CMD = {LSF_CMD}

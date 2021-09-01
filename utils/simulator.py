@@ -21,7 +21,7 @@ def sims_run( args, workdir, binary ):
         # set options of sim
         if k != 'gem5':
             options = f'+signature={workdir}/{k}.sig +signature-granularity={32}'
-        if k == 'vcs':            
+        if k == 'vcs':           
             ret = os.system(f'smartelf2hex.sh {binary} > {workdir}/test.hex')
             if ret != 0:
                 result[k] = ret
