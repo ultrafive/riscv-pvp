@@ -676,11 +676,13 @@ def main():
 
         os.system('cp -rf utils/make/spike.mk utils/make/*.py utils/make/Makefile build/')
         if vmap['GEM5']:
+            vmap['GEM5'] = os.path.abspath(vmap['GEM5'])
             os.system('cp -rf utils/make/gem5.mk build/')
         else:
             if os.path.exists(f'build/gem5.mk'):
                 os.system('rm build/gem5.mk')
         if vmap['VCS']:
+            vmap['VCS'] = os.path.abspath(vmap['VCS'])
             os.system('cp -rf utils/make/vcs.mk build/')
         else:
             if os.path.exists(f'build/vcs.mk'):
