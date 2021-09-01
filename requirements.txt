@@ -61,5 +61,5 @@ wrapt==1.12.1
 zipp==3.4.0
 pytest-shutil==1.7.0
 rich==10.5.0
-jaxlib==0.1.70
-jax==0.2.19
+jaxlib==0.1.67
+jax==0.2.17
