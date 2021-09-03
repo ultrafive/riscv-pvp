@@ -160,7 +160,7 @@ vrgather_vi:
         params_yml.append([np.linspace(0x40,0x80,32,dtype=np.uint8 ), np.uint8(2),  np.linspace(0x20,0x000000ff,32,dtype=np.uint8 ),  8, 32, 1])
         params_yml.append([np.linspace(0x40,0x80,64,dtype=np.uint16), np.uint16(3), np.linspace(0x20,0x00ff00ff,64,dtype=np.uint16), 16, 64, 1])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for uimm in [min(vl//2,31), min(vl-1,28)]:
                 ori = np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew) )
@@ -173,7 +173,7 @@ vrgather_vi:
         params_yml.append([np.array([7],dtype=np.uint8), np.uint8(0), np.array([0x10],dtype=np.uint8), 8, 1, 1, np.array([0x0],dtype=np.uint8)])
         params_yml.append([np.array([7,7,9,7],dtype=np.uint16), np.uint16(1), np.array([1,3,205,7],dtype=np.uint16), 16, 4, 1, np.array([0x5],dtype=np.uint8)])
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for uimm in [min(vl//3,31), min(vl-1,28)]:
                 ori = np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew) )
@@ -185,7 +185,7 @@ vrgather_vi:
     test_regression_without_mask: 
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
         uimm: min(np.random.randint(vl),31)
@@ -197,7 +197,7 @@ vrgather_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               uimm= min(np.random.randint(vl),28)
               tail= get_tailmax(lmul, sew)
@@ -209,7 +209,7 @@ vrgather_vi:
     test_vstart_not_eq_zero_without_mask:
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
         uimm: min(np.random.randint(vl),28)
@@ -220,7 +220,7 @@ vrgather_vi:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in [vl//3]:
                 ori = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))

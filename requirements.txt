@@ -63,3 +63,5 @@ pytest-shutil==1.7.0
 rich==10.5.0
 jaxlib==0.1.67
 jax==0.2.17
+mkdocstrings==0.15.2
+mkdocs-material==7.2.5

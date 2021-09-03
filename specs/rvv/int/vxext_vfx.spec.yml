@@ -195,7 +195,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -207,7 +207,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -221,7 +221,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -235,7 +235,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -249,7 +249,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -262,7 +262,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//2
@@ -277,7 +277,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -289,7 +289,7 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [8]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew
               vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
@@ -303,7 +303,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -315,7 +315,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -329,7 +329,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -343,7 +343,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -357,7 +357,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -370,7 +370,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//2
@@ -385,7 +385,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//2
               emul= get_emul(eew, sew, lmul)
@@ -397,7 +397,7 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [8]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew
               vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
@@ -411,7 +411,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -423,7 +423,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -437,7 +437,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -451,7 +451,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -465,7 +465,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -478,7 +478,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//4
@@ -493,7 +493,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [64, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -505,7 +505,7 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [8, 16]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew
               vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
@@ -519,7 +519,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -531,7 +531,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -545,7 +545,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -559,7 +559,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -573,7 +573,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -586,7 +586,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//4
@@ -601,7 +601,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [64, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//4
               emul= get_emul(eew, sew, lmul)
@@ -613,7 +613,7 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [8, 16]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew
               vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
@@ -628,7 +628,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -640,7 +640,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -654,7 +654,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -668,7 +668,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -682,7 +682,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -695,7 +695,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//8
@@ -710,7 +710,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -722,7 +722,7 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew
               vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
@@ -736,7 +736,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -748,7 +748,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -762,7 +762,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -776,7 +776,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -790,7 +790,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -803,7 +803,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//8
@@ -818,7 +818,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew//8
               emul= get_emul(eew, sew, lmul)
@@ -830,7 +830,7 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               eew = sew
               vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))

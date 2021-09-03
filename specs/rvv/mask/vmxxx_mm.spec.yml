@@ -857,9 +857,9 @@ _: &default
         lmul: get_lmul(ebits)
         vl: get_random_vl(lmul, ebits, ebits, vlen)
         start: get_random_start(vl)
-        vreg1: get_vreg()
-        vreg2: get_vreg((vreg1, ))
-        vregd: get_vreg((vreg1, vreg2))
+        vreg1: get_vregister_name(1)
+        vreg2: get_vregister_name(1, vreg1)
+        vregd: get_vregister_name(1, [vreg1, vreg2], [1,1])
         vs1: np.random.uniform(0, 0xff, vl).astype(np.uint8)
         vs2: np.random.uniform(0, 0xff, vl).astype(np.uint8)
      

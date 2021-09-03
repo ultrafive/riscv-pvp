@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from utils.params import *
+from utils.fixtures import *
 from utils.generate import generate, result_dict, result_detail_dict, result_condition, tests, fails
 from isa import *
 import jax.numpy as jnp

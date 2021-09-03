@@ -129,7 +129,7 @@ vcompress_vm:
         params_yml.append([np.linspace(0x20,0x30,32,dtype=np.uint32), np.linspace(0x01,0x21,32,dtype=np.uint32), np.array([0xa5,0x5a,0xa5,0x5a,0xa5,0x5a,0xa5,0x5a],dtype=np.uint8), 32, 1, 32])
         params_yml.append([np.linspace(0x20,0x30,64,dtype=np.uint32), np.linspace(0x01,0x21,64,dtype=np.uint32), np.array([0x5a,0xa5,0x5a,0xa5,0x5a,0xa5,0x5a,0xa5],dtype=np.uint8), 32, 2, 64])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               ori = np.linspace( 0, vl,  vl, dtype=get_uintdtype(sew))
               vs2 = np.linspace( 1, get_uintmax(sew), vl, dtype=get_intdtype(sew))
@@ -140,7 +140,7 @@ vcompress_vm:
     test_regression_with_mask:
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vma : ["ma", "mu"]
         ori : np.linspace( 0, vl,  vl, dtype=get_uintdtype(sew))
@@ -152,7 +152,7 @@ vcompress_vm:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 tail= get_tailmax(lmul, sew)
@@ -165,7 +165,7 @@ vcompress_vm:
     test_register_vs1_equ_vs2_with_mask :
       matrix: 
         sew : [8]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         mask: np.linspace( 0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
         vs2 : mask
@@ -174,7 +174,7 @@ vcompress_vm:
     test_exception_vstart_not_eq_zero_with_mask:
       matrix: 
         sew : [16]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         ori : np.linspace( 0, vl,  vl, dtype=get_uintdtype(sew))
         vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_intdtype(sew))

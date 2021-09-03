@@ -213,7 +213,7 @@ vrgatherei16_vv:
         params_yml.append([np.linspace(0x40,0x80,32,dtype=np.uint8 ), np.linspace(0,31,32,dtype=np.uint16), np.linspace(0x20,0x000000ff,32,dtype=np.uint8 ),  8, 32, 1, 2])
         params_yml.append([np.linspace(0x40,0x80,64,dtype=np.uint16), np.linspace(0,63,64,dtype=np.uint16), np.linspace(0x20,0x00ff00ff,64,dtype=np.uint16), 16, 64, 1, 1])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               emul= get_emul(16, sew, lmul)
               ori = np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -227,7 +227,7 @@ vrgatherei16_vv:
         params_yml.append([np.array([7],dtype=np.uint8), np.array([1],dtype=np.uint16), np.array([0x10],dtype=np.uint8), 8, 1, 1, 2, np.array([0x0],dtype=np.uint8)])
         params_yml.append([np.array([7,7,9,7],dtype=np.uint16), np.array([1,1,2,5],dtype=np.uint16), np.array([1,3,205,7],dtype=np.uint16), 16, 4, 1, 1, np.array([0x5],dtype=np.uint8)])
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               emul= get_emul(16, sew, lmul)
               ori = np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -240,7 +240,7 @@ vrgatherei16_vv:
     test_regression_without_mask: 
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         emul: get_emul(16, sew, lmul)
         vs2 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
@@ -253,7 +253,7 @@ vrgatherei16_vv:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               emul= get_emul(16, sew, lmul)
               tail= get_tailmax(lmul, sew)
@@ -266,7 +266,7 @@ vrgatherei16_vv:
     test_vstart_not_eq_zero_without_mask:
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         emul: get_emul(16, sew, lmul)
         vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -278,7 +278,7 @@ vrgatherei16_vv:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               emul= get_emul(16, sew, lmul)
               ori = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -291,7 +291,7 @@ vrgatherei16_vv:
     test_register_vs1_eq_vs2_without_mask:
       matrix: 
         sew : [16] 
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         emul: get_emul(16, sew, lmul)        
         vs1 : np.linspace( 0, vl-1, vl, dtype=get_uintdtype(16))

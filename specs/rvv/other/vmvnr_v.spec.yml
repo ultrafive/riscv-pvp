@@ -134,7 +134,7 @@ vmv1r_v:
         params_yml.append([np.linspace(0x1,0x10,16,dtype=np.int8),   np.linspace(0x0,0x10,16,dtype=np.int8),   16,  8, "f8"])
         params_yml.append([np.linspace(0x1,0x10,16,dtype=np.int8),   np.linspace(0x0,0x10,16,dtype=np.int8),   16,  8, "f4"])
         for sew in [ 8, 16]:
-          for lmul in [1,'f2', 'f4']: #get_lmul_seg(sew):
+          for lmul in [1,'f2', 'f4']: #get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               ori = np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew))
               vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))

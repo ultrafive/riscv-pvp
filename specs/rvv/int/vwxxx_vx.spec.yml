@@ -177,7 +177,7 @@ _: &default
         params_yml.append([np.array([7],dtype=np.int32), np.int16(-1), np.array([get_intmin(16)],dtype=np.int16), 16, 32,1, 1])
         params_yml.append([np.array([7],dtype=np.int64), np.int32(10),  np.array([0x10],dtype=np.int32), 32, 64, 1, 1])
         for sew in [ 8, 16, 32 ]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [get_intmin(sew), get_intmax(sew)]:
                 sew2= 2*sew
@@ -189,7 +189,7 @@ _: &default
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 for rs1 in [-1, np.random.randint(get_intmax(sew))//2]:
@@ -204,7 +204,7 @@ _: &default
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
         rs1 : [np.random.randint(get_intmax(sew))]
@@ -216,7 +216,7 @@ _: &default
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [0, np.random.randint(get_intmax(sew))]:
                 tail= get_tailmax(lmul, sew)
@@ -230,7 +230,7 @@ _: &default
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
         rs1 : [np.random.randint(get_intmax(sew))]
@@ -241,7 +241,7 @@ _: &default
       matrix:
         sew : [8, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
         rs1 : [-1, np.random.randint(get_intmax(sew))]
@@ -253,7 +253,7 @@ _: &default
       matrix: 
         sew : [64]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(16), vl, dtype=get_intdtype(sew))
         rs1 : [1]
@@ -278,7 +278,7 @@ vwaddu_vx: &unsigned
         params_yml.append([np.array([7],dtype=np.uint32), np.uint16(2),  np.array([get_uintmax(16)],dtype=np.uint16), 16, 32,1, 1])
         params_yml.append([np.array([7],dtype=np.uint64), np.uint32(10), np.array([0x10],dtype=np.uint32), 32, 64, 1, 1])
         for sew in [ 8, 16, 32 ]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [1, get_uintmax(sew)]:
                 sew2= min(2*sew, 64)
@@ -290,7 +290,7 @@ vwaddu_vx: &unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 for rs1 in [1, np.random.randint(get_uintmax(sew))//2]:
@@ -305,7 +305,7 @@ vwaddu_vx: &unsigned
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.random.uniform(5, get_uintmax(sew), vl).astype(get_uintdtype(sew))
         rs1 : [np.random.randint(get_uintmax(sew))]
@@ -317,7 +317,7 @@ vwaddu_vx: &unsigned
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [0, np.random.randint(get_uintmax(sew))]:
                 tail= get_tailmax(lmul, sew)
@@ -331,7 +331,7 @@ vwaddu_vx: &unsigned
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
         rs1 : [np.random.randint(get_uintmax(sew))]
@@ -342,7 +342,7 @@ vwaddu_vx: &unsigned
       matrix:
         sew : [8, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
         rs1 : [7, np.random.randint(get_uintmax(sew))]
@@ -354,7 +354,7 @@ vwaddu_vx: &unsigned
       matrix: 
         sew : [64]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_uintmax(16), vl, dtype=get_uintdtype(sew))
         rs1 : [1]
@@ -376,7 +376,7 @@ vwmulsu_vx: &signed_unsigned
         params_yml.append([np.array([7],dtype=np.uint32), np.uint16(2), np.array([get_intmax(16)],dtype=np.int16), 16, 32,1, 1])
         params_yml.append([np.array([7],dtype=np.uint64), np.uint32(1), np.array([0x10],dtype=np.int32), 32, 64, 1, 1])
         for sew in [ 8, 16, 32 ]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [1, get_uintmax(sew)]:
                 sew2= min(2*sew, 64)
@@ -388,7 +388,7 @@ vwmulsu_vx: &signed_unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 for rs1 in [1, np.random.randint(get_uintmax(sew))//2]:
@@ -403,7 +403,7 @@ vwmulsu_vx: &signed_unsigned
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.random.uniform(5, get_intmax(sew), vl).astype(get_intdtype(sew))
         rs1 : [np.random.randint(get_uintmax(sew))]
@@ -415,7 +415,7 @@ vwmulsu_vx: &signed_unsigned
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in [0, np.random.randint(get_uintmax(sew))]:
                 tail= get_tailmax(lmul, sew)
@@ -429,7 +429,7 @@ vwmulsu_vx: &signed_unsigned
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
         rs1 : [np.random.randint(get_uintmax(sew))]
@@ -440,7 +440,7 @@ vwmulsu_vx: &signed_unsigned
       matrix:
         sew : [8, 32]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(sew),  vl, dtype=get_intdtype(sew))
         rs1 : [7, np.random.randint(get_uintmax(sew))]
@@ -452,7 +452,7 @@ vwmulsu_vx: &signed_unsigned
       matrix: 
         sew : [64]
         sew2: 2*sew
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         vs2 : np.linspace( 2, get_intmax(16),  vl, dtype=get_intdtype(sew))
         rs1 : [1]

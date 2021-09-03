@@ -6,9 +6,13 @@ repo_url: https://github.com/ultrafive/riscv-pvp
 copyright: Copyright &copy; 2021 - 2021 UltraFive Team
 
 theme:
-  name: material
+  name: "material"
   features:
     - navigation.sections
+
+plugins:
+  - search
+  - mkdocstrings
 
 markdown_extensions:
   - pymdownx.highlight
@@ -26,6 +30,10 @@ nav:
        - RVV: custom/rvv-example.md
   - Reference: 
     - Command Line: reference/cmdline.md
+    - Utils:
+      - fixtures: reference/utils/fixtures-reference.md
+      - params: reference/utils/params-reference.md
+    - example google style python docstrings: reference/example-reference.md
 
 extra_css:
   - assets/style.css

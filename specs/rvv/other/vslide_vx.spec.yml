@@ -201,7 +201,7 @@ vslide1up_vx:
         params_yml.append([np.linspace(0x40,0x50,128,dtype=np.uint8), np.linspace(0x00,0x10,128,dtype=np.uint8), np.uint8(0x1), 8, "f2", 1, 15, 128])
         params_yml.append([np.linspace(0x40,0x60,128,dtype=np.uint8), np.linspace(0x00,0x20,128,dtype=np.uint8), np.uint8(0x1), 8, "f4", 1, 32, 128])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -214,7 +214,7 @@ vslide1up_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -229,7 +229,7 @@ vslide1up_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):  
                 tail= get_tailmax(lmul, sew)              
@@ -243,7 +243,7 @@ vslide1up_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               ori = np.linspace( 1, tail, tail, dtype=get_intdtype(sew))
@@ -257,7 +257,7 @@ vslide1up_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3],dtype=get_intdtype(sew)):
@@ -271,7 +271,7 @@ vslide1up_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
@@ -292,7 +292,7 @@ vslideup_vx:
         params_yml.append([np.linspace(0x40,0x50,128,dtype=np.uint8), np.linspace(0x00,0x10,128,dtype=np.uint8), np.uint8(0x1), 8, "f2", 1, 15, 128])
         params_yml.append([np.linspace(0x40,0x60,128,dtype=np.uint8), np.linspace(0x00,0x20,128,dtype=np.uint8), np.uint8(0x1), 8, "f4", 1, 32, 128])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([min(sew//3,vl//2),np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -305,7 +305,7 @@ vslideup_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([min(sew//3,vl//2),np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -320,7 +320,7 @@ vslideup_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):  
                 tail= get_tailmax(lmul, sew)              
@@ -334,7 +334,7 @@ vslideup_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               ori = np.linspace( 1, tail, tail, dtype=get_intdtype(sew))
@@ -348,7 +348,7 @@ vslideup_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3],dtype=get_uintdtype(sew)):
@@ -362,7 +362,7 @@ vslideup_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
@@ -383,7 +383,7 @@ vslide1down_vx:
         params_yml.append([np.linspace(0x40,0x50,128,dtype=np.uint8), np.linspace(0x00,0x10,128,dtype=np.uint8), np.uint8(0x1), 8, "f2", 1, 15, 128])
         params_yml.append([np.linspace(0x40,0x60,128,dtype=np.uint8), np.linspace(0x00,0x20,128,dtype=np.uint8), np.uint8(0x1), 8, "f4", 1, 32, 128])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -396,7 +396,7 @@ vslide1down_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -411,7 +411,7 @@ vslide1down_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):  
                 tail= get_tailmax(lmul, sew)              
@@ -425,7 +425,7 @@ vslide1down_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               ori = np.linspace( 1, tail, tail, dtype=get_intdtype(sew))
@@ -439,7 +439,7 @@ vslide1down_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
@@ -453,7 +453,7 @@ vslide1down_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3],dtype=get_intdtype(sew)):
@@ -468,7 +468,7 @@ vslide1down_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_intdtype(sew)):
                 tail= get_tailmax(lmul, sew)                  
@@ -487,7 +487,7 @@ vslidedown_vx:
         params_yml.append([np.linspace(0x40,0x50,128,dtype=np.uint8), np.linspace(0x00,0x10,128,dtype=np.uint8), np.uint8(0x1), 8, "f2", 1, 15, 128])
         params_yml.append([np.linspace(0x40,0x60,128,dtype=np.uint8), np.linspace(0x00,0x20,128,dtype=np.uint8), np.uint8(0x1), 8, "f4", 1, 32, 128])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([min(sew//3,vl//2),np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -500,7 +500,7 @@ vslidedown_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([min(sew//3,vl//2),np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 tail= get_tailmax(lmul, sew)
@@ -515,7 +515,7 @@ vslidedown_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):  
                 tail= get_tailmax(lmul, sew)              
@@ -529,7 +529,7 @@ vslidedown_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               ori = np.linspace( 1, tail, tail, dtype=get_intdtype(sew))
@@ -543,7 +543,7 @@ vslidedown_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
@@ -557,7 +557,7 @@ vslidedown_vx:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vstart in np.array([vl//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 for rs1 in np.array([sew//3],dtype=get_uintdtype(sew)):
@@ -572,7 +572,7 @@ vslidedown_vx:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for rs1 in np.array([sew//3,np.random.uniform(vl)],dtype=get_uintdtype(sew)):
                 tail= get_tailmax(lmul, sew)                  

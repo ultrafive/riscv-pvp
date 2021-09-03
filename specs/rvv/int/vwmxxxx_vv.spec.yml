@@ -199,7 +199,7 @@ _: &default
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               sew2= 2*sew
               ori = np.linspace( 0, 256, vl, dtype=get_intdtype(sew2))
@@ -211,7 +211,7 @@ _: &default
       setup: |
         params_yml = []
         for sew in [8, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 sew2= 2*sew
@@ -225,7 +225,7 @@ _: &default
     test_regression_without_mask: 
       matrix:
         sew : [8, 16, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
@@ -238,7 +238,7 @@ _: &default
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               sew2= 2*sew
@@ -251,7 +251,7 @@ _: &default
     test_vstart_not_equal_zero_without_mask:
       matrix:
         sew : [8, 16, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -262,7 +262,7 @@ _: &default
     test_vstart_not_equal_zero_with_mask:
       matrix:
         sew : [8, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -274,7 +274,7 @@ _: &default
     test_register_vs1_equ_vs2_without_mask :
       matrix:
         sew : [8, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 1, get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -285,7 +285,7 @@ _: &default
       matrix: 
         sew : [64]
         sew2: min(2*sew,64)
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew2))
         vs2 : np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew))
@@ -302,7 +302,7 @@ vwmaccu_vv:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               sew2= 2*sew
               ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew2))
@@ -314,7 +314,7 @@ vwmaccu_vv:
       setup: |
         params_yml = []
         for sew in [8, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 sew2= 2*sew
@@ -328,7 +328,7 @@ vwmaccu_vv:
     test_regression_without_mask: 
       matrix:
         sew : [8, 16, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.random.uniform(0, sew2,  vl).astype(get_uintdtype(sew))
@@ -341,7 +341,7 @@ vwmaccu_vv:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               sew2= 2*sew
@@ -354,7 +354,7 @@ vwmaccu_vv:
     test_vstart_not_equal_zero_without_mask:
       matrix:
         sew : [8, 16, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 2, min(get_uintmax(sew),1024), vl, dtype=get_uintdtype(sew))
@@ -365,7 +365,7 @@ vwmaccu_vv:
     test_vstart_not_equal_zero_with_mask:
       matrix:
         sew : [8, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
@@ -377,7 +377,7 @@ vwmaccu_vv:
     test_register_vs1_equ_vs2_without_mask :
       matrix:
         sew : [8, 16]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
@@ -388,7 +388,7 @@ vwmaccu_vv:
       matrix: 
         sew : [64]
         sew2: min(2*sew,64)
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         ori : np.linspace( 0, vl,   vl, dtype=get_uintdtype(sew2))
         vs2 : np.linspace( 0, sew2, vl, dtype=get_uintdtype(sew))
@@ -402,7 +402,7 @@ vwmaccsu_vv:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               sew2= 2*sew
               ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew2))
@@ -414,7 +414,7 @@ vwmaccsu_vv:
       setup: |
         params_yml = []
         for sew in [8, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 sew2= 2*sew
@@ -428,7 +428,7 @@ vwmaccsu_vv:
     test_regression_without_mask: 
       matrix:
         sew : [8, 16, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.random.uniform(0, get_uintmax(sew), vl).astype(get_uintdtype(sew))
@@ -441,7 +441,7 @@ vwmaccsu_vv:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_seg(sew):
+          for lmul in get_lmul_w(sew):
             for vl in get_vl(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               sew2= 2*sew
@@ -454,7 +454,7 @@ vwmaccsu_vv:
     test_vstart_not_equal_zero_without_mask:
       matrix:
         sew : [8, 16, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
@@ -465,7 +465,7 @@ vwmaccsu_vv:
     test_vstart_not_equal_zero_with_mask:
       matrix:
         sew : [8, 32]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
@@ -477,7 +477,7 @@ vwmaccsu_vv:
     test_register_vs1_equ_vs2_without_mask :
       matrix:
         sew : [8, 16]
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         sew2: 2*sew
         vs2 : np.linspace( 1, 127, vl, dtype=get_uintdtype(sew))
@@ -488,7 +488,7 @@ vwmaccsu_vv:
       matrix: 
         sew : [64]
         sew2: min(2*sew,64)
-        lmul: get_lmul_seg(sew)
+        lmul: get_lmul_w(sew)
         vl  : get_vl(lmul, sew, vlen)
         ori : np.linspace( 0, 104, vl, dtype=get_intdtype(sew2))
         vs2 : np.linspace( 0, 256, vl, dtype=get_uintdtype(sew))
