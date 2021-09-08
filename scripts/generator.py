@@ -8,8 +8,6 @@ import re
 import yaml
 import glob
 import os
-import textwrap
-import argparse
 import io
 import sys, inspect
 from multiprocessing import Pool
@@ -24,48 +22,6 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn
 )
-
-
-
-def parse_argument():
-
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-
-    # options to configure the test frame
-    parser.add_argument('--config', help='config yaml file', default='config/prod.yml')
-    parser.add_argument('--nproc', '-n', help='generate elf files on n processes', type=int, default=1)
-    parser.add_argument('--level', '-l', help='''put which level of cases together to compile and run:
-                                                    - inst for one instruction case, 
-                                                    - type for one test_type cases of one instruction, 
-                                                    - case for one case in one file''', default="case")
-  
-
-    parser.add_argument('--specs', '-s', help='test specs')
-    parser.add_argument('--cases', '-c', help=textwrap.dedent('''\
-                                        test case list string or file, for example:
-                                        - vsub_vv,addi/test_imm_op/
-                                        - cases.list
-                                        you can find more examples with option --collect'''), default='')                                    
-
-    parser.add_argument('--collect', help='just collect the test case to know what cases we can test', action="store_true")
-    parser.add_argument('--little', help='only run at most 4 test cases for each test type of each instruction', action="store_true") 
-    parser.add_argument('--basic', '-b', help='run basic tests of basic_cases test data in yml for regression.', action='store_true')
-    parser.add_argument('--random', '-r', help='run random tests of random_cases test data in yml', action='store_true')
-    parser.add_argument('--seed', help="set random seed for random functions of each spec yaml", type=int, default=3428)
-    parser.add_argument('--rtimes', help="set random cases generation times", type=int, default=1)    
-    parser.add_argument('--retry', help='retry last failed cases', action="store_true") 
-
-    parser.add_argument('--failing-info', '-fi', help="print the failing info into the screen, rather than into the log/generator_report.log.", action="store_true")                                              
-    parser.add_argument('--param-info', '-pi', help="print params information into log/params.yaml of cases collected.", action = "store_true")
-
-    args, unknown_args = parser.parse_known_args()
-    
-    # if there are wrong arguments, print and exit
-    if unknown_args:
-        print("Please check your arguments(%s)." % unknown_args)
-        sys.exit(-1)
-    
-    return args
 
 def get_config_info(args):
     config_file = args.config
@@ -636,11 +592,9 @@ def gen_report( ps, failing_info, collected_case_list, collected_case_num_list )
 
     return failed_num  
 
-def main():
+def main(args):
     
     try:
-        args = parse_argument()
-
         # get config information from config file, including isa options and compilation options mainly
         get_config_info(args)
 

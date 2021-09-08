@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import textwrap
 import numpy as np
 import jax.numpy as jnp
-import allure
 from multiprocessing import Pool, Manager, Condition, Value, Process
 import sys
 import io
-import argparse
 import time
 import yaml
 import re
@@ -24,39 +21,6 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn
 )
-
-def parse_argument():
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    # options to configure the test frame
-    parser.add_argument('--config', help='config yaml file, default config/prod.yml', default='config/prod.yml')
-    parser.add_argument('--retry', '-r', help='retry last failed cases', action="store_true")
-    parser.add_argument('--nproc', '-n', help='runner process number for run cases, default 1', type=int, default=1)
-    parser.add_argument('--cases', '-c', help=textwrap.dedent('''\
-                                        test case list string or file, for example:
-                                        - vsub_vv,addi/test_imm_op/
-                                        - cases.list'''), default='')
-    parser.add_argument('--failing-info', '-fi', help="print the failing info into the screen, rather than  in the log/runner_report.log.", action="store_true")                                     
-
-
-    # options to configure the test CPU
-    # parser.add_argument('--xlen', help='bits of int register (xreg)', default=64, choices=[32,64], type=int)
-    # parser.add_argument('--flen', help='bits of float register (freg)', default=64, choices=[32,64], type=int)
-    # parser.add_argument('--vlen', help='bits of vector register (vreg)', default=1024, choices=[256, 512, 1024, 2048], type=int)
-    # parser.add_argument('--elen', help='bits of maximum size of vector element', default=64, choices=[32, 64], type=int)
-    # parser.add_argument('--slen', help='bits of vector striping distance', default=1024, choices=[256, 512, 1024, 2048], type=int)
-
-    # options to configure the simulator
-    parser.add_argument('--lsf', help='run tests on with lsf clusters, if not set, depend on lsf:is_flag in the file set by --config', action="store_true")
-    parser.add_argument('--fsdb', '-f', help='generate fsdb waveform file when running vcs simulator, if not set, depend on vcs:fsdb in the file set by --config', action="store_true")
-    parser.add_argument('--tsiloadmem', '-tlm', help='Load binary through TSI instead of backdoor, if not set, depend on vcs:tsiloadmem in the file set by --config', action="store_true")
-    parser.add_argument('--vcstimeout', '-vto', help='Number of cycles after which VCS stops, if not set, depend on vcs:vcstimeout in the file set by --config', default=-3333, type=int)
-
-    args, unknown_args = parser.parse_known_args()
-    if unknown_args:
-        print("Please check your arguments")
-        sys.exit(-1)
-
-    return args
 
 def sync_variable():
     # to synchronize the runner processes with the main process
@@ -405,11 +369,9 @@ def run_test(case, args):
 
         return output
 
-def main():
+def main(args):
 
     try:
-
-        args = parse_argument()
 
         # define some global sync variables to synchronize the runner processes with the main process
         sync_variable()
