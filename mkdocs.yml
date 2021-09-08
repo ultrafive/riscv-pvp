@@ -28,12 +28,12 @@ nav:
     - Examples:
        - RVG: custom/rvg-example.md
        - RVV: custom/rvv-example.md
-  - Reference: 
+  - Reference:
     - Command Line: reference/cmdline.md
-    - Utils:
+    - Cases: reference/spec.md
+    - API:
       - fixtures: reference/utils/fixtures-reference.md
       - params: reference/utils/params-reference.md
-    - example google style python docstrings: reference/example-reference.md
 
 extra_css:
   - assets/style.css

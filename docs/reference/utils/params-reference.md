@@ -1,3 +1,3 @@
 # params - utility variables and functions
 
-:::utils.params
+:::rvpvp.utils.params
