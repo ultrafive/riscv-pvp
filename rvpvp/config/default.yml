@@ -48,7 +48,7 @@ vcs:
   path: ~
   cmd: f'{path}'
   vcstimeout: 1000000
-  fsdb: True
+  fsdb: False
   tsiloadmem: False
 
 verilator:
