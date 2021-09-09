@@ -22,30 +22,17 @@ from rich.progress import (
     TimeRemainingColumn
 )
 
-rootdir = os.path.dirname(os.path.realpath(__file__))
+from .common import expend_path
 
-def get_config_info(args):
-    config_file = args.config
-    # analyse the env.yaml to get compile info
-    with open(config_file, 'r' ) as f_config:
-        config = yaml.load(f_config, Loader=yaml.SafeLoader)
-        globals()["xlen"] = config["processor"]['xlen']
-        globals()["flen"] = config["processor"]['flen']
-        globals()["vlen"] = config["processor"]['vlen']
-        globals()["elen"] = config["processor"]['elen']
-        globals()["slen"] = config["processor"]['slen']
-        globals()["path"] = config["compile"]['path']
-        globals()["cc"] = eval(config["compile"]['cc'])
-        globals()["defines"] = eval(config["compile"]['defines'])
-        globals()["cflags"] = config["compile"]['cflags']
-        globals()["incs"] = config["compile"]['incs']
-        globals()["linkflags"] = config["compile"]['linkflags']
-        globals()["compile_cmd"] = f'{cc} {defines} {cflags} {incs} {linkflags}'
-        globals()["objdump_cmd"] = config["compile"]["objdump"]
-        globals()["is_objdump"] = config["compile"]["is_objdump"]
-        globals()["readelf"] = config["compile"]['readelf']
-        globals()["config"] = config
-        args.compile_config = { "compile_cmd": compile_cmd, "objdump_cmd": objdump_cmd, "is_objdump": is_objdump }
+def export_global_variables(config):
+
+    globals()["xlen"] = config["processor"]['xlen']
+    globals()["flen"] = config["processor"]['flen']
+    globals()["vlen"] = config["processor"]['vlen']
+    globals()["elen"] = config["processor"]['elen']
+    globals()["slen"] = config["processor"]['slen']
+    globals()["readelf"] = config["compile"]['readelf']
+    globals()["config"] = config
 
 # find the params for matrix cases
 def search_matrix(arg_names, vals, no, params, locals_dict, **kwargs):
@@ -366,7 +353,7 @@ def collect_tests( args ):
 
     if not args.specs or len(args.specs.split()) == 0:
         # if no specs argument, default find the case from specs folder
-        specs = ['specs']
+        specs = [args.pkgroot + '/specs', 'specs']
     else:
         # otherwise find the case from args.specs
         specs = args.specs.split(',')
@@ -591,13 +578,64 @@ def gen_report( ps, failing_info, collected_case_list, collected_case_num_list )
     report.close()
     generator_case_log.close()
 
-    return failed_num  
+    return failed_num
+
+def prepare_makefiles(args):
+    config = args.config
+    vmap = {
+        'CC': config['compile']['cc'],
+        'CFLAGS': f"{config['compile']['defines']} {config['compile']['cflags']}",
+        'LDFLAGS': config['compile']['linkflags'],
+        'OBJDUMP': config['compile']['objdump'],
+        'READELF': config['compile']['readelf'],
+        'SPIKE': config['spike']['cmd'], 'SPIKE_OPTS': '',
+        'GEM5': config['gem5']['cmd'], 'GEM5_OPTS': '',
+        'VCS': config['vcs']['cmd'], 'vcstimeout':config['vcs']['vcstimeout'],
+        'fsdb': config['vcs']['fsdb'], 'tsiloadmem': config['vcs']['tsiloadmem'],
+        'lsf': config['lsf']['enable'], 'LSF_CMD': config['lsf']['cmd']
+
+    }
+
+    rootdir_dict = {"case": '../../../..', 'type':'../../..', 'inst': '../..'}
+    vmap['ROOTDIR'] = rootdir_dict[args.level]
+    vmap['PKGROOT'] = args.pkgroot
+
+    pkgroot = args.pkgroot
+
+    os.system(f'cp -rf {pkgroot}/utils/make/spike.mk {pkgroot}/utils/make/*.py {pkgroot}/utils/make/Makefile build/')
+    if vmap['SPIKE'] and vmap['SPIKE'] != 'None':
+        vmap['SPIKE'] = expend_path(vmap['SPIKE'])
+
+    if vmap['GEM5'] and vmap['GEM5'] != 'None':
+        vmap['GEM5'] = expend_path(vmap['GEM5'])
+        os.system(f'cp -rf {pkgroot}/utils/make/gem5.mk build/')
+    else:
+        if os.path.exists(f'build/gem5.mk'):
+            os.system('rm build/gem5.mk')
+    if vmap['VCS'] and vmap['VCS'] != 'None':
+        vmap['VCS'] = expend_path(vmap['VCS'])
+        os.system(f'cp -rf {pkgroot}/utils/make/vcs.mk build/')
+    else:
+        if os.path.exists(f'build/vcs.mk'):
+            os.system('rm build/vcs.mk')
+
+    with open(f'{pkgroot}/utils/make/Makefile.subdir', 'r' ) as f:
+        template = f.read()
+        makefile_str = template.format_map(vmap)
+        with open('build/Makefile.subdir', 'w') as f_ref:
+            f_ref.write(makefile_str)
+
+    with open(f'{pkgroot}/utils/make/variables.mk.in', 'r') as f:
+        template = f.read()
+        vars = template.format_map(vmap)
+        with open('build/variables.mk', 'w') as fo:
+            fo.write(vars)
 
 def main(args):
     
     try:
         # get config information from config file, including isa options and compilation options mainly
-        get_config_info(args)
+        export_global_variables(args.config)
 
         # collect test cases in spec files
         [collected_case_list, collected_case_num_list] = collect_tests( args )
@@ -614,47 +652,7 @@ def main(args):
 
         os.makedirs('build', exist_ok=True)
 
-        vmap = {
-            'CC': cc, 'CFLAGS': f'{defines} {cflags}', 'LDFLAGS': '', 'OBJDUMP': objdump_cmd, 'READELF': readelf,
-            'SPIKE': eval(config['spike']['cmd'].format_map({
-                'path': config['spike']['path'],
-                'xlen': xlen, 'vlen': vlen, 'elen': elen, 'slen': slen,
-            })), 'SPIKE_OPTS': '',
-            'GEM5': config['gem5']['path'], 'GEM5_OPTS': config['gem5']['options'],
-            'VCS': config['vcs']['path'], 'vcstimeout':config['vcs']['vcstimeout'],
-            'fsdb': config['vcs']['fsdb'], 'tsiloadmem': config['vcs']['tsiloadmem'],
-            'lsf': config['lsf']['is_flag'], 'LSF_CMD': config['lsf']['cmd']
-
-        }
-
-        rootdir_dict = {"case": '../../../..', 'type':'../../..', 'inst': '../..'}
-        vmap['ROOTDIR'] = rootdir_dict[args.level]
-
-        os.system(f'cp -rf {rootdir}/utils/make/spike.mk {rootdir}/utils/make/*.py {rootdir}/utils/make/Makefile build/')
-        if vmap['GEM5']:
-            vmap['GEM5'] = os.path.abspath(vmap['GEM5'])
-            os.system(f'cp -rf {rootdir}/utils/make/gem5.mk build/')
-        else:
-            if os.path.exists(f'build/gem5.mk'):
-                os.system('rm build/gem5.mk')
-        if vmap['VCS']:
-            vmap['VCS'] = os.path.abspath(vmap['VCS'])
-            os.system(f'cp -rf {rootdir}/utils/make/vcs.mk build/')
-        else:
-            if os.path.exists(f'build/vcs.mk'):
-                os.system('rm build/vcs.mk')
-
-        with open(f'{rootdir}/utils/make/Makefile.subdir', 'r' ) as f:
-            template = f.read()
-            makefile_str = template.format_map(vmap)
-            with open('build/Makefile.subdir', 'w') as f_ref:
-                f_ref.write(makefile_str)
-
-        with open(f'{rootdir}/utils/make/variables.mk.in', 'r') as f:
-            template = f.read()
-            vars = template.format_map(vmap)
-            with open('build/variables.mk', 'w') as fo:
-                fo.write(vars)
+        prepare_makefiles(args)
 
 
         with Pool(processes=args.nproc) as pool:

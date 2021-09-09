@@ -1,12 +1,13 @@
 rootdir := {ROOTDIR}
+pkgroot := {PKGROOT}
 
 include $(rootdir)/build/variables.mk
 
 all: diff
 
 # generate
-INCS = -I$(rootdir)/env/p -I$(rootdir)/macros/scalar -I$(rootdir)/macros/vector
-LIBS = -T$(rootdir)/env/p/link.ld
+INCS = -I$(pkgroot)/env/p -I$(pkgroot)/macros/scalar -I$(pkgroot)/macros/vector
+LIBS = -T$(pkgroot)/env/p/link.ld
 
 elf: test.elf test.dump
 

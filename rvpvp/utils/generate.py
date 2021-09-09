@@ -187,7 +187,7 @@ def gen_inst_case( args, test_inst ):
     print(content_all, file=open(source, 'w'))
 
     # compile the test code 
-    ret = compile(args, binary, mapfile, dumpfile, source, compile_log)
+    ret = compile(args.config, binary, mapfile, dumpfile, source, compile_log)
     if ret != 0:
         # if failed, set the result as compile failed
         with result_condition:          

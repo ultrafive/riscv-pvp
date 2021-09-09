@@ -4,11 +4,8 @@ import click
 import textwrap
 import shutil
 
-from . import generator, runner
-
-class Args(object):
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+from rvpvp import generator, runner
+from rvpvp.common import Args, parse_config_files, get_package_root
 
 @click.group()
 def cli():
@@ -21,11 +18,11 @@ def cli():
 def new(dir):
     """Create a new target for verification."""
     click.echo(f'New target is created in {dir}.')
-    shutil.copytree('new', dir)
+    shutil.copytree(get_package_root() + '/new', dir)
 
 
 @cli.command()
-@click.option('--config', help='config yaml file', default='config/prod.yml')
+@click.option('--config', help='config yaml file', default='target.yml')
 @click.option('--nproc', '-n', help='generate elf files on n processes', type=int, default=1)
 @click.option('--level', '-l', help='level of cases to compile into one elf file',
                 type=click.Choice(['group', 'type', 'case'], case_sensitive=False), default="case")
@@ -46,11 +43,13 @@ def new(dir):
 @click.option('--param-info', '-pi', help="print params information into log/params.yaml of cases collected.", default=False)
 def gen(**kwargs):
     """Generate verification cases for current target."""
+    kwargs['config'] = parse_config_files(kwargs['config'])
+    kwargs['pkgroot'] = get_package_root()
     generator.main(Args(**kwargs))
 
 
 @ cli.command()
-@click.option('--config', help='config yaml file, default config/prod.yml', default='config/prod.yml')
+@click.option('--config', help='config yaml file, default config/prod.yml', default='target.yml')
 @click.option('--retry', '-r', help='retry last failed cases', default=False)
 @click.option('--nproc', '-n', help='runner process number for run cases, default 1', type=int, default=1)
 @click.option('--cases', '-c', help=textwrap.dedent('''\
@@ -65,6 +64,8 @@ def gen(**kwargs):
 @click.option('--vcstimeout', '-vto', help='Number of cycles after which VCS stops, if not set, depend on vcs:vcstimeout in the file set by --config', default=-3333, type=int)
 def run(**kwargs):
     """Run verification cases for current target."""
+    kwargs['config'] = parse_config_files(kwargs['config'])
+    kwargs['pkgroot'] = get_package_root()
     runner.main(Args(**kwargs))
 
 

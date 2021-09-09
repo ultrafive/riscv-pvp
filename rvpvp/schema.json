@@ -1,0 +1,345 @@
+{
+	"definitions": {},
+	"$schema": "http://json-schema.org/draft-07/schema#", 
+	"$id": "https://example.com/object1631142688.json", 
+	"title": "Root", 
+	"type": "object",
+	"required": [
+	],
+	"properties": {
+		"processor": {
+			"$id": "#root/processor", 
+			"title": "Processor", 
+			"type": "object",
+			"required": [
+				"xlen",
+				"flen",
+				"vlen",
+				"elen",
+				"slen"
+			],
+			"properties": {
+				"xlen": {
+					"$id": "#root/processor/xlen", 
+					"title": "Xlen", 
+					"type": "integer",
+					"examples": [
+						64
+					],
+					"default": 64
+				},
+				"flen": {
+					"$id": "#root/processor/flen", 
+					"title": "Flen", 
+					"type": "integer",
+					"examples": [
+						64
+					],
+					"default": 64
+				},
+				"vlen": {
+					"$id": "#root/processor/vlen", 
+					"title": "Vlen", 
+					"type": "integer",
+					"examples": [
+						1024
+					],
+					"default": 1024
+				},
+				"elen": {
+					"$id": "#root/processor/elen", 
+					"title": "Elen", 
+					"type": "integer",
+					"examples": [
+						64
+					],
+					"default": 64
+				},
+				"slen": {
+					"$id": "#root/processor/slen", 
+					"title": "Slen", 
+					"type": "integer",
+					"examples": [
+						1024
+					],
+					"default": 1024
+				}
+			}
+		}
+,
+		"compile": {
+			"$id": "#root/compile", 
+			"title": "Compile", 
+			"type": "object",
+			"required": [
+				"path",
+				"cc",
+				"defines",
+				"cflags",
+				"incs",
+				"linkflags",
+				"objdump",
+				"is_objdump",
+				"readelf"
+			],
+			"properties": {
+				"path": {
+					"$id": "#root/compile/path", 
+					"title": "Path", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"clang"
+					],
+					"pattern": "^.*$"
+				},
+				"cc": {
+					"$id": "#root/compile/cc", 
+					"title": "Cc", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"f'{path} --target=riscv{xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{xlen}gv0p10zfh0p1 -menable-experimental-extensions'"
+					],
+					"pattern": "^.*$"
+				},
+				"defines": {
+					"$id": "#root/compile/defines", 
+					"title": "Defines", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"f'-DXLEN={xlen} -DVLEN={vlen}'"
+					],
+					"pattern": "^.*$"
+				},
+				"cflags": {
+					"$id": "#root/compile/cflags", 
+					"title": "Cflags", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles"
+					],
+					"pattern": "^.*$"
+				},
+				"incs": {
+					"$id": "#root/compile/incs", 
+					"title": "Incs", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"-Ienv/p -Imacros/scalar -Imacros/vector -Imacros/stc"
+					],
+					"pattern": "^.*$"
+				},
+				"linkflags": {
+					"$id": "#root/compile/linkflags", 
+					"title": "Linkflags", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"-Tenv/p/link.ld"
+					],
+					"pattern": "^.*$"
+				},
+				"objdump": {
+					"$id": "#root/compile/objdump", 
+					"title": "Objdump", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"riscv64-unknown-elf-objdump -S -D"
+					],
+					"pattern": "^.*$"
+				},
+				"is_objdump": {
+					"$id": "#root/compile/is_objdump", 
+					"title": "Is_objdump", 
+					"type": "boolean",
+					"examples": [
+						true
+					],
+					"default": true
+				},
+				"readelf": {
+					"$id": "#root/compile/readelf", 
+					"title": "Readelf", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"riscv64-unknown-elf-readelf"
+					],
+					"pattern": "^.*$"
+				}
+			}
+		}
+,
+		"lsf": {
+			"$id": "#root/lsf", 
+			"title": "Lsf", 
+			"type": "object",
+			"required": [
+				"cmd",
+				"is_flag"
+			],
+			"properties": {
+				"cmd": {
+					"$id": "#root/lsf/cmd", 
+					"title": "Cmd", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"bsub -n 1 -J simv -Ip"
+					],
+					"pattern": "^.*$"
+				},
+				"is_flag": {
+					"$id": "#root/lsf/is_flag", 
+					"title": "Is_flag", 
+					"type": "boolean",
+					"examples": [
+						false
+					],
+					"default": true
+				}
+			}
+		}
+,
+		"spike": {
+			"$id": "#root/spike", 
+			"title": "Spike", 
+			"type": "object",
+			"required": [
+				"path",
+				"cmd"
+			],
+			"properties": {
+				"path": {
+					"$id": "#root/spike/path", 
+					"title": "Path", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"spike"
+					],
+					"pattern": "^.*$"
+				},
+				"cmd": {
+					"$id": "#root/spike/cmd", 
+					"title": "Cmd", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"f'{path} --isa=rv{xlen}gcv_zfh --varch=vlen:{vlen},elen:{elen},slen:{slen}'"
+					],
+					"pattern": "^.*$"
+				}
+			}
+		}
+,
+		"gem5": {
+			"$id": "#root/gem5", 
+			"title": "Gem5", 
+			"type": "object",
+			"required": [
+				"path",
+				"options"
+			],
+			"properties": {
+				"path": {
+					"$id": "#root/gem5/path", 
+					"title": "Path", 
+					"type": "null",
+					"default": null
+				},
+				"options": {
+					"$id": "#root/gem5/options", 
+					"title": "Options", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"--debug-flags=Exec \\\n--listener-mode=off \\\n~/work/gem5/gem5/configs/example/fs.py \\\n--cpu-type=MinorCPU \\\n--bp-type=LTAGE \\\n--num-cpu=1 \\\n--mem-channels=1 \\\n--mem-size=3072MB \\\n--caches \\\n--l1d_size=32kB \\\n--l1i_size=32kB \\\n--cacheline_size=64 \\\n--l1i_assoc=8 \\\n--l1d_assoc=8 \\\n--l2cache \\\n--l2_size=512kB \\\n"
+					],
+					"pattern": "^.*$"
+				}
+			}
+		}
+,
+		"vcs": {
+			"$id": "#root/vcs", 
+			"title": "Vcs", 
+			"type": "object",
+			"required": [
+				"path",
+				"cmd",
+				"vcstimeout",
+				"fsdb",
+				"tsiloadmem"
+			],
+			"properties": {
+				"path": {
+					"$id": "#root/vcs/path", 
+					"title": "Path", 
+					"type": "null",
+					"default": null
+				},
+				"cmd": {
+					"$id": "#root/vcs/cmd", 
+					"title": "Cmd", 
+					"type": "string",
+					"default": "",
+					"examples": [
+						"f'{path}'"
+					],
+					"pattern": "^.*$"
+				},
+				"vcstimeout": {
+					"$id": "#root/vcs/vcstimeout", 
+					"title": "Vcstimeout", 
+					"type": "integer",
+					"examples": [
+						1000000
+					],
+					"default": 0
+				},
+				"fsdb": {
+					"$id": "#root/vcs/fsdb", 
+					"title": "Fsdb", 
+					"type": "boolean",
+					"examples": [
+						true
+					],
+					"default": true
+				},
+				"tsiloadmem": {
+					"$id": "#root/vcs/tsiloadmem", 
+					"title": "Tsiloadmem", 
+					"type": "boolean",
+					"examples": [
+						false
+					],
+					"default": true
+				}
+			}
+		}
+,
+		"verilator": {
+			"$id": "#root/verilator", 
+			"title": "Verilator", 
+			"type": "object",
+			"required": [
+				"path"
+			],
+			"properties": {
+				"path": {
+					"$id": "#root/verilator/path", 
+					"title": "Path", 
+					"type": "null",
+					"default": null
+				}
+			}
+		}
+
+	}
+}

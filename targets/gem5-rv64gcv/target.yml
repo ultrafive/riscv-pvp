@@ -15,6 +15,6 @@ compile:
 spike:
   path: spike
 
-# gem5:
-#   path: ~/work/gem5/gem5/build/RISCV/gem5.opt
-#   config: ~/work/gem5/gem5/configs/example/fs.py
+gem5:
+  path: ~/work/gem5/gem5/build/RISCV/gem5.opt
+  config: ~/work/gem5/gem5/configs/example/fs.py

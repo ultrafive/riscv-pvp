@@ -31,41 +31,6 @@ def sync_variable():
     globals()["tests"] = Value('L', 0)
     globals()["fails"] = Value('L', 0)
 
-def get_config_info(args):
-
-    # analyse the config yaml to get simulator info
-    with open(args.config, 'r' ) as f_env:
-        env = yaml.load(f_env, Loader=yaml.SafeLoader)
-        args.xlen = xlen = env["processor"]['xlen']
-        args.flen = flen = env["processor"]['flen']
-        args.vlen = vlen = env["processor"]['vlen']
-        args.elen = elen = env["processor"]['elen']
-        args.slen = slen = env["processor"]['slen']
-
-        args.readelf = env["compile"]['readelf']
-
-        args.lsf_cmd = lsf_cmd = env["lsf"]["cmd"]
-        if args.lsf == False:
-            args.is_lsf = is_lsf = env["lsf"]["is_flag"]
-        else:
-            args.is_lsf = True
-        
-        path = env["spike"]['path']
-        args.spike_cmd = eval(env["spike"]['cmd'])
-        
-        args.gem5_path = env["gem5"]["path"]
-        args.gem5_options = env["gem5"]["options"]
-
-        args.vcs_path = env["vcs"]["path"]
-        if args.vcstimeout == -3333:
-            args.vcstimeout = env["vcs"]["vcstimeout"]
-        if args.fsdb == False:
-            args.fsdb = env["vcs"]["fsdb"]
-        if args.tsiloadmem == False:
-            args.tsiloadmem = env["vcs"]["tsiloadmem"]
-
-        args.verilator_path = env["verilator"]["path"]
-
 # run failed cases last time
 def get_retry_cases():
     print("retry last failed cases...")
@@ -187,9 +152,9 @@ def gen_runner_report( ps, args, generator_case_list, generator_num_list ):
                 time.sleep(0.5)
                 print(f'FAIL {case} - {reason}')
             
-            report.write(f'FAIL {case} - {reason}')                  
+            report.write(f'FAIL {case} - {reason}\n')
         else:
-            report.write(f'PASS {case}')                                                             
+            report.write(f'PASS {case}\n')
 
     report.close()
 
@@ -244,7 +209,7 @@ def run_test(case, args):
         # check the golden result computed by python with the spike result
         spike_result = {}
         start_dict = {}
-        read_elf_cmd = args.readelf + ' -s ' + binary
+        read_elf_cmd = args.config['compile']['readelf'] + ' -s ' + binary
         try:
             addr_begin_sig_str =  str( subprocess.check_output( read_elf_cmd + ' | grep begin_signature ', shell=True ), encoding = 'utf-8' )
             addr_begin_sig = int( addr_begin_sig_str.split()[1], 16 )
@@ -290,7 +255,7 @@ def run_test(case, args):
         # run case in more simulators and compare simulator results with spike results, which need to be same
         sims_result = sims_run( args, f'build/{case}', binary )
         for sim in [ "vcs", "verilator", "gem5" ]:
-            if eval(f'args.{sim}_path') == None:
+            if args.config[sim]['path'] == None:
                 # don't set the path of sim, so dont't run it and needn't judge the result
                 continue
 
@@ -375,9 +340,6 @@ def main(args):
 
         # define some global sync variables to synchronize the runner processes with the main process
         sync_variable()
-
-        # get config information from config file, including spike\gem5\vcs\verilator config info
-        get_config_info(args)
 
         if args.retry:
             cases = get_retry_cases()

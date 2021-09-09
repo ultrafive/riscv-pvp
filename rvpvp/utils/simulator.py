@@ -3,20 +3,24 @@ import os
 # run test.elf in spike
 def spike_run(args, memfile, binary, logfile, res_file, **kw):    
 
-    cmd = f'{args.spike_cmd} +signature={res_file} +signature-granularity={32} {binary} >> {logfile} 2>&1'
+    cmd = f"{args.config['spike']['cmd']} +signature={res_file} +signature-granularity={32} {binary} >> {logfile} 2>&1"
     print(f'# {cmd}\n', file=open(logfile, 'w'))
     ret = os.system(cmd)
     return ret
 
 # run test.elf in more simulator: gem5 vcs ...
 def sims_run( args, workdir, binary ):   
-    sims = { 'vcs': args.vcs_path, 'verilator': args.verilator_path, 'gem5': args.gem5_path }
+    #sims = { 'vcs': args.config['vcs']['cmd'], 'verilator': args.config['verilator']['cmd'], 'gem5': args.config['gem5']['cmd'] }
+
+    sims = ['vcs', 'verilator', 'gem5']
     options = ''
     result = { 'vcs': 0, 'verilator': 0, 'gem5': 0 }
-    for k, sim in sims.items():
-        if sim == None:
+    for k in sims:
+        if args.config[k]['path'] == None or args.config[k]['path'] == '~':
             # don't set the path of sim, so don't run it
             continue
+
+        sim = args.config[k]['cmd']
 
         # set options of sim
         if k != 'gem5':
@@ -35,7 +39,6 @@ def sims_run( args, workdir, binary ):
                 opt_fsdb = f'+fsdbfile={workdir}/test.fsdb'
             options += f' +permissive {opt_fsdb} {opt_ldmem} +permissive-off'
         elif k == 'gem5':
-            options += args.gem5_options
             options += f'--signature={workdir}/{k}.sig'
 
         # set the cmd to run the sim and save the cmd
@@ -45,8 +48,8 @@ def sims_run( args, workdir, binary ):
             cmd = f'{sim} {options} {binary} >> {workdir}/{k}.log 2>&1'
         print(f'# {cmd}\n', file=open(f'{workdir}/{k}.log', 'w'))
 
-        if args.is_lsf:
-            cmd = f'{args.lsf_cmd} {cmd}'
+        if args.config['lsf']['enable']:
+            cmd = f"{args.config['lsf']['cmd']} {cmd}"
 
         # run the cmd and save the result
         ret = os.system(cmd)
