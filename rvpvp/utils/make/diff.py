@@ -128,7 +128,7 @@ def trans_dtype( input, dtype ):
 def main():
     spike_res_file = sys.argv[1]
     sig_file = sys.argv[2]
-    sig_name = sig_file.replace(".sig", "")
+    sim = sig_file.replace(".sig", "")
 
     # get the cases list, including test_num, name, check string, golden
     case_list = np.load(spike_res_file, allow_pickle=True)
@@ -142,10 +142,10 @@ def main():
         result = from_txt(sig_file, spike_result,  offset)
 
         # save the spike result and sim result into diff-sim.data
-        if not diff_to_txt(spike_result, result, f'diff-{sig_name}.data', "spike", sig_name):
+        if not diff_to_txt(spike_result, result, f'diff-{sim}.data', "spike", sim):
             print( f'The results of spike and {sim} of test case {test_case["no"]} in test.S check failed. You can find the data in diff-{sim}.data\n' )
 
-    print(f'{sig_name} diff done.')
+    print(f'{sim} diff done.')
 
 
 if __name__ == "__main__":

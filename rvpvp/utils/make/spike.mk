@@ -1,7 +1,7 @@
 SIMS += spike
 
 .NOTPARALLEL:
-spike: spike.clean spike.log spike.sig
+spike: spike.log spike.sig
 
 spike.run: test.elf
 	$(SPIKE) $(SPIKE_OPTS) +signature=spike.sig +signature-granularity=32 $< >spike.tmp 2>&1 && touch $@
