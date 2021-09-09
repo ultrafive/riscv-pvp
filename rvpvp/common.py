@@ -1,6 +1,8 @@
 import os
 import collections
 import yaml
+import inspect
+from importlib.machinery import SourceFileLoader
 
 from . import consts
 
@@ -11,6 +13,24 @@ def expend_path(path):
     if path.startswith('~') or path.startswith('.'):
         return os.path.abspath(os.path.expanduser(path))
     return path
+
+def import_from_directory(path, globals):
+    if not os.path.exists(path):
+        return
+    for root, dirs, _ in os.walk(path):
+        for d in dirs:
+            for f in os.listdir(os.path.join(root, d)):
+                ff = os.path.join(root, d, f)
+                if not os.path.isfile(ff):
+                    continue
+                if not f.endswith('.py') or f == '__init__.py':
+                    continue
+
+                m = SourceFileLoader(f, ff).load_module()
+                for a in dir(m):
+                    attr = getattr(m, a)
+                    if inspect.isclass(attr) or inspect.isfunction(attr):
+                        globals[a] = attr
 
 def parse_config_items(cfg, ctx = {}):
     for k, v in cfg.items():

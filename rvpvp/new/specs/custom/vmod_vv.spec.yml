@@ -1,66 +1,66 @@
-_: &default
-  head: |   # the head string will be used in the test.S to include the header files and to define some macros.
-    #include "exception.h"
-  env: RVTEST_RV64UV # the env string will be used in the test.S before RVTEST_CODE_BEGIN to initialize the environment.
-  templates: # templates of different types will be used in the corresponding test.S as test code.
-    # The variable in the brace{} will be replaced by the params in the cases. 
-    # {num} will be assigned automatically. 
-    # The test frame will use data in test_{num}_data and check string to check if the result is equal with the data computed by python golden function. 
-    # You can check the result in the test code, too.
-    test_basic_without_mask: | 
-      test_{num}: 
-        li TESTNUM, {num};   // {num} set automatically
-        li t0, 4;
-        fsrm t1, t0;         // set rounding mode as RMM
-        li a0, {vl} ; 
-        vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
-        la a1, {vs1_data} ;  // vs1 data label
-        la a2, {vs2_data} ;  // vs2 data label
-        vle{ebits}.v v8, (a1) ; 
-        vle{ebits}.v v16, (a2) ;
-        li t0, 0;
-        csrw vstart, t0;      // set vstart as 0
-        {name} v24, v16, v8;  // {name} is the test instruction
-        csrr t0, vstart;
-        beqz t0, 1f;          // test if vstart==0 after the instruction
-        j fail;
-      1:la a3, test_{num}_data; 
-        vse{ebits}.v v24, (a3);    // save the result data into test_{num}_data memory
-        .pushsection .data, 1;
-        .align  6
-      test_{num}_data:            
-        .fill {vl}, ({ebits}/8), 0;  // there are {vl} sets of ({ebits}/8) bytes 0
-        .popsection
+# _: &default
+#   head: |   # the head string will be used in the test.S to include the header files and to define some macros.
+#     #include "exception.h"
+#   env: RVTEST_RV64UV # the env string will be used in the test.S before RVTEST_CODE_BEGIN to initialize the environment.
+#   templates: # templates of different types will be used in the corresponding test.S as test code.
+#     # The variable in the brace{} will be replaced by the params in the cases. 
+#     # {num} will be assigned automatically. 
+#     # The test frame will use data in test_{num}_data and check string to check if the result is equal with the data computed by python golden function. 
+#     # You can check the result in the test code, too.
+#     test_basic_without_mask: | 
+#       test_{num}: 
+#         li TESTNUM, {num};   // {num} set automatically
+#         li t0, 4;
+#         fsrm t1, t0;         // set rounding mode as RMM
+#         li a0, {vl} ; 
+#         vsetvli t0, a0, e{ebits},m{lmul},ta,ma;
+#         la a1, {vs1_data} ;  // vs1 data label
+#         la a2, {vs2_data} ;  // vs2 data label
+#         vle{ebits}.v v8, (a1) ; 
+#         vle{ebits}.v v16, (a2) ;
+#         li t0, 0;
+#         csrw vstart, t0;      // set vstart as 0
+#         {name} v24, v16, v8;  // {name} is the test instruction
+#         csrr t0, vstart;
+#         beqz t0, 1f;          // test if vstart==0 after the instruction
+#         j fail;
+#       1:la a3, test_{num}_data; 
+#         vse{ebits}.v v24, (a3);    // save the result data into test_{num}_data memory
+#         .pushsection .data, 1;
+#         .align  6
+#       test_{num}_data:            
+#         .fill {vl}, ({ebits}/8), 0;  // there are {vl} sets of ({ebits}/8) bytes 0
+#         .popsection
 
-  cases:
-  # Params of different types will replace corresponding variables in the corresponding test template.
-    test_basic_without_mask:
-      matrix:
-        ebits: [16, 32]
-        lmul: 1
-        vl: [1,10]
-        vs1: np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
-    # You can write the params using following two methods:
-    # test_basic_without_mask @ ebits, lmul, vl, vs1, vs2:
-    #   - [ 16, 1, 1,  np.linspace(-500, 300, 1 ).astype(np.float16), np.linspace(-500, 300, 1 ).astype(np.float16) ]
-    #   - [ 16, 1, 10, np.linspace(-500, 300, 10).astype(np.float16), np.linspace(-500, 300, 10).astype(np.float16) ]
-    #   - [ 32, 1, 1,  np.linspace(-500, 300, 1 ).astype(np.float32), np.linspace(-500, 300, 1 ).astype(np.float32) ]
-    #   - [ 32, 1, 10, np.linspace(-500, 300, 10).astype(np.float32), np.linspace(-500, 300, 10).astype(np.float32) ]           
-    # test_basic_without_mask @ ebits, lmul, vl, vs1, vs2:
-    #   setup: |
-    #     params_yml = []
-    #     for ebits in [16, 32]:
-    #       lmul = 1
-    #       for vl in [1,10]:
-    #         vs1 = np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
-    #         vs2 = np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
-    #         params_yml.append( [ebits, lmul, vl, vs1, vs2] )
+#   cases:
+#   # Params of different types will replace corresponding variables in the corresponding test template.
+#     test_basic_without_mask:
+#       matrix:
+#         ebits: [16, 32]
+#         lmul: 1
+#         vl: [1,10]
+#         vs1: np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
+#         vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
+#     # You can write the params using following two methods:
+#     # test_basic_without_mask @ ebits, lmul, vl, vs1, vs2:
+#     #   - [ 16, 1, 1,  np.linspace(-500, 300, 1 ).astype(np.float16), np.linspace(-500, 300, 1 ).astype(np.float16) ]
+#     #   - [ 16, 1, 10, np.linspace(-500, 300, 10).astype(np.float16), np.linspace(-500, 300, 10).astype(np.float16) ]
+#     #   - [ 32, 1, 1,  np.linspace(-500, 300, 1 ).astype(np.float32), np.linspace(-500, 300, 1 ).astype(np.float32) ]
+#     #   - [ 32, 1, 10, np.linspace(-500, 300, 10).astype(np.float32), np.linspace(-500, 300, 10).astype(np.float32) ]           
+#     # test_basic_without_mask @ ebits, lmul, vl, vs1, vs2:
+#     #   setup: |
+#     #     params_yml = []
+#     #     for ebits in [16, 32]:
+#     #       lmul = 1
+#     #       for vl in [1,10]:
+#     #         vs1 = np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
+#     #         vs2 = np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
+#     #         params_yml.append( [ebits, lmul, vl, vs1, vs2] )
 
 
 
-  check: # check string will be used to check the spike result and python golden data.
-    test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
+#   check: # check string will be used to check the spike result and python golden data.
+#     test_basic_without_mask: np.allclose( result, golden, rtol=1e-3, atol=0, equal_nan=True) 
 
-vmod_vv:
-  <<: *default # This includes the code of the key of which the colon is followed by &default.
+# vmod_vv:
+#   <<: *default # This includes the code of the key of which the colon is followed by &default.

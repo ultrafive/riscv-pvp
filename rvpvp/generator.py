@@ -22,7 +22,10 @@ from rich.progress import (
     TimeRemainingColumn
 )
 
-from .common import expend_path
+from .common import expend_path, import_from_directory
+
+import_from_directory('isa', globals())
+import_from_directory('utils', globals())
 
 def export_global_variables(config):
 
@@ -90,7 +93,6 @@ def search_matrix(arg_names, vals, no, params, locals_dict, **kwargs):
         return params_yml
 
 def cases_gen( args, filename, inst, cases_dict, templates, check_dict, collected_case_list, collected_case_num_list, param_dict  ):
-    
     test_dict = dict()
 
     for key, params in cases_dict.items():
@@ -275,6 +277,8 @@ def analyse_spec( spec_file, args, collected_case_list, collected_case_num_list,
     # load information from the yml file 
     stream = open(spec_file, 'r')
     config = yaml.load(stream, Loader=yaml.SafeLoader)
+    if config == None:
+        return
 
     for inst, cfg in config.items(): #inst is the instruction needed to test, cfg is the env\head\template\cases\check  test configuration
 
