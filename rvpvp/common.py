@@ -9,11 +9,6 @@ from . import consts
 def get_package_root():
     return os.path.dirname(os.path.realpath(__file__))
 
-def expend_path(path):
-    if path.startswith('~') or path.startswith('.'):
-        return os.path.abspath(os.path.expanduser(path))
-    return path
-
 def import_from_directory(path, globals):
     if not os.path.exists(path):
         return
@@ -38,6 +33,10 @@ def parse_config_items(cfg, ctx = {}):
             parse_config_items(v, ctx)
             continue
         if isinstance(v, str):
+            if v.startswith('~') or v.startswith('.'):
+                newpath = os.path.expanduser(v)
+                if v != '~' and os.path.exists(newpath):
+                    cfg[k] = os.path.abspath(newpath)
             if v.startswith("f'") or v.startswith('f"'):
                 cfg[k] = eval(v, ctx)
             

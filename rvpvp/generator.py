@@ -22,7 +22,7 @@ from rich.progress import (
     TimeRemainingColumn
 )
 
-from .common import expend_path, import_from_directory
+from .common import import_from_directory
 
 import_from_directory('isa', globals())
 import_from_directory('utils', globals())
@@ -604,32 +604,27 @@ def prepare_makefiles(args):
     vmap['ROOTDIR'] = rootdir_dict[args.level]
     vmap['PKGROOT'] = args.pkgroot
 
-    pkgroot = args.pkgroot
+    tmproot = f'{args.pkgroot}/utils/make'
 
-    os.system(f'cp -rf {pkgroot}/utils/make/spike.mk {pkgroot}/utils/make/*.py {pkgroot}/utils/make/Makefile build/')
-    if vmap['SPIKE'] and vmap['SPIKE'] != 'None':
-        vmap['SPIKE'] = expend_path(vmap['SPIKE'])
-
-    if vmap['GEM5'] and vmap['GEM5'] != 'None':
-        vmap['GEM5'] = expend_path(vmap['GEM5'])
-        os.system(f'cp -rf {pkgroot}/utils/make/gem5.mk build/')
+    os.system(f'cp -rf {tmproot}/spike.mk {tmproot}/*.py {tmproot}/Makefile build/')
+    if config['gem5']['path'] and config['gem5']['path'] != '~':
+        os.system(f'cp -rf {tmproot}/gem5.mk build/')
     else:
         if os.path.exists(f'build/gem5.mk'):
-            os.system('rm build/gem5.mk')
-    if vmap['VCS'] and vmap['VCS'] != 'None':
-        vmap['VCS'] = expend_path(vmap['VCS'])
-        os.system(f'cp -rf {pkgroot}/utils/make/vcs.mk build/')
+            os.remove('build/gem5.mk')
+    if config['vcs']['path'] and config['vcs']['path'] != '~':
+        os.system(f'cp -rf {tmproot}/vcs.mk build/')
     else:
         if os.path.exists(f'build/vcs.mk'):
-            os.system('rm build/vcs.mk')
+            os.remove('build/vcs.mk')
 
-    with open(f'{pkgroot}/utils/make/Makefile.subdir', 'r' ) as f:
+    with open(f'{tmproot}/Makefile.subdir', 'r' ) as f:
         template = f.read()
         makefile_str = template.format_map(vmap)
         with open('build/Makefile.subdir', 'w') as f_ref:
             f_ref.write(makefile_str)
 
-    with open(f'{pkgroot}/utils/make/variables.mk.in', 'r') as f:
+    with open(f'{tmproot}/variables.mk.in', 'r') as f:
         template = f.read()
         vars = template.format_map(vmap)
         with open('build/variables.mk', 'w') as fo:
