@@ -61,7 +61,7 @@ We have verified with Synopsys VCS, verilator in chipyard framework. Please make
 sure the EDA tool environment is properly setup before running the co-simulation
 flow.
 
-## Install RISCV-PVP
+## Use RISCV-PVP
 
 Getting the source from github.
 
@@ -75,17 +75,13 @@ Install dependencies and run.
 ```bash
 cd riscv-pvp
 pip3 install -r requirements.txt    # install dependencies (only once)
-python3 run.py --help
+pip3 install .                      # install riscv-pvp package and cli
 ```
 
-Run verification with default spike ISS:
+Generate and run verification with default spike ISS target:
 
 ```bash
-python3 ./run.py
-```
-
-Run verification with default spike ISS and diff with vcs RTL simulator:
-
-```bash
-python3 ./run.py --vcs=<simv_path>
+cd targets/spike-rv64gcv
+rvpvp gen
+rvpvp run -n `nproc`
 ```

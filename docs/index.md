@@ -5,14 +5,10 @@ RISC-V PVP is a modular and parameterized RISC-V Processor Verification Platform
 It currently supports the following features:
 
 - Supported RISC-V ISA:
-    - RV32G
-    - RV64G
-    - C Extension, 2.0
-    - V Extension, 0.10
+    - V Extension, 1.0
 - YAML based hand-written sequence templates
 - numpy based golden data for vector ISA
-- Easy to support new ISAs
-- Easy to add new cases
+- Easy to support new targets with new or custom ISAs
 - End-to-end RTL&ISS co-simulation flow
 
 ## Motivation

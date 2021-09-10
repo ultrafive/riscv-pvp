@@ -1,0 +1,17 @@
+processor:
+  xlen: 64
+  flen: 64
+  vlen: 1024
+  elen: 64
+  slen: 1024
+
+compile:
+  path: clang
+  cc: f'{path} --target=riscv{xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{xlen}gv0p10zfh0p1 -menable-experimental-extensions'
+  defines: f'-DXLEN={xlen} -DVLEN={vlen}'
+  cflags: -g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
+  linkflags: ''
+
+spike:
+  path: spike
+
