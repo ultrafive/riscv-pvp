@@ -9,7 +9,7 @@ from rvpvp.common import Args, parse_config_files, get_package_root
 
 @click.group()
 def cli():
-    """Create a new target for verification."""
+    """RISC-V PVP tool to manage co-verification flow."""
     pass
 
 
