@@ -368,8 +368,8 @@ def main(args):
 
             progress.stop()
 
-            # spike may make that user can't input in command line, use stty echo to fix that.
-            os.system("stty echo")
+            # spike may make that user can't input in command line, use stty sane to fix that.
+            os.system("stty sane")
 
             if failed_num == 0:
                 print(f'{len(ps)} files running finish, all pass.( {tests.value} tests )')
@@ -392,7 +392,7 @@ def main(args):
             progress.stop()
         
         print("Catch KeyboardInterrupt!")
-        os.system("stty echo")
+        os.system("stty sane")
         sys.exit(-1)
 
         

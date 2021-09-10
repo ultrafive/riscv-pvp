@@ -27,6 +27,7 @@ vcs_opts := +permissive $(opt_fsdb) $(opt_ldmem) +permissive-off +signature=vcs.
 vcs.run: test.elf
 	smartelf2hex.sh $< > test.hex
 	$(lsf_cmd) $(VCS) $(vcs_opts) $< >vcs.tmp 2>&1 && touch $@
+	@stty sane
 
 vcs.clean:
 	@rm -f vcs.run
