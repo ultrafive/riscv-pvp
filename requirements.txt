@@ -31,6 +31,7 @@ iniconfig==1.1.1
 ipaddr==2.2.0
 isort==5.7.0
 jax==0.2.17
+jaxlib==0.1.69
 Jinja2==2.11.3
 Keras-Preprocessing==1.1.2
 lazy-object-proxy==1.5.2
