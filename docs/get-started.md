@@ -74,6 +74,7 @@ Install dependencies and run.
 
 ```bash
 cd riscv-pvp
+pip3 install -U pip                 # update pip version
 pip3 install -r requirements.txt    # install dependencies (only once)
 pip3 install .                      # install riscv-pvp package and cli
 ```
