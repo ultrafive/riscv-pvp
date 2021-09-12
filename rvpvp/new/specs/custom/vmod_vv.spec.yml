@@ -39,8 +39,8 @@
 #         ebits: [16, 32]
 #         lmul: 1
 #         vl: [1,10]
-#         vs1: np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
-#         vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
+#         vs1: np.linspace(-500, 300, vl).astype(bits_to_dtype_float(ebits))
+#         vs2: np.linspace(-300, 500, vl).astype(bits_to_dtype_float(ebits))
 #     # You can write the params using following two methods:
 #     # test_basic_without_mask @ ebits, lmul, vl, vs1, vs2:
 #     #   - [ 16, 1, 1,  np.linspace(-500, 300, 1 ).astype(np.float16), np.linspace(-500, 300, 1 ).astype(np.float16) ]
@@ -53,8 +53,8 @@
 #     #     for ebits in [16, 32]:
 #     #       lmul = 1
 #     #       for vl in [1,10]:
-#     #         vs1 = np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
-#     #         vs2 = np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
+#     #         vs1 = np.linspace(-500, 300, vl).astype(bits_to_dtype_float(ebits))
+#     #         vs2 = np.linspace(-300, 500, vl).astype(bits_to_dtype_float(ebits))
 #     #         params_yml.append( [ebits, lmul, vl, vs1, vs2] )
 
 

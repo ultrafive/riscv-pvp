@@ -10,15 +10,15 @@ class Vnclip_wv(Inst):
             return self['ori']
         
         if self['vs2'].dtype == self['vs1'].dtype: 
-            self['vs1'].dtype = self.get_intdtype(self['sew'])  
+            self['vs1'].dtype = self.intdtype()  
 
         result = self['ori'].copy() 
         vxrm   = self['vxrm'] if 'vxrm' in self else 0  
         vstart = self['vstart'] if 'vstart' in self else 0
         maskflag = 1 if 'mask' in self else 0 
 
-        int_max = np.iinfo(self.get_intdtype(self['sew'])).max
-        int_min = np.iinfo(self.get_intdtype(self['sew'])).min
+        int_max = np.iinfo(self.intdtype()).max
+        int_min = np.iinfo(self.intdtype()).min
         tmp = np.array([0], dtype='object') 
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
@@ -44,14 +44,14 @@ class Vnclipu_wv(Inst):
             return self['ori']
         
         if self['vs2'].dtype == self['vs1'].dtype: 
-            self['vs1'].dtype = self.get_uintdtype(self['sew'])  
+            self['vs1'].dtype = self.uintdtype()  
 
         result = self['ori'].copy() 
         vxrm   = self['vxrm'] if 'vxrm' in self else 0  
         vstart = self['vstart'] if 'vstart' in self else 0
         maskflag = 1 if 'mask' in self else 0 
 
-        uint_max = np.iinfo(self.get_uintdtype(self['sew'])).max
+        uint_max = np.iinfo(self.uintdtype()).max
         tmp = np.array([0], dtype='object') 
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
@@ -78,8 +78,8 @@ class Vnclip_wx(Inst):
         vstart = self['vstart'] if 'vstart' in self else 0
         maskflag = 1 if 'mask' in self else 0 
 
-        int_max = np.iinfo(self.get_intdtype(self['sew'])).max
-        int_min = np.iinfo(self.get_intdtype(self['sew'])).min
+        int_max = np.iinfo(self.intdtype()).max
+        int_min = np.iinfo(self.intdtype()).min
         tmp = np.array([0], dtype='object') 
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
@@ -109,7 +109,7 @@ class Vnclipu_wx(Inst):
         vstart = self['vstart'] if 'vstart' in self else 0
         maskflag = 1 if 'mask' in self else 0 
 
-        uint_max = np.iinfo(self.get_uintdtype(self['sew'])).max
+        uint_max = np.iinfo(self.uintdtype()).max
         tmp = np.array([0], dtype='object') 
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
@@ -137,8 +137,8 @@ class Vnclip_wi(Inst):
         vstart = self['vstart'] if 'vstart' in self else 0
         maskflag = 1 if 'mask' in self else 0 
 
-        int_max = np.iinfo(self.get_intdtype(self['sew'])).max
-        int_min = np.iinfo(self.get_intdtype(self['sew'])).min
+        int_max = np.iinfo(self.intdtype()).max
+        int_min = np.iinfo(self.intdtype()).min
         tmp = np.array([0], dtype='object') 
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
@@ -168,7 +168,7 @@ class Vnclipu_wi(Inst):
         vstart = self['vstart'] if 'vstart' in self else 0
         maskflag = 1 if 'mask' in self else 0 
 
-        uint_max = np.iinfo(self.get_uintdtype(self['sew'])).max
+        uint_max = np.iinfo(self.uintdtype()).max
         tmp = np.array([0], dtype='object') 
         for ii in range(vstart, self['vl']): 
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):

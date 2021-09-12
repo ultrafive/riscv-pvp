@@ -8,7 +8,7 @@ class Vwredsum_vs(Inst):
             return self['ori'][0]
 
         if self['vs2'].dtype == self['vs1'].dtype: 
-            self['vs2'].dtype = self.get_intdtype(self['sew']) 
+            self['vs2'].dtype = self.intdtype() 
         
         result = self['vs1'][0]
         maskflag = 1 if 'mask' in self else 0 
@@ -25,7 +25,7 @@ class Vwredsumu_vs(Inst):
             return self['ori'][0]
 
         if self['vs2'].dtype == self['vs1'].dtype: 
-            self['vs2'].dtype = self.get_uintdtype(self['sew']) 
+            self['vs2'].dtype = self.uintdtype() 
         
         result = self['vs1'][0] # extension
         maskflag = 1 if 'mask' in self else 0 

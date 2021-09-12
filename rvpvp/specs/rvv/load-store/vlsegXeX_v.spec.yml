@@ -438,19 +438,19 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_eew_neq_sew_without_mask:
       matrix:
         eew: [8, 16, 32, 64]
-        sew: get_sew_neq_eew(eew)
+        sew: vector_sew_list_neq_eew(eew)
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_vstart_without_mask:
       matrix:
@@ -458,10 +458,10 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        start: get_vstart(vl)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        start: vector_vstart_list_linspace(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_tu_without_mask:
       matrix:
@@ -469,10 +469,10 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(get_uintdtype(eew))
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(bits_to_dtype_uint(eew))
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_misalign_without_mask:
       matrix:
@@ -481,10 +481,10 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
         offset: np.random.randint(1, int(eew/8))
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_regression_without_mask:
       matrix:
@@ -493,10 +493,10 @@ vlsegxex_v:
         sew: list(2**np.random.uniform(3, 7, 2).astype(int))
         VLEN: 1024
         nf: list(np.random.uniform(2, 8, 2).astype(int))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_random_vl(lmul, sew, eew, vlen)
-        start: get_random_start(vl)
-        rs1: np.random.uniform(0, 2**eew, vl*nf).astype(get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_random(lmul, sew, eew, vlen)
+        start: vector_vstart_list_random(vl)
+        rs1: np.random.uniform(0, 2**eew, vl*nf).astype(bits_to_dtype_uint(eew))
 
     test_basic_with_mask:
       matrix:
@@ -504,21 +504,21 @@ vlsegxex_v:
         sew: 8
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        mask: random_mask(vl)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        mask: vector_mask_array_random(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_eew_neq_sew_with_mask:
       matrix:
         eew: [8, 16, 32, 64]
-        sew: get_sew_neq_eew(eew)
+        sew: vector_sew_list_neq_eew(eew)
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        mask: random_mask(vl)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        mask: vector_mask_array_random(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_vstart_with_mask:
       matrix:
@@ -526,11 +526,11 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        start: get_vstart(vl)
-        mask: random_mask(vl)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        start: vector_vstart_list_linspace(vl)
+        mask: vector_mask_array_random(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_tu_with_mask:
       matrix:
@@ -538,11 +538,11 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
-        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(get_uintdtype(eew))
-        mask: random_mask(vl)
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
+        origin: np.random.uniform(0, 2**eew, int(VLEN*8/eew)).astype(bits_to_dtype_uint(eew))
+        mask: vector_mask_array_random(vl)
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_misalign_with_mask:
       matrix:
@@ -551,11 +551,11 @@ vlsegxex_v:
         sew: eew
         VLEN: 1024
         nf: list(np.linspace(2, 8, 7, dtype=np.uint8))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_seg_vl(lmul, sew, eew, vlen)
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_seg(lmul, sew, eew, vlen)
         offset: np.random.randint(1, int(eew/8))
-        mask: random_mask(vl)*2+1
-        rs1: np.linspace(0, 2**eew, vl*nf, dtype=get_uintdtype(eew))
+        mask: vector_mask_array_random(vl)*2+1
+        rs1: np.linspace(0, 2**eew, vl*nf, dtype=bits_to_dtype_uint(eew))
 
     test_regression_with_mask:
       matrix:
@@ -564,11 +564,11 @@ vlsegxex_v:
         sew: list(2**np.random.uniform(3, 7, 2).astype(int))
         VLEN: 1024
         nf: list(np.random.uniform(2, 8, 2).astype(int))
-        lmul: get_seg_lmul(eew, sew, nf)
-        vl : get_random_vl(lmul, sew, eew, vlen)
-        start: get_random_start(vl)
-        mask: random_mask(vl)
-        rs1: np.random.uniform(0, 2**eew, vl*nf).astype(get_uintdtype(eew))
+        lmul: vector_lmul_list_seg(eew, sew, nf)
+        vl : vector_vl_list_ls_random(lmul, sew, eew, vlen)
+        start: vector_vstart_list_random(vl)
+        mask: vector_mask_array_random(vl)
+        rs1: np.random.uniform(0, 2**eew, vl*nf).astype(bits_to_dtype_uint(eew))
 
     
     test_exception_misalign_lmul @ rs1, eew, sew, vl, lmul, nf, isExcept:

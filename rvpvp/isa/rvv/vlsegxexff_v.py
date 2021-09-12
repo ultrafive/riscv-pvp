@@ -2,8 +2,6 @@ from ...isa.inst import *
 import numpy as np
 import math
 
-factor_lmul = { 1:1, 2:2, 4:4, 8:8, 'f2':0.5, 'f4':0.25, 'f8':0.125}
-
 class Vlsegxexff_v(Inst):
     name = 'vlsegxexff.v'
 

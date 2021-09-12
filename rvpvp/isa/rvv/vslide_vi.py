@@ -32,7 +32,7 @@ class Vslidedown_vi(Inst):
                 if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
                     if (ii+self['uimm']) >= self['vl'] :                    
                         if 'tail' in self:
-                            if (ii+self['uimm']) < self.get_VLMAX(self['sew'],self['lmul']):
+                            if (ii+self['uimm']) < self.VLMAX(self['sew'],self['lmul']):
                                 result[ii] = self['vs2'][ii+int(self['uimm'])] 
                             else:
                                 result[ii] = 0x0

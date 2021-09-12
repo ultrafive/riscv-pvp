@@ -231,7 +231,7 @@ def run_test(case, args):
                         failed_case_list.append(test_case["name"])
                         continue
 
-                    golden = test_case["golden"] = trans_dtype( test_case["golden_data"], eval(f'jnp.{test_case["golden_dtype"]}') )
+                    golden = test_case["golden"] = copy_to_dtype( test_case["golden_data"], eval(f'jnp.{test_case["golden_dtype"]}') )
 
                     #because many subcases in one signature file, so we need the spike_start to know where to find the result
                     result = from_txt( res_file, golden,  addr_testdata - addr_begin_sig )

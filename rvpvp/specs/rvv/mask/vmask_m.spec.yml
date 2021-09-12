@@ -373,16 +373,16 @@ _: &default
     test_regression_without_mask :
       matrix: 
         ebits: [8, 16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: get_random_vl(lmul, ebits, ebits, vlen)
+        lmul: vector_lmul_list(ebits)
+        vl: vector_vl_list_ls_random(lmul, ebits, ebits, vlen)
         vs2: np.random.uniform(0, 0xff, np.ceil(vl/8).astype(np.int16)).astype(np.uint8)
     
     test_regression_with_mask :
       matrix: 
         ebits: [8, 16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: get_random_vl(lmul, ebits, ebits, vlen)
-        mask: random_mask(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: vector_vl_list_ls_random(lmul, ebits, ebits, vlen)
+        mask: vector_mask_array_random(vl)
         vs2: np.random.uniform(0, 0xff, np.ceil(vl/8).astype(np.int16)).astype(np.uint8)
 
     test_v0_without_mask @ vs2, vl, lmul, ebits :

@@ -78,7 +78,7 @@ vsetvli:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:        
-          for lmul in get_lmul_w(sew):   
+          for lmul in vector_lmul_list_w(sew):   
             for vta in ["ta", "tu"]:
               for vma in ["ma", "mu"]:
                 # sew8 : 0<<3, sew16: 1<<3, sew32: 2<<3, sew64: 3<<3
@@ -89,7 +89,7 @@ vsetvli:
                 vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
                 test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
 
-                vlmax = get_vlmax(lmul, sew, vlen)  
+                vlmax = vector_vlmax(lmul, sew, vlen)  
                 test_vl = 0
                 for rs_vl in [ 0, 1, vlmax//2-1, vlmax-1 , vlmax, 2*vlmax-1 ]:  #  vlmax+2, 2*vlmax, 2*vlmax+1                               
                   if rs_vl <= vlmax:
@@ -105,7 +105,7 @@ vsetvli:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:        
-          for lmul in get_lmul_w(sew):   
+          for lmul in vector_lmul_list_w(sew):   
             for vta in ["ta", "tu"]:
               for vma in ["ma", "mu"]:
                 sewD  = { 8:0, 16:8, 32:16, 64:24 }  
@@ -114,7 +114,7 @@ vsetvli:
                 vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
                 test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
 
-                vlmax = get_vlmax(lmul, sew, vlen)  
+                vlmax = vector_vlmax(lmul, sew, vlen)  
                 test_vl = 0
                 for rs_vl in [ 0, 1, vlmax//2-1, vlmax-1 , vlmax, 2*vlmax-1 ]:                              
                   if rs_vl <= vlmax:
@@ -128,7 +128,7 @@ vsetvli:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:        
-          for lmul in get_lmul_w(sew):   
+          for lmul in vector_lmul_list_w(sew):   
             for vta in ["ta", "tu"]:
               for vma in ["ma", "mu"]:
                 sewD  = { 8:0, 16:8, 32:16, 64:24 }  
@@ -137,7 +137,7 @@ vsetvli:
                 vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
                 test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
 
-                vlmax = get_vlmax(lmul, sew, vlen)  
+                vlmax = vector_vlmax(lmul, sew, vlen)  
                 test_vl = 0
                 for rs_vl in [ 0, 1, vlmax//2-1, vlmax-1 , vlmax, 2*vlmax-1 ]:                               
                   if rs_vl <= vlmax:
@@ -150,7 +150,7 @@ vsetvli:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:        
-          for lmul in get_lmul_w(sew):   
+          for lmul in vector_lmul_list_w(sew):   
             for vta in ["ta", "tu"]:
               for vma in ["ma", "mu"]:
                 sewD  = { 8:0, 16:8, 32:16, 64:24 }  
@@ -159,7 +159,7 @@ vsetvli:
                 vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
                 test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
 
-                vlmax = get_vlmax(lmul, sew, vlen)  
+                vlmax = vector_vlmax(lmul, sew, vlen)  
                 test_vl = 0
                 for rs_vl in [ 0, vlmax//2-1, vlmax-1 , vlmax, 2*vlmax-1 ]:                             
                   if rs_vl <= vlmax:
@@ -172,7 +172,7 @@ vsetvli:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:        
-          for lmul in get_lmul_w(sew):   
+          for lmul in vector_lmul_list_w(sew):   
             for vta in ["ta", "tu"]:
               for vma in ["ma", "mu"]:
                 sewD  = { 8:0, 16:8, 32:16, 64:24 }  
@@ -180,14 +180,14 @@ vsetvli:
                 vtaD  = {'ta': 1<<6, 'tu': 0<<6 }
                 vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
                 test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
-                test_vl = get_vlmax(lmul, sew, vlen)  
+                test_vl = vector_vlmax(lmul, sew, vlen)  
                 params_yml.append([sew, lmul, vma, vta, test_vtype, test_vl])
 
     test_vset_rd_rs1_zero @ sew, lmul, vma, vta, test_vtype, rs_vl, test_vl:
       setup: |
         params_yml = []
         for sew in [8, 16, 64]:        
-          for lmul in get_lmul_w(sew):   
+          for lmul in vector_lmul_list_w(sew):   
             for vta in ["ta", "tu"]:
               for vma in ["ma", "mu"]:
                 sewD  = { 8:0, 16:8, 32:16, 64:24 }  
@@ -196,7 +196,7 @@ vsetvli:
                 vmaD  = {'ma': 1<<7, 'mu': 0<<7 }
                 test_vtype = sewD[sew] + lmulD[lmul] + vtaD[vta] + vmaD[vma]
 
-                vlmax = get_vlmax(lmul, sew, vlen)  
+                vlmax = vector_vlmax(lmul, sew, vlen)  
                 test_vl = 0
                 for rs_vl in [ 0, vlmax//2-1, vlmax-1 , vlmax, 2*vlmax-1 ]:                             
                   if rs_vl <= vlmax:

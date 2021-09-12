@@ -115,7 +115,7 @@ def check_to_txt(golden, result, filename, check_str):
     
     return check_result
 
-def trans_dtype( input, dtype ):
+def copy_to_dtype( input, dtype ):
     output = input.copy()
     if output.shape == ():
         output = output.reshape(1,)
@@ -151,12 +151,12 @@ def main():
                 print( f"Can't find symbol test_{test_case['no']}_data, please check test.map.\n" )
                 continue
 
-            golden = trans_dtype( test_case["golden_data"], eval(f'jnp.{test_case["golden_dtype"]}') )
+            golden = copy_to_dtype( test_case["golden_data"], eval(f'jnp.{test_case["golden_dtype"]}') )
 
             #because many subcases in one signature file, so we need the spike_start to know where to find the result
             result = from_txt( iss_sig_file, golden,  addr_testdata - addr_begin_sig )
             result_info = { "name":test_case["name"], 'no':test_case['no'], "start_addr":addr_testdata - addr_begin_sig, 
-            "spike_result_data":trans_dtype(result, np.uint8), "spike_result_dtype":str(result.dtype)}
+            "spike_result_data":copy_to_dtype(result, np.uint8), "spike_result_dtype":str(result.dtype)}
             result_info_list.append( result_info )
 
             #save the python golden result and spike result into check.data file of each case        

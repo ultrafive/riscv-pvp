@@ -192,26 +192,26 @@ _: &default
       setup: |
         params_yml = []
         for sew in [ 8, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               imm = 0
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
-              bvl = Bitsl2Bytesl(vl)
-              ori = random_mask(8*bvl)
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+              bvl = bits_to_bytes(vl)
+              ori = vector_mask_array_random(8*bvl)
               params_yml.append([ori, imm, vs2, sew, vl, lmul, bvl])
 
     test_base_with_mask @ ori, imm, vs2, sew, vl, lmul, vma, mask, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 imm = 15
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
-                mask= random_mask(vl)
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+                mask= vector_mask_array_random(vl)
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, vma, mask, bvl])
 
   random_cases:               
@@ -219,14 +219,14 @@ _: &default
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 for vstart in [vl//2,np.random.randint(vl+2)]:
                   imm = -1
-                  vs2 = np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
-                  bvl = Bitsl2Bytesl(vl)
-                  ori = random_mask(8*bvl) 
+                  vs2 = np.random.uniform(bits_to_intmin(sew), bits_to_intmax(sew), vl).astype(bits_to_dtype_int(sew))
+                  bvl = bits_to_bytes(vl)
+                  ori = vector_mask_array_random(8*bvl) 
                   params_yml.append([ori, imm, vs2, sew, vl, lmul, vma, vstart, bvl])  
 
   cases:
@@ -234,13 +234,13 @@ _: &default
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               imm = -16
-              vs2 = np.linspace( 1, get_intmax(sew), tail, dtype=get_intdtype(sew))
-              bvl = Bitsl2Bytesl(tail)
-              ori = random_mask(8*tail) 
+              vs2 = np.linspace( 1, bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
+              bvl = bits_to_bytes(tail)
+              ori = vector_mask_array_random(8*tail) 
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, imm, sew, lmul, lmul_tu, vl, tail, bvl])
 
@@ -248,38 +248,38 @@ _: &default
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2,sew//2]:
                 imm = 0
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)                 
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)                 
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, vstart, bvl])  
 
     test_vstart_not_equal_zero_with_mask @ ori, imm, vs2, sew, vl, lmul, mask, vstart, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2]:
                 imm = 15
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
-                mask= random_mask(vl) 
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)                 
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+                mask= vector_mask_array_random(vl) 
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)                 
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, vstart, bvl])  
              
     test_register_vd_equ_vs2_without_mask @ ori, imm, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               imm = 1
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew))
-              bvl = Bitsl2Bytesl(vl)
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+              bvl = bits_to_bytes(vl)
               ori = vs2.copy()
               params_yml.append([ori, imm, vs2, sew, vl, lmul, bvl])    
 
@@ -303,26 +303,26 @@ _: &unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen): 
-              for imm in np.array([1],dtype=get_intdtype(sew)):         
-                vs2 = np.linspace( 0, sew, vl, dtype=get_uintdtype(sew))
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen): 
+              for imm in np.array([1],dtype=bits_to_dtype_int(sew)):         
+                vs2 = np.linspace( 0, sew, vl, dtype=bits_to_dtype_uint(sew))
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, bvl])
 
     test_base_with_mask @ ori, imm, vs2, sew, vl, lmul, vma, mask, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 imm = 15
-                vs2 = np.linspace(1, vl, vl, dtype=get_uintdtype(sew))
-                mask= random_mask(vl)
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)
+                vs2 = np.linspace(1, vl, vl, dtype=bits_to_dtype_uint(sew))
+                mask= vector_mask_array_random(vl)
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, vma, mask, bvl])
 
   random_cases:              
@@ -330,27 +330,27 @@ _: &unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 for vstart in [vl//2,np.random.randint(vl+2)]:
                   imm = 7
-                  vs2 = np.random.uniform(2, get_uintmax(sew), vl).astype(get_uintdtype(sew))
-                  bvl = Bitsl2Bytesl(vl)
-                  ori = random_mask(8*bvl) 
+                  vs2 = np.random.uniform(2, bits_to_uintmax(sew), vl).astype(bits_to_dtype_uint(sew))
+                  bvl = bits_to_bytes(vl)
+                  ori = vector_mask_array_random(8*bvl) 
                   params_yml.append([ori, imm, vs2, sew, vl, lmul, vma, vstart, bvl]) 
   cases:
     test_agnostic_without_mask @ ori, vs2, imm, sew, lmul, lmul_tu, vl, tail, bvl:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               imm = 7
-              vs2 = np.linspace( 1, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
-              bvl = Bitsl2Bytesl(tail)
-              ori = random_mask(8*tail) 
+              vs2 = np.linspace( 1, bits_to_uintmax(sew), tail, dtype=bits_to_dtype_uint(sew))
+              bvl = bits_to_bytes(tail)
+              ori = vector_mask_array_random(8*tail) 
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, imm, sew, lmul, lmul_tu, vl, tail, bvl])
 
@@ -358,38 +358,38 @@ _: &unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2,sew//2]:
                 imm = 0
-                vs2 = np.linspace(0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)                 
+                vs2 = np.linspace(0, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)                 
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, vstart, bvl])  
 
     test_vstart_not_equal_zero_with_mask @ ori, imm, vs2, sew, vl, lmul, mask, vstart, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2]:
                 imm = 15
-                vs2 = np.linspace(1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
-                mask= random_mask(vl) 
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)                 
+                vs2 = np.linspace(1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+                mask= vector_mask_array_random(vl) 
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)                 
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, mask, vstart, bvl])  
     
     test_register_vd_equ_vs2_without_mask @ ori, imm, vs2, sew, vl, lmul, bvl:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               imm = 1
-              vs2 = np.linspace(1, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
-              bvl = Bitsl2Bytesl(vl)
+              vs2 = np.linspace(1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+              bvl = bits_to_bytes(vl)
               ori = vs2.copy()
               params_yml.append([ori, imm, vs2, sew, vl, lmul, bvl])  
 vmsleu_vi: 
@@ -406,12 +406,12 @@ _: &addsub
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen): 
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen): 
               imm = 2        
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_uintdtype(sew))
-              bvl = Bitsl2Bytesl(vl)
-              ori = random_mask(8*bvl)
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+              bvl = bits_to_bytes(vl)
+              ori = vector_mask_array_random(8*bvl)
               params_yml.append([ori, imm, vs2, sew, vl, lmul, bvl])
 
   random_cases:             
@@ -419,14 +419,14 @@ _: &addsub
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 for vstart in [vl//2,np.random.randint(vl+2)]:
                   imm = 7
-                  vs2 = np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_uintdtype(sew))
-                  bvl = Bitsl2Bytesl(vl)
-                  ori = random_mask(8*bvl) 
+                  vs2 = np.random.uniform(bits_to_intmin(sew), bits_to_intmax(sew), vl).astype(bits_to_dtype_uint(sew))
+                  bvl = bits_to_bytes(vl)
+                  ori = vector_mask_array_random(8*bvl) 
                   params_yml.append([ori, imm, vs2, sew, vl, lmul, vma, vstart, bvl]) 
 
   cases:
@@ -434,13 +434,13 @@ _: &addsub
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
               imm = 5
-              vs2 = np.linspace(-1, get_intmax(sew), tail, dtype=get_uintdtype(sew))
-              bvl = Bitsl2Bytesl(tail)
-              ori = random_mask(8*tail) 
+              vs2 = np.linspace(-1, bits_to_intmax(sew), tail, dtype=bits_to_dtype_uint(sew))
+              bvl = bits_to_bytes(tail)
+              ori = vector_mask_array_random(8*tail) 
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, imm, sew, lmul, lmul_tu, vl, tail, bvl])
 
@@ -448,13 +448,13 @@ _: &addsub
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32, 64 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2,sew//2]:
                 imm = 7
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_uintdtype(sew))
-                bvl = Bitsl2Bytesl(vl)
-                ori = random_mask(8*bvl)                 
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+                bvl = bits_to_bytes(vl)
+                ori = vector_mask_array_random(8*bvl)                 
                 params_yml.append([ori, imm, vs2, sew, vl, lmul, vstart, bvl])  
  
 vmadc_vi:

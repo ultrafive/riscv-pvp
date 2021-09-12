@@ -82,10 +82,10 @@ vmv_x_s:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for rd in np.array([vl, sew],dtype=get_intdtype(sew)):
-                vs2 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for rd in np.array([vl, sew],dtype=bits_to_dtype_int(sew)):
+                vs2 = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
                 params_yml.append([rd, vs2, sew, lmul, vl])
 
   random_cases: 
@@ -93,10 +93,10 @@ vmv_x_s:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for rd in np.array([vl, sew],dtype=get_intdtype(sew)):
-                vs2 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for rd in np.array([vl, sew],dtype=bits_to_dtype_int(sew)):
+                vs2 = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
                 vstart = sew//9
                 params_yml.append([rd, vs2, sew, lmul, vl, vstart])
 
@@ -105,10 +105,10 @@ vmv_x_s:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for rd in np.array([vl, sew],dtype=get_intdtype(sew)):
-                vs2 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for rd in np.array([vl, sew],dtype=bits_to_dtype_int(sew)):
+                vs2 = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
                 vstart = sew//9
                 params_yml.append([rd, vs2, sew, lmul, vl, vstart])
                 

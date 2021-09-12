@@ -97,43 +97,43 @@ vmv_v_x:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for rs1 in [get_intmax(sew), np.random.randint(sew)]:
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for rs1 in [bits_to_intmax(sew), np.random.randint(sew)]:
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
                 params_yml.append([ori, rs1, vl, sew, lmul])
 
   random_cases:
     test_regression_vmv : 
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
         vta : ["tu"]
         rs1 : np.random.randint(sew)
-        ori : np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
+        ori : np.random.uniform(0, vl, vl).astype(bits_to_dtype_int(sew))
 
   cases:
     test_agnostic_vmv @ori, rs1, sew, lmul, lmul_tu, vl, vta, tail:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vta in ["ta", "tu"]:
-                for rs1 in [get_intmax(sew), np.random.randint(sew)]:
+                for rs1 in [bits_to_intmax(sew), np.random.randint(sew)]:
                   tail= get_tailmax(lmul, sew)
-                  ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                  ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
                   lmul_tu = 1 if isinstance(lmul,str) else lmul
                   params_yml.append([ori, rs1, sew, lmul, lmul_tu, vl, vta, tail])
 
     test_vstart_not_eq_zero_vmv : 
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
         vta : ["tu"]
-        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
         rs1 : sew
         vstart: [vl//2] 
 

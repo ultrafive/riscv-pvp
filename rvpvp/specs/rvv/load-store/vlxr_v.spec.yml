@@ -88,7 +88,7 @@ vlxrx_v:
         eew: [8, 16, 32, 64]
         nf: [1, 2, 4, 8]
         VLEN: 1024
-        rs1: np.linspace(0, 2**eew, VLEN*8//eew, dtype=get_uintdtype(eew))
+        rs1: np.linspace(0, 2**eew, VLEN*8//eew, dtype=bits_to_dtype_uint(eew))
 
     test_vstart_without_mask:
       matrix:
@@ -96,7 +96,7 @@ vlxrx_v:
         nf: [1, 2, 4, 8]
         VLEN: 1024
         start: list(np.random.uniform(0, VLEN*nf//8, 10).astype(np.int32))
-        rs1: np.linspace(0, 2**eew, VLEN*8//eew, dtype=get_uintdtype(eew))
+        rs1: np.linspace(0, 2**eew, VLEN*8//eew, dtype=bits_to_dtype_uint(eew))
 
     test_exception_invalid_addr @ rs1, addr, eew, nf, VLEN, trapNum:
       - '[np.linspace(0, 255, 256, dtype=np.uint8),  0xc0300000, 16, 2, 1024, 5]'

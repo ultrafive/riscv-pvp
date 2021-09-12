@@ -239,74 +239,74 @@ _: &default
     test_basic_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: get_vl(lmul, ebits, vlen)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
-        fldins: get_fldins(ebits)  
+        lmul: vector_lmul_list(ebits)
+        vl: vector_vl_list(lmul, ebits, vlen)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, vl).astype(bits_to_dtype_float(ebits))
+        fldins: fload_inst(ebits)  
     test_basic_with_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: random_mask(vl)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        fldins: get_fldins(ebits)      
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: vector_mask_array_random(vl)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        fldins: fload_inst(ebits)      
 
   cases: &cases_default
     test_basic_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: get_vl(lmul, ebits, vlen)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
-        fldins: get_fldins(ebits)                
+        lmul: vector_lmul_list(ebits)
+        vl: vector_vl_list(lmul, ebits, vlen)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, vl).astype(bits_to_dtype_float(ebits))
+        fldins: fload_inst(ebits)                
 
     test_vta_eq_tu_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
+        lmul: vector_lmul_list(ebits)
         lmul_orig: 1 if isinstance(lmul,str) else lmul
-        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits)) 
-        orig: np.linspace(-400, 400, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits))    
-        fldins: get_fldins(ebits)
+        vl: list(np.random.choice( vector_vl_list(lmul, ebits, vlen), 1))
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, vector_len_vreg_aligned(lmul, ebits, vlen)).astype(bits_to_dtype_float(ebits)) 
+        orig: np.linspace(-400, 400, vector_len_vreg_aligned(lmul, ebits, vlen)).astype(bits_to_dtype_float(ebits))    
+        fldins: fload_inst(ebits)
     
     test_basic_with_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: random_mask(vl)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        fldins: get_fldins(ebits) 
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: vector_mask_array_random(vl)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        fldins: fload_inst(ebits) 
       
     test_vstart_not_eq_zero_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
-        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(ebits))
-        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
-        fldins: get_fldins(ebits) 
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(bits_to_dtype_float(ebits))
+        vstart:   "list(np.random.choice(vl, 2)) + [ vector_vlmax(lmul, ebits, vlen) + 1 ]"
+        fldins: fload_inst(ebits) 
 
     test_vstart_not_eq_zero_with_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
-        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(ebits))
-        mask: random_mask(vl)
-        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]" 
-        fldins: get_fldins(ebits)    
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(bits_to_dtype_float(ebits))
+        mask: vector_mask_array_random(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ vector_vlmax(lmul, ebits, vlen) + 1 ]" 
+        fldins: fload_inst(ebits)    
   
     test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
       - [ 8, 1, 50 ]
@@ -334,31 +334,31 @@ _: &default
     test_exception_wrong_lmul_without_mask:
       matrix:
         sew: [16, 32, 64]
-        lmul: get_illegal_lmul(sew)
+        lmul: vector_illegal_lmul(sew)
 
   random_cases:
     test_vstart_not_eq_zero_without_mask:
       matrix:
         ebits: [16, 32, 64]
         lmul: 1
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        rs1: random_float(ebits, 1)
-        vs2: random_float(ebits, vl)   
-        orig:  random_float(ebits, vl) 
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        rs1: scalar_float_random(ebits, 1)
+        vs2: scalar_float_random(ebits, vl)   
+        orig:  scalar_float_random(ebits, vl) 
         vstart:   np.random.randint(0, vl)
-        fldins: get_fldins(ebits) 
+        fldins: fload_inst(ebits) 
 
     test_vstart_not_eq_zero_with_mask:
       matrix:
         ebits: [16, 32, 64]
         lmul: 1
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        rs1: random_float(ebits, 1)
-        vs2: random_float(ebits, vl)  
-        orig:  random_float(ebits, vl)
-        mask: random_mask(vl)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        rs1: scalar_float_random(ebits, 1)
+        vs2: scalar_float_random(ebits, vl)  
+        orig:  scalar_float_random(ebits, vl)
+        mask: vector_mask_array_random(vl)
         vstart:   np.random.randint(0, vl)
-        fldins: get_fldins(ebits) 
+        fldins: fload_inst(ebits) 
    
 
   basic_check:
@@ -386,13 +386,13 @@ vfslide1up_vf:
     test_basic_with_mask_mu:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: "[random_mask(vl), mask_first(vl)]"
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
-        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(ebits))
-        fldins: get_fldins(ebits)    
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: "[vector_mask_array_random(vl), vector_mask_array_first_masked(vl)]"
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(bits_to_dtype_float(ebits))
+        fldins: fload_inst(ebits)    
 
 
 vfslide1down_vf:
@@ -402,20 +402,20 @@ vfslide1down_vf:
     test_dest_eq_vs2_without_mask:
       matrix:
         ebits: [ 16, 32, 64 ]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        vs2_name: get_vregister_name( lmul )   
-        fldins: get_fldins(ebits) 
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2_name: alloc_vreg( lmul )   
+        fldins: fload_inst(ebits) 
     test_basic_with_mask_mu:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: "[random_mask(vl), mask_last(vl)]"
-        rs1: np.array([np.random.random()], dtype=get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
-        orig:  np.linspace(-400, 400, int(vl)).astype(get_floatdtype(ebits))
-        fldins: get_fldins(ebits)         
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: "[vector_mask_array_random(vl), vector_mask_array_last_masked(vl)]"
+        rs1: np.array([np.random.random()], dtype=bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))   
+        orig:  np.linspace(-400, 400, int(vl)).astype(bits_to_dtype_float(ebits))
+        fldins: fload_inst(ebits)         
      

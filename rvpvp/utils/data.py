@@ -3,17 +3,12 @@
 
 import numpy as np
 
-from .params import ( 
-    factor_lmul, 
-    double_lmul_dict, 
-    string_lmul, 
-    fldins_dict, 
-    fstins_dict, 
-    get_uintdtype
+from .utils import ( 
+    bits_to_dtype_uint,
+    factor_lmul
 )
 
-
-def random_mask( vl ):
+def vector_mask_array_random( vl ):
     '''Function used to generate random mask bits for rvv instructions.
 
     Args:
@@ -28,7 +23,7 @@ def random_mask( vl ):
     mask = np.packbits( mask, bitorder='little' )
     return mask
 
-def zero_mask( vl ):
+def vector_mask_array_zero( vl ):
     '''Function used to generate zero mask bits for rvv instruction.
 
     Args:
@@ -40,7 +35,7 @@ def zero_mask( vl ):
     mask =  np.zeros( int(np.ceil(vl/8)), dtype=np.uint8 )
     return mask 
 
-def mask_first( vl ):
+def vector_mask_array_first_masked( vl ):
     '''Function used to generate mask bits of which the first bit is 0, others are 1 for rvv instruction.
 
     Args:
@@ -54,7 +49,7 @@ def mask_first( vl ):
     mask = np.packbits( mask, bitorder='little' )
     return mask 
 
-def mask_last( vl ):
+def vector_mask_array_last_masked( vl ):
     '''Function used to generate mask bits of which the vlth bit is 0, others are 1 for rvv instruction.
 
     Args:
@@ -69,13 +64,6 @@ def mask_last( vl ):
     return mask
 
 def special_fp16():
-    '''Function to generate a list of special float16 numbers.
-
-    Returns:
-        list: A list of 8 numpy ndarrays of which size is 1 and dtype is numpy.float16.
-        There is a special float16 number in every numpy ndarray.
-        The special numbers are 0, inf, nan, 0.1, 10, 65500, 6.104e-5, 6e-8.
-    '''
     # 0   ,  inf  ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
     fpt0 = np.array([0x0000], dtype=np.int16)
     fpt1 = np.array([0x7c00], dtype=np.int16)
@@ -93,13 +81,6 @@ def special_fp16():
     return fpt  
 
 def special_fp32():
-    '''Function to generate a list of special float32 numbers.
-
-    Returns:
-        list: A list of 8 numpy ndarrays of which size is 1 and dtype is numpy.float32.
-        There is a special float32 number in every numpy ndarray.
-        The special numbers are 0, inf, nan, 0.1, 10, 3.40282e+38, 1.1755e-38, 1e-45.
-    '''    
     # 0   ,       inf  ,       nan  ,      0.1  ,      10  , 3.40282e+38,  1.1755e-38,      1e-45
     fpt0 = np.array([0x00000000], dtype=np.int32)
     fpt1 = np.array([0x7f800000], dtype=np.int32)
@@ -116,14 +97,7 @@ def special_fp32():
 
     return fpt 
 
-def special_fp64():
-    '''Function to generate a list of special float64 numbers.
-
-    Returns:
-        list: A list of 8 numpy ndarrays of which size is 1 and dtype is numpy.float64.
-        There is a special float64 number in every numpy ndarray.
-        The special numbers are 0, inf, nan, 0.1, 10, 1.79769313e+308, 2.22507386e-308, 5.e-324.
-    '''     
+def special_fp64():   
     #0   ,               inf  ,               nan  ,              0.1  ,               10  ,    1.79769313e+308,     2.22507386e-308,         5.e-324
     fpt0 = np.array([0x0000000000000000], dtype=np.uint64)
     fpt1 = np.array([0x7ff0000000000000], dtype=np.uint64)
@@ -140,7 +114,7 @@ def special_fp64():
 
     return fpt 
 
-def special_float(sew):
+def scalar_float_list_special(sew):
     '''Function to generate a list special float numbers of which the data type is depended on sew.
 
     Args:
@@ -162,7 +136,7 @@ def special_float(sew):
     if sew == 64:
         return special_fp64()   
 
-def special_vv_fp16():
+def vector_float_array_special_fp16_vv():
     '''Function to generate a list of 2 numpy ndarrays which include 32 special float16 numbers.
 
     Returns:
@@ -185,7 +159,7 @@ def special_vv_fp16():
 
     return [ fpt_data[0], fpt_data[1] ] 
 
-def special_vv_fp32():
+def vector_float_array_special_fp32_vv():
     '''Function to generate a list of 2 numpy ndarrays which include 32 special float32 numbers.
 
     Returns:
@@ -208,7 +182,7 @@ def special_vv_fp32():
 
     return [ fpt_data[0], fpt_data[1] ]     
 
-def special_vv_fp64():
+def vector_float_array_special_fp64_vv():
     '''Function to generate a list of 2 numpy ndarrays which include 32 special float64 numbers.
 
     Returns:
@@ -233,11 +207,6 @@ def special_vv_fp64():
 
 
 def special_v_fp16():
-    '''Function to generate a numpy ndarray which including 10 special float16 number.
-
-    Returns:
-        numpy ndarray: A float16 numpy ndarray, including [ 0, -0, inf, -inf, nan, 0.1, 10, 65500, 6.104e-05, 6.e-08 ]
-    '''
     # special float table          -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08
     fpt_data = np.array([ 0x0000, 0x8000, 0x7c00, 0xfc00, 0x7e00, 0x2e66, 0x4900, 0x7bff, 0x0400, 0x0001], dtype=np.int16) 
 
@@ -245,12 +214,7 @@ def special_v_fp16():
 
     return fpt_data
 
-def special_v_fp32():
-    '''Function to generate a numpy ndarray which including 10 special float32 number.
-
-    Returns:
-        numpy ndarray: A float32 numpy ndarray, including [ 0, -0, inf, -inf, nan, 0.1, 10, 3.40282e+38, 1.1755e-38, 1e-45 ]
-    '''    
+def special_v_fp32():   
     # special float table                  -0   ,       inf  ,       -inf ,       nan  ,      0.1  ,      10  , 3.40282e+38,  1.1755e-38,      1e-45
     fpt_data = np.array([ 0x00000000, 0x80000000,  0x7f800000,  0xff800000,  0x7fc00000, 0x3dcccccd, 0x41200000, 0x7f7fffff,  0x00800000, 0x00000001], dtype=np.int32)
  
@@ -258,20 +222,21 @@ def special_v_fp32():
 
     return fpt_data
 
-def special_v_fp64():
-    '''Function to generate a numpy ndarray which including 10 special float64 number.
-
-    Returns:
-        numpy ndarray: A float64 numpy ndarray, including [ 0, -0, inf, -inf, nan, 0.1, 10, 1.79769313e+308, 2.22507386e-308, 5.e-324 ]
-    '''     
-    # special float table                                  -0   ,               inf  ,               -inf ,               nan  ,              0.1  ,               10  ,    1.79769313e+308,     2.22507386e-308,         5.e-324
-    fpt_data = np.array([ 0x0000000000000000, 0x8000000000000000,  0x7ff0000000000000,  0xfff0000000000000,  0x7ff8000000000000, 0x3fb999999999999a, 0x4024000000000000, 0x7fefffffffffffff,  0x0010000000000000, 0x0000000000000001], dtype=np.uint64)   
+def special_v_fp64(): 
+    # special float table                                 
+    fpt_data = np.array([
+        0x0000000000000000, 0x8000000000000000,     # 0,                    -0
+        0x7ff0000000000000, 0xfff0000000000000,     # inf,                -inf
+        0x7ff8000000000000, 0x3fb999999999999a,     # nan,                 0.1  
+        0x4024000000000000, 0x7fefffffffffffff,     # 10,      1.79769313e+308
+        0x0010000000000000, 0x0000000000000001      # 2.22507386e-308, 5.e-324
+    ], dtype=np.uint64)   
 
     fpt_data.dtype = np.float64
 
     return fpt_data
 
-def special_v_float(sew):
+def vector_float_array_special(sew):
     '''Function to generate a special float numpy ndarray of which the data type is decided by sew.
     
     Args:
@@ -292,7 +257,7 @@ def special_v_float(sew):
     if sew == 64:
         return special_v_fp64() 
 
-def get_sew_neq_eew(eew):
+def vector_sew_list_neq_eew(eew):
     '''Function to get available vsew values which don't equal to eew.
 
     Args:
@@ -311,7 +276,7 @@ def get_sew_neq_eew(eew):
     elif 64 == eew:
         return [8, 16, 32]
 
-def get_lmul(sew_t):
+def vector_lmul_list(sew_t):
     '''Function to get available lmul according to sew or sew and eew.
 
     Args:
@@ -344,7 +309,7 @@ def get_lmul(sew_t):
     
     return lmul_list
 
-def get_seg_lmul(eew, sew, nf):
+def vector_lmul_list_seg(eew, sew, nf):
     '''Function to get avaliable lmul for segment instructions.
 
     Args:
@@ -373,7 +338,7 @@ def get_seg_lmul(eew, sew, nf):
     
 
 
-def get_segi_lmul(eew, sew, nf):
+def vector_lmul_list_index_seg(eew, sew, nf):
     '''Function to get avaliable lmul for segment index instructions.
 
     Args:
@@ -400,7 +365,7 @@ def get_segi_lmul(eew, sew, nf):
 
     return lmul_list
 
-def get_illegal_lmul(sew):
+def vector_illegal_lmul(sew):
     '''Function to get illegal lmul with input sew.
     
     Args:
@@ -418,7 +383,7 @@ def get_illegal_lmul(sew):
     if 64 == sew:
         return ['f2', 'f4', 'f8']    
 
-def get_illegal_lmul_w(sew):
+def vector_illegal_lmul_w(sew):
     '''Function to get illegal lmul values with input sew for widening and narrowing instructions.
     
     Args:
@@ -436,7 +401,7 @@ def get_illegal_lmul_w(sew):
     if 64 == sew:
         return ['f2', 'f4', 'f8', 8 ]         
 
-def get_lmul_w(sew):
+def vector_lmul_list_w(sew):
     '''Function to get available lmul with input sew for widening and narrowing instructions.
 
     Args:
@@ -454,32 +419,7 @@ def get_lmul_w(sew):
     if 64 == sew:
         return [1,2,4] 
 
-def double_lmul(lmul):
-    '''Function to compute double lmul value of input lmul.
-
-    Args:
-        lmul (int or str): lmul register value, which can be 1, 2, 4, '1', '2', '4', 'f2', 'f4', 'f8'
-
-    Returns:
-        int or str: double lmul value
-    '''
-    return double_lmul_dict[lmul]
-
-def get_emul(eew, sew, lmul):
-    '''Function to get emul based on sew, eew and lmul.
-
-    Args:
-        eew (int): effective element width 
-        sew (int): selected element width
-        lmul (int or str): vlmul register value
-
-    Returns:
-        int or str: computed emul value based eew/sew = emul/lmul
-
-    '''
-    return string_lmul[ (eew/sew)*factor_lmul[lmul] ]
-
-def get_vl(lmul, ebits, vlen):
+def vector_vl_list(lmul, ebits, vlen):
     '''Functions to get vl value based on vlen, sew, lmul
 
     Args:
@@ -504,36 +444,7 @@ def get_vl(lmul, ebits, vlen):
     else:
         return [1]    
 
-def get_vlmax(lmul, ebits, vlen):
-    '''Function to get vlmax based on vlen, sew, lmul.
-    
-    Args:
-        lmul (int or str): vlmul register value
-        ebits (int): element bits length, which equals to vsew value.
-        vlen (int): rvv register length
-    
-    Returns:
-        int: vlmax value computed based on vlen*lmul/sew
-    '''
-    max = int( vlen * factor_lmul[lmul] / ebits )
-    return max
-
-def get_tailmax(lmul, ebits, vlen=1024):
-    '''Function to get tail part maximum length in element units of vector operand.
-
-    Args:
-        lmul (int or str): vlmul register value
-        ebits (int): element bits length, which equals to vsew value.
-        vlen (int): rvv register length  
-
-    Returns:
-        int: tail part maximum length in element units. When lmul >= 1, it equals to vlmax.
-        When lmul < 1, it equals to vlen/sew.
-    '''    
-    tail = max( vlen*factor_lmul[lmul]//ebits, vlen//ebits )
-    return tail
-
-def get_ls_vl(lmul, sew, eew, vlen):
+def vector_vl_list_ls(lmul, sew, eew, vlen):
     '''Function to get vl list for rvv load-store instruction
 
     Args:
@@ -561,7 +472,7 @@ def get_ls_vl(lmul, sew, eew, vlen):
             vl_list.append(isum)
         return vl_list
 
-def get_seg_vl(lmul, sew, eew, vlen):
+def vector_vl_list_ls_seg(lmul, sew, eew, vlen):
     '''Function to get vl list for rvv segment load-store instruction
 
     Args:
@@ -591,8 +502,9 @@ def get_seg_vl(lmul, sew, eew, vlen):
                 vl_list.append(isum)
         return vl_list
 
-def get_random_vl(lmul, sew, eew, vlen):
-    '''Functions to get random vl list based on lmul, sew, eew, vlen.
+def vector_vl_list_ls_random(lmul, sew, eew, vlen):
+    '''Functions to get random vl list for load&store cases,
+    based on lmul, sew, eew, vlen.
 
     Args:
         lmul (int or str): vlmul register value
@@ -611,28 +523,8 @@ def get_random_vl(lmul, sew, eew, vlen):
     minSum = min(sum, esum)
     return list(np.unique(np.random.uniform(1, minSum, 10)).astype(int))
 
-def get_tail_end(lmul, ebits, vlen):
-    '''Function to get maximum element number of the tail part.
 
-    Args:
-        lmul (int or str): vlmul register value
-        ebits (int): element bits length, which equals to vsew value.
-        vlen (int): rvv register length
-
-    Returns:
-        int: The maximum element number of the tail part. When lmul >= 1, 
-        the number is computed by vlen*lmul/sew. When lmul < 1, the number 
-        is computed by vlen/sew.
-    '''
-    if factor_lmul[lmul] >= 1:
-        max = int( vlen * factor_lmul[lmul] / ebits )
-    else:
-        max = int( vlen / ebits )
-    
-    return max
-
-
-def get_vstart(vl):
+def vector_vstart_list_linspace(vl):
     '''Function to get a list of int numbers to be used as vstart in test cases.
 
     Args:
@@ -644,7 +536,7 @@ def get_vstart(vl):
     '''
     return list(np.unique(np.linspace(0, vl-1, vl//10).astype(int)))    
 
-def get_random_start(vl) :
+def vector_vstart_list_random(vl) :
     '''Function to get a list of 5 random int numbers between 0 and vl-1 to be used as vstart.
 
     Args:
@@ -657,7 +549,7 @@ def get_random_start(vl) :
 
 
 
-def get_random_stride(eew):
+def vector_stride_list_random(eew):
     '''Function to get a list of 5 random int numbers between 0 and 0xff*eew.
 
     Args:
@@ -670,7 +562,7 @@ def get_random_stride(eew):
     return list(np.random.uniform(0, 0xff, 5).astype(int)*eew)
 
 
-def vlsenn_get_stride(vl, eew, nf=1):
+def vector_stride_list_random_ls_stride(vl, eew, nf=1):
     '''Function to get a list of random int numbers to be used as stride of vector stride instructions.
 
     Args:
@@ -689,7 +581,7 @@ def vlsenn_get_stride(vl, eew, nf=1):
         stride_list.append(np.random.randint(nf+1, 16)*eew)
     return stride_list
 
-def get_quent_index(eew, sew, vl):
+def vector_index_array_consecutive(eew, sew, vl):
     '''Function to get consecutive indexes for index instructions.
 
     Args:
@@ -703,11 +595,11 @@ def get_quent_index(eew, sew, vl):
         of which the dtype is uint in eew width. They are consecutive indexes.
     '''
     index=[]
-    index.append(np.zeros(vl, dtype=get_uintdtype(eew)))
-    index.append(np.linspace(0, vl-1, vl, dtype=get_uintdtype(eew))*(sew//8))
+    index.append(np.zeros(vl, dtype=bits_to_dtype_uint(eew)))
+    index.append(np.linspace(0, vl-1, vl, dtype=bits_to_dtype_uint(eew))*(sew//8))
     return index
 
-def get_index(eew, sew, vl):
+def vector_index_array(eew, sew, vl):
     '''Function to get a numpy ndarray of vl size to be used as indexes for index instructions.
 
     Args:
@@ -719,9 +611,9 @@ def get_index(eew, sew, vl):
         numpy ndarray:  A linspace numpy ndarray between 0 and 2**20 multiplying with sew//8 
         with size equal to vl. Its dtype is uint in eew width.
     '''
-    return np.linspace(0, 2**20, vl, dtype=get_uintdtype(eew))*(sew//8)
+    return np.linspace(0, 2**20, vl, dtype=bits_to_dtype_uint(eew))*(sew//8)
 
-def get_misalign_index(eew, sew, vl):
+def vector_index_array_misaligned(eew, sew, vl):
     '''Function to get misaligned indexes for index instructions.
 
     Args:
@@ -734,104 +626,10 @@ def get_misalign_index(eew, sew, vl):
         array between 0 and 0xff multiplying with (sew//8)*4 and adding 3, its dtype is uint in 
         eew width.
     '''
-    return np.linspace(0, 0xff, vl, dtype=get_uintdtype(eew))*(sew//8)*4+3
-
-ld_ins = { 8: 'lbu', 16: 'lhu', 32: 'lwu', 64: 'ld'}
-'''dictionary: Scalar load instructions corresponding to different widths of 8, 16, 32, 64.
-'''
-st_ins = { 8: 'sbu', 16: 'shu', 32: 'swu', 64: 'sd'}
-'''dictionary: Scalar store instructions corresponding to different widths of 8, 16, 32, 64.
-'''
-
-def get_fldins(ebits):
-    '''Function to get float load instruction corresponding to the input width.
-
-    Args:
-        ebits (int): float number width
-
-    Returns:
-        str: Float load instruction corresponding to the input width.
-    '''
-    return fldins_dict[ebits]
-
-def get_fstins(ebits):
-    '''Function to get float store instruction corresponding to the input width.
-
-    Args:
-        ebits (int): float number width
-
-    Returns:
-        str: Float store instruction corresponding to the input width.
-    '''    
-    return fstins_dict[ebits]
+    return np.linspace(0, 0xff, vl, dtype=bits_to_dtype_uint(eew))*(sew//8)*4+3
 
 
-def get_vregister_name( lmul, neqs = 'v33', lmul_neqs = 0 ):
-    '''Function to get a vector register name, which isn't overlapping with given vector register groups.
-
-    Args:
-        lmul (int or str): vmul register value.
-        neqs (str or list): Given vector register or registers, default v33.
-        lmul_neqs (int,str or list ): Given lmul corresponding to given vector registers. If it is equal 
-            to 0, the function will use the input lmul argument as the given lmul.
-
-    Returns:
-        str: A vector register name, such as v2. The vector register group won't overlap with the given 
-        vector register group.
-
-    Raises:
-        ValueError: If the length of neqs is not equal to the length of lmul_neqs.
-    '''
-
-    if not isinstance( neqs, list):
-        neqs = [ neqs, ]
-    if not isinstance( lmul_neqs, list ):
-        lmul_neqs = [ lmul_neqs, ]
-    if len(neqs) != len(lmul_neqs):
-        raise ValueError("The lengths of neqs and lmul_neqs are not equal")
-        return
-
-    if isinstance( lmul, str ):
-        lmul = 1
-
-    no_neqs = []
-    for no in range(len(lmul_neqs)):
-        if isinstance( lmul_neqs[no], str):
-            lmul_neqs[no] = 1
-        if 0 == lmul_neqs[no]:
-            lmul_neqs[no] = lmul
-        no_neqs.append( int( neqs[no].replace( 'v', '' ) ) )
-
-    while True:
-        if isinstance(lmul, int) and lmul >= 2:
-            new_no = factor_lmul[lmul] * np.random.randint(0,32/factor_lmul[lmul])            
-        else:
-            new_no = np.random.randint(0,32)
-        
-        finished = True
-        for i in  range(len(lmul_neqs)):
-            if ( new_no >= no_neqs[i] and new_no < ( no_neqs[i] + lmul_neqs[i] ) ) or ( no_neqs[i] >= new_no and no_neqs[i] < ( new_no + lmul )  ):
-                finished = False
-                break                
-        if finished:
-            break                
-    
-    return 'v'+str(new_no)
-
-
-def Bitsl2Bytesl( num ):
-    '''Function to transfrom bits length to corresponding bytes length.
-
-    Args:
-        num (int): Bits length.
-
-    Returns:
-        int: The length of the corresponding bytes of the input bits.
-    '''
-    return int(np.ceil(num/8))
-
-
-def random_float(sew, vl):
+def scalar_float_random(sew, vl):
     '''Function to return a numpy ndarray of random float numbers.
 
     Args:
@@ -860,7 +658,7 @@ def random_float(sew, vl):
 
     return num
     
-def random_int( sew, vl ):
+def scalar_int_random( sew, vl ):
     '''Function to return a numpy ndarray of random int numbers.
 
     Args:
@@ -892,7 +690,7 @@ def random_int( sew, vl ):
 
     return num    
 
-def random_uint( sew, vl ):
+def scalar_uint_random( sew, vl ):
     '''Function to return a numpy ndarray of random uint numbers.
 
     Args:

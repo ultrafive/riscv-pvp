@@ -5,7 +5,7 @@ from string import Template
 import numpy as np
 import jax.numpy as jnp
 from .compile import compile
-from .params import trans_dtype
+from .utils import copy_to_dtype
 from multiprocessing import Manager, Condition, Value
 
 # to synchronize the generator processes and the main process
@@ -160,7 +160,7 @@ def gen_inst_case( args, test_inst ):
                 tdata += content["tdata"] + '\n'
                 footer += content["footer"] + '\n'
                 if test_info['check'] != '':                   
-                    case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{case_name}', "check_str": test_info['check'], "golden_data": trans_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
+                    case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{case_name}', "check_str": test_info['check'], "golden_data": copy_to_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
                 else:
                     case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{case_name}', "check_str": test_info['check'] } )
                 num += 1
@@ -176,7 +176,7 @@ def gen_inst_case( args, test_inst ):
             tdata += content["tdata"] + '\n'
             footer += content["footer"] + '\n'
             if test_info['check'] != '':                   
-                case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}', "check_str": test_info['check'], "golden_data": trans_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
+                case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}', "check_str": test_info['check'], "golden_data": copy_to_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
             else:
                 case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}', "check_str": test_info['check'] } )             
             num += 1
@@ -266,7 +266,7 @@ def gen_type_case( args, test_inst, test_type ):
             tdata += content["tdata"] + '\n'
             footer += content["footer"] + '\n'
             if test_info['check'] != '':                   
-                case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{case_name}', "check_str": test_info['check'], "golden_data": trans_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
+                case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{case_name}', "check_str": test_info['check'], "golden_data": copy_to_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
             else:
                 case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{case_name}', "check_str": test_info['check'] } )                             
             num += 1
@@ -282,7 +282,7 @@ def gen_type_case( args, test_inst, test_type ):
         tdata += content["tdata"] + '\n'
         footer += content["footer"] + '\n'
         if test_info['check'] != '':                   
-            case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}', "check_str": test_info['check'], "golden_data": trans_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
+            case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}', "check_str": test_info['check'], "golden_data": copy_to_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } )
         else:
             case_list.append({ "no": content["num"], "name": f'{test_inst.name}/{test_type}', "check_str": test_info['check'] } )
 
@@ -365,7 +365,7 @@ def gen_case( args, test_inst, test_type, test_case ):
     tdata = content["tdata"] + '\n'
     footer = content["footer"] + '\n'
     if test_info['check'] != '':                 
-        case_list =  [{ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{test_case}', "check_str": test_info['check'], "golden_data": trans_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } ]
+        case_list =  [{ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{test_case}', "check_str": test_info['check'], "golden_data": copy_to_dtype( golden, np.uint8 ), "golden_dtype": str(golden.dtype) } ]
     else:
         case_list =  [{ "no": content["num"], "name": f'{test_inst.name}/{test_type}/{test_case}', "check_str": test_info['check'] }]
 

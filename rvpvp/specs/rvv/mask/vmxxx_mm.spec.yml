@@ -854,12 +854,12 @@ _: &default
     test_vmxxx_mm_regression :
       matrix: 
         ebits: [8, 16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: get_random_vl(lmul, ebits, ebits, vlen)
-        start: get_random_start(vl)
-        vreg1: get_vregister_name(1)
-        vreg2: get_vregister_name(1, vreg1)
-        vregd: get_vregister_name(1, [vreg1, vreg2], [1,1])
+        lmul: vector_lmul_list(ebits)
+        vl: vector_vl_list_ls_random(lmul, ebits, ebits, vlen)
+        start: vector_vstart_list_random(vl)
+        vreg1: alloc_vreg(1)
+        vreg2: alloc_vreg(1, vreg1)
+        vregd: alloc_vreg(1, [vreg1, vreg2], [1,1])
         vs1: np.random.uniform(0, 0xff, vl).astype(np.uint8)
         vs2: np.random.uniform(0, 0xff, vl).astype(np.uint8)
      

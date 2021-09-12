@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 ##               uint8  -->  bit  -->  uint8 --> (u)intSEW
-##  (random_mask)   (unpackbits)(packbits)   (dtype)
+##  (vector_mask_array_random)   (unpackbits)(packbits)   (dtype)
 class Vmseq_vv(Inst):
     name = 'vmseq.vv'
     # vmseq.vv vd, vs2, vs1, vm 

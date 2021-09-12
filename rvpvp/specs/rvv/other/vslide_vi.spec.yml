@@ -197,12 +197,12 @@ vslideup_vi:
         params_yml.append([np.linspace(0x40,0x50,128,dtype=np.uint8), np.linspace(0x00,0x10,128,dtype=np.uint8),   np.uint8(0x1),   8, "f2", 1, 15, 128])
         params_yml.append([np.linspace(0x40,0x60,128,dtype=np.uint8), np.linspace(0x00,0x20,128,dtype=np.uint8),   np.uint8(0x1),   8, "f4", 1, 32, 128])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
               uimm= min(np.random.randint(tail), 31)
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, tail])
    
@@ -210,13 +210,13 @@ vslideup_vi:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
               uimm= min(np.random.randint(tail), 31)
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
-              mask= random_mask(tail)
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
+              mask= vector_mask_array_random(tail)
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, mask, tail])
 
@@ -225,13 +225,13 @@ vslideup_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vta in ["ta", "tu"]:
                 tail= get_tailmax(lmul, sew)
-                ori = np.random.uniform(get_intmin(sew),  get_intmax(sew), tail).astype(get_intdtype(sew))
+                ori = np.random.uniform(bits_to_intmin(sew),  bits_to_intmax(sew), tail).astype(bits_to_dtype_int(sew))
                 uimm= min(np.random.randint(tail), 31)
-                vs2 = np.random.uniform(get_intmin(sew),  get_intmax(sew), tail).astype(get_intdtype(sew)) 
+                vs2 = np.random.uniform(bits_to_intmin(sew),  bits_to_intmax(sew), tail).astype(bits_to_dtype_int(sew)) 
                 lmul_tu = 1 if isinstance(lmul,str) else lmul
                 params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, vta, tail])
 
@@ -240,13 +240,13 @@ vslideup_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
               uimm= min(np.random.randint(vl+2), 31)
-              mask= random_mask(tail)
+              mask= vector_mask_array_random(tail)
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, mask, sew, lmul, lmul_tu, vl, tail])
 
@@ -254,13 +254,13 @@ vslideup_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for vstart in np.array([min(vl//3,7),min(np.random.uniform(sew),31)],dtype=get_intdtype(sew)):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for vstart in np.array([min(vl//3,7),min(np.random.uniform(sew),31)],dtype=bits_to_dtype_int(sew)):
                 tail= get_tailmax(lmul, sew)
-                ori = np.linspace( 0, tail,  tail, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, tail,  tail, dtype=bits_to_dtype_int(sew))
                 uimm= min(np.random.randint(tail), 31)
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
                 lmul_tu = 1 if isinstance(lmul,str) else lmul
                 params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, vstart, tail])
 
@@ -268,14 +268,14 @@ vslideup_vi:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for vstart in np.array([min(vl//3,7)],dtype=get_intdtype(sew)):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for vstart in np.array([min(vl//3,7)],dtype=bits_to_dtype_int(sew)):
                 tail= get_tailmax(lmul, sew)
-                ori = np.linspace( 0, tail,  tail, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, tail,  tail, dtype=bits_to_dtype_int(sew))
                 uimm= min(np.random.randint(tail), 31)
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
-                mask= random_mask(tail)
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
+                mask= vector_mask_array_random(tail)
                 lmul_tu = 1 if isinstance(lmul,str) else lmul
                 params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, mask, vstart, tail])
 
@@ -288,12 +288,12 @@ vslidedown_vi:
         params_yml.append([np.linspace(0x40,0x50,128,dtype=np.uint8), np.linspace(0x00,0x10,128,dtype=np.uint8), np.uint8(0x1), 8, "f2", 1, 15, 128])
         params_yml.append([np.linspace(0x40,0x60,128,dtype=np.uint8), np.linspace(0x00,0x20,128,dtype=np.uint8), np.uint8(0x1), 8, "f4", 1, 32, 128])
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
               uimm= min(np.random.randint(tail), 31) 
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, tail])
    
@@ -301,13 +301,13 @@ vslidedown_vi:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
               uimm= min(np.random.randint(tail), 31)
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
-              mask= random_mask(tail)
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
+              mask= vector_mask_array_random(tail)
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, mask, tail])
 
@@ -316,13 +316,13 @@ vslidedown_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vta in ["ta", "tu"]:
                 tail= get_tailmax(lmul, sew)
-                ori = np.random.uniform(get_intmin(sew),  get_intmax(sew), tail).astype(get_intdtype(sew))
+                ori = np.random.uniform(bits_to_intmin(sew),  bits_to_intmax(sew), tail).astype(bits_to_dtype_int(sew))
                 uimm= min(np.random.randint(tail), 31)
-                vs2 = np.random.uniform(get_intmin(sew),  get_intmax(sew), tail).astype(get_intdtype(sew))
+                vs2 = np.random.uniform(bits_to_intmin(sew),  bits_to_intmax(sew), tail).astype(bits_to_dtype_int(sew))
                 lmul_tu = 1 if isinstance(lmul,str) else lmul
                 params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, vta, tail])
 
@@ -331,13 +331,13 @@ vslidedown_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 1, tail, tail, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+              ori = np.linspace( 1, tail, tail, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
               uimm= min(np.random.randint(vl), 31)
-              mask= random_mask(tail)
+              mask= vector_mask_array_random(tail)
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, mask, sew, lmul, lmul_tu, vl, tail])
 
@@ -345,13 +345,13 @@ vslidedown_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for vstart in np.array([min(vl//3,7),min(np.random.uniform(sew),31)],dtype=get_intdtype(sew)):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for vstart in np.array([min(vl//3,7),min(np.random.uniform(sew),31)],dtype=bits_to_dtype_int(sew)):
                 tail= get_tailmax(lmul, sew)
-                ori = np.linspace( 0, tail,  tail, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, tail,  tail, dtype=bits_to_dtype_int(sew))
                 uimm= min(np.random.randint(tail), 31)
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
                 lmul_tu = 1 if isinstance(lmul,str) else lmul
                 params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, vstart, tail])
 
@@ -359,14 +359,14 @@ vslidedown_vi:
       setup: |
         params_yml = []
         for sew in [8, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
-              for vstart in np.array([min(vl//3,7)],dtype=get_intdtype(sew)):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
+              for vstart in np.array([min(vl//3,7)],dtype=bits_to_dtype_int(sew)):
                 tail= get_tailmax(lmul, sew)
-                ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
                 uimm= min(np.random.randint(tail), 31)
-                vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
-                mask= random_mask(tail)
+                vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
+                mask= vector_mask_array_random(tail)
                 lmul_tu = 1 if isinstance(lmul,str) else lmul
                 params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, mask, vstart, tail])
 
@@ -374,11 +374,11 @@ vslidedown_vi:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               tail= get_tailmax(lmul, sew)              
               uimm= min(np.random.randint(tail), 31) 
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew), tail, dtype=get_intdtype(sew))
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
               ori = vs2
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, uimm, sew, lmul, lmul_tu, vl, tail])

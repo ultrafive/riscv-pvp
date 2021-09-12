@@ -2,6 +2,12 @@
 import sys
 import numpy as np
 
+factor_lmul = {
+    1: 1, 2: 2, 4: 4, 8: 8,
+    '1': 1, '2': 2, '4': 4, '8': 8,
+    'f2': 1/2, 'f4': 1/4, 'f8': 1/8
+}
+
 class Inst(dict):
     name = 'unknown'
 
@@ -75,15 +81,14 @@ class Inst(dict):
         return result//(2**shift)
 
 
-    def get_VLMAX(self, sew, lmul, VLEN=1024):
-        factor_lmul = {'1': 1, '2': 2, '4': 4, '8': 8, 'f2': 1/2, 'f4': 1/4, 'f8': 1/8}
+    def VLMAX(self, sew, lmul, VLEN=1024):
         return int(factor_lmul[str(lmul)]*VLEN/sew)
 
 
-    def get_intdtype(self, sew):
+    def intdtype(self):
         int_dtype_dict  = { 8: np.int8,  16: np.int16,  32: np.int32,  64: np.int64 }
-        return int_dtype_dict[sew]
+        return int_dtype_dict[self['sew']]
 
-    def get_uintdtype(self, sew):
+    def uintdtype(self):
         uint_dtype_dict = { 8: np.uint8, 16: np.uint16, 32: np.uint32, 64: np.uint64 }
-        return uint_dtype_dict[sew]       
+        return uint_dtype_dict[self['sew']]       

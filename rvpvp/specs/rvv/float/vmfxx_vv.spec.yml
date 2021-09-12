@@ -421,153 +421,153 @@ _: &default
     test_basic_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, vl).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, vl).astype(bits_to_dtype_float(ebits))
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
     test_basic_with_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: random_mask(vl)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: vector_mask_array_random(vl)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )                
 
   cases:
     test_basic_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: get_vl(lmul, ebits, vlen)
-        vs1: np.linspace(-500, 300, vl).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, vl).astype(get_floatdtype(ebits))
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: vector_vl_list(lmul, ebits, vlen)
+        vs1: np.linspace(-500, 300, vl).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, vl).astype(bits_to_dtype_float(ebits))
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
 
     test_special_without_mask @ vs1,vs2,ebits,lmul,vl,vl_bits_Bsize, orig:
-      - "special_vv_fp16() + [ 16, 1, 32, 4, np.zeros( 4, dtype=np.uint8 ) ]"
-      - "special_vv_fp32() + [ 32, 1, 32, 4, np.zeros( 4, dtype=np.uint8 ) ]"
-      - "special_vv_fp64() + [ 64, 2, 32, 4, np.zeros( 4, dtype=np.uint8 ) ]"
+      - "vector_float_array_special_fp16_vv() + [ 16, 1, 32, 4, np.zeros( 4, dtype=np.uint8 ) ]"
+      - "vector_float_array_special_fp32_vv() + [ 32, 1, 32, 4, np.zeros( 4, dtype=np.uint8 ) ]"
+      - "vector_float_array_special_fp64_vv() + [ 64, 2, 32, 4, np.zeros( 4, dtype=np.uint8 ) ]"
 
     test_vta_eq_tu_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
+        lmul: vector_lmul_list(ebits)
         lmul_vta: 1 if isinstance(lmul,str) else lmul
-        vl: list(np.random.choice( get_vl(lmul, ebits, vlen), 1))
-        vs1: np.linspace(-500, 300, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, get_tail_end(lmul, ebits, vlen)).astype(get_floatdtype(ebits)) 
-        orig: np.zeros( Bitsl2Bytesl(get_tail_end(lmul, ebits, vlen)), dtype=np.uint8 )    
+        vl: list(np.random.choice( vector_vl_list(lmul, ebits, vlen), 1))
+        vs1: np.linspace(-500, 300, vector_len_vreg_aligned(lmul, ebits, vlen)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, vector_len_vreg_aligned(lmul, ebits, vlen)).astype(bits_to_dtype_float(ebits)) 
+        orig: np.zeros( bits_to_bytes(vector_len_vreg_aligned(lmul, ebits, vlen)), dtype=np.uint8 )    
 
 
     test_vs1_eq_vs2_without_mask:
       matrix:
         ebits: [ 16, 32, 64 ]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
         vs2: vs1
-        vs1_name: get_vregister_name( lmul )
-        vd_name: get_vregister_name( lmul, vs1_name )
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        vs1_name: alloc_vreg( lmul )
+        vd_name: alloc_vreg( lmul, vs1_name )
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )        
 
 
     test_dest_eq_vs1_without_mask:
       matrix:
         ebits: [ 16, 32, 64 ]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        vs1_name: get_vregister_name( lmul )
-        vs2_name: get_vregister_name( lmul, vs1_name )
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
-        orig: trans_dtype( vs1, np.uint8 )[0:vl_bits_Bsize]
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs1_name: alloc_vreg( lmul )
+        vs2_name: alloc_vreg( lmul, vs1_name )
+        vl_bits_Bsize: bits_to_bytes(vl)
+        orig: copy_to_dtype( vs1, np.uint8 )[0:vl_bits_Bsize]
 
       
     test_dest_eq_vs2_without_mask:
       matrix:
         ebits: [ 16, 32, 64 ]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        vs1_name: get_vregister_name( lmul )
-        vs2_name: get_vregister_name( lmul, vs1_name )  
-        vl_bits_Bsize: Bitsl2Bytesl(vl) 
-        orig: trans_dtype( vs2, np.uint8 )[0:vl_bits_Bsize] 
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs1_name: alloc_vreg( lmul )
+        vs2_name: alloc_vreg( lmul, vs1_name )  
+        vl_bits_Bsize: bits_to_bytes(vl) 
+        orig: copy_to_dtype( vs2, np.uint8 )[0:vl_bits_Bsize] 
     
     test_dest_eq_vs1vs2_without_mask:
       matrix:
         ebits: [ 16, 32, 64 ]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
         vs2: vs1
-        vs1_name: get_vregister_name( lmul )
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
-        orig: trans_dtype( vs1, np.uint8 )[0:vl_bits_Bsize]
+        vs1_name: alloc_vreg( lmul )
+        vl_bits_Bsize: bits_to_bytes(vl)
+        orig: copy_to_dtype( vs1, np.uint8 )[0:vl_bits_Bsize]
 
     test_basic_with_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: random_mask(vl)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: vector_mask_array_random(vl)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
       
     test_basic_with_mask_mu:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: random_mask(vl)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits)) 
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: vector_mask_array_random(vl)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits)) 
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 ) 
 
     test_dest_eq_v0_with_mask_mu:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        mask: random_mask(vl)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits)) 
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        mask: vector_mask_array_random(vl)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits)) 
         orig: mask     
       
     test_vstart_not_eq_zero_without_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))   
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
-        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"
+        vstart:   "list(np.random.choice(vl, 2)) + [ vector_vlmax(lmul, ebits, vlen) + 1 ]"
 
     test_vstart_not_eq_zero_with_mask:
       matrix:
         ebits: [16, 32, 64]
-        lmul: get_lmul(ebits)
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: np.linspace(-500, 300, int(vl)).astype(get_floatdtype(ebits))
-        vs2: np.linspace(-300, 500, int(vl)).astype(get_floatdtype(ebits))   
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        lmul: vector_lmul_list(ebits)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: np.linspace(-500, 300, int(vl)).astype(bits_to_dtype_float(ebits))
+        vs2: np.linspace(-300, 500, int(vl)).astype(bits_to_dtype_float(ebits))   
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
-        mask: random_mask(vl)
-        vstart:   "list(np.random.choice(vl, 2)) + [ get_vlmax(lmul, ebits, vlen) + 1 ]"    
+        mask: vector_mask_array_random(vl)
+        vstart:   "list(np.random.choice(vl, 2)) + [ vector_vlmax(lmul, ebits, vlen) + 1 ]"    
   
     test_exception_wrong_sew_without_mask  @ sew, lmul, vl:
       - [ 8, 1, 50 ]
@@ -604,7 +604,7 @@ _: &default
     test_exception_wrong_lmul_without_mask:
       matrix:
         sew: [16, 32, 64]
-        lmul: get_illegal_lmul(sew)      
+        lmul: vector_illegal_lmul(sew)      
 
 
   random_cases:
@@ -612,10 +612,10 @@ _: &default
       matrix:
         ebits: [16, 32, 64]
         lmul: 1
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: random_float(ebits, vl)
-        vs2: random_float(ebits, vl)    
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: scalar_float_random(ebits, vl)
+        vs2: scalar_float_random(ebits, vl)    
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
         vstart:   np.random.randint(0, vl)
 
@@ -623,12 +623,12 @@ _: &default
       matrix:
         ebits: [16, 32, 64]
         lmul: 1
-        vl: np.random.randint(1, get_vlmax(lmul, ebits, vlen) + 1)
-        vs1: random_float(ebits, vl)
-        vs2: random_float(ebits, vl) 
-        vl_bits_Bsize: Bitsl2Bytesl(vl)
+        vl: np.random.randint(1, vector_vlmax(lmul, ebits, vlen) + 1)
+        vs1: scalar_float_random(ebits, vl)
+        vs2: scalar_float_random(ebits, vl) 
+        vl_bits_Bsize: bits_to_bytes(vl)
         orig: np.zeros( vl_bits_Bsize, dtype=np.uint8 )
-        mask: random_mask(vl)
+        mask: vector_mask_array_random(vl)
         vstart:   np.random.randint(0, vl)
 
   basic_check:

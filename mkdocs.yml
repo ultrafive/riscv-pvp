@@ -27,8 +27,9 @@ nav:
   - Reference:
     - Command Line: reference/cli.md
     - Cases: reference/spec.md
-    - Fixtures: reference/utils/fixtures-reference.md
-    - Params: reference/utils/params-reference.md
+    - Functions:
+       - Test Data: reference/functions/data.md
+       - Utilities: reference/functions/utils.md
 
 extra_css:
   - assets/style.css

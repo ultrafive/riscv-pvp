@@ -94,43 +94,43 @@ vmv_v_i:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for imm in [min(np.random.randint(sew),15), -1]:
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
                 params_yml.append([ori, imm, vl, sew, lmul])
 
   random_cases:
     test_regression_vmv : 
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
         vta : ["tu"]
         imm : min(np.random.randint(sew),15)
-        ori : np.random.uniform(get_intmin(sew), get_intmax(sew), vl).astype(get_intdtype(sew))
+        ori : np.random.uniform(bits_to_intmin(sew), bits_to_intmax(sew), vl).astype(bits_to_dtype_int(sew))
 
   cases:
     test_agnostic_vmv @ori, imm, sew, lmul, lmul_tu, vl, vta, tail:
       setup: |
         params_yml = []
         for sew in [8, 16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vta in ["ta", "tu"]:
                 for imm in [min(np.random.randint(sew),15)]:
                   tail= get_tailmax(lmul, sew)
-                  ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+                  ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
                   lmul_tu = 1 if isinstance(lmul,str) else lmul
                   params_yml.append([ori, imm, sew, lmul, lmul_tu, vl, vta, tail])
 
     test_vstart_not_eq_zero_vmv : 
       matrix: 
         sew : [8, 16, 32, 64]
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
         vta : ["tu"]
-        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
         imm : sew//8
         vstart: [vl//2] 
 

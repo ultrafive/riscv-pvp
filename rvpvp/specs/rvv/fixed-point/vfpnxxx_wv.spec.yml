@@ -278,26 +278,26 @@ _: &default
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen): 
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen): 
               sew2= 2*sew             
-              vs1 = np.linspace( 0, sew,  vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(sew), get_intmax(sew2), vl, dtype=get_intdtype(sew2))
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              vs1 = np.linspace( 0, sew,  vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(sew), bits_to_intmax(sew2), vl, dtype=bits_to_dtype_int(sew2))
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
               params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul])
 
     test_base_with_mask @ ori, vs1, vs2, sew, sew2, vl, lmul, vma, mask:
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 sew2= 2*sew 
-                vs1 = np.linspace( 1, sew2, vl, dtype=get_intdtype(sew))
-                vs2 = np.linspace( get_intmin(sew2), get_intmax(sew)*4, vl, dtype=get_intdtype(sew2))
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-                mask= random_mask(vl)
+                vs1 = np.linspace( 1, sew2, vl, dtype=bits_to_dtype_int(sew))
+                vs2 = np.linspace( bits_to_intmin(sew2), bits_to_intmax(sew)*4, vl, dtype=bits_to_dtype_int(sew2))
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+                mask= vector_mask_array_random(vl)
                 params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul, vma, mask])
 
   random_cases: 
@@ -305,13 +305,13 @@ _: &default
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2, sew//3]:
                 sew2= 2*sew 
-                vs1 = np.random.uniform(0, get_intmax(sew), vl).astype(get_intdtype(sew))
-                vs2 = np.random.uniform(get_intmin(sew2), get_intmax(sew), vl).astype(get_intdtype(sew2))
-                ori = np.random.uniform(get_intmin(sew),  get_intmax(sew), vl).astype(get_intdtype(sew))
+                vs1 = np.random.uniform(0, bits_to_intmax(sew), vl).astype(bits_to_dtype_int(sew))
+                vs2 = np.random.uniform(bits_to_intmin(sew2), bits_to_intmax(sew), vl).astype(bits_to_dtype_int(sew2))
+                ori = np.random.uniform(bits_to_intmin(sew),  bits_to_intmax(sew), vl).astype(bits_to_dtype_int(sew))
                 params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul, vstart])      
 
   cases:
@@ -319,13 +319,13 @@ _: &default
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               sew2= 2*sew 
               tail= get_tailmax(lmul, sew)
-              vs1 = np.linspace( 2, get_intmax(sew), tail, dtype=get_intdtype(sew))
-              vs2 = np.linspace( 1, get_intmax(sew)*8, tail, dtype=get_intdtype(sew2))
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
+              vs1 = np.linspace( 2, bits_to_intmax(sew), tail, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( 1, bits_to_intmax(sew)*8, tail, dtype=bits_to_dtype_int(sew2))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vs1, sew, sew2, lmul, lmul_tu, vl, tail])
 
@@ -333,87 +333,87 @@ _: &default
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 2, get_intmax(sew), vl, dtype=get_intdtype(sew))
-        vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew2))
-        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 2, bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+        vs2 : np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew2))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
         vstart: [vl//3]
 
     test_vstart_not_equal_zero_with_mask:
       matrix:
         sew : [8, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 2, vl, vl, dtype=get_intdtype(sew))
-        vs2 : np.linspace( -10, get_intmax(sew), vl, dtype=get_intdtype(sew2))
-        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-        mask: random_mask(vl)
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 2, vl, vl, dtype=bits_to_dtype_int(sew))
+        vs2 : np.linspace( -10, bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew2))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+        mask: vector_mask_array_random(vl)
         vstart: [sew//2]
 
     test_register_vd_equ_vs1_without_mask :
       matrix:
         sew : [8, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 0, get_intmax(sew), vl, dtype=get_intdtype(sew))
-        vs2 : np.linspace( get_intmin(sew), get_intmax(sew), vl, dtype=get_intdtype(sew2))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 0, bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew))
+        vs2 : np.linspace( bits_to_intmin(sew), bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew2))
         ori : vs1
     
     test_register_vd_equ_vs2_without_mask :
       matrix:
         sew : [16, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 1, vl, vl, dtype=get_intdtype(sew))
-        vs2 : np.linspace( 1, get_intmax(sew), vl, dtype=get_intdtype(sew2))
-        ori : vs2.astype(get_intdtype(sew))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 1, vl, vl, dtype=bits_to_dtype_int(sew))
+        vs2 : np.linspace( 1, bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew2))
+        ori : vs2.astype(bits_to_dtype_int(sew))
 
     test_register_vs1_equ_vs2_without_mask :
       matrix:
         sew : [8, 16]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs2 : np.linspace( 1, vl, vl, dtype=get_intdtype(sew2))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs2 : np.linspace( 1, vl, vl, dtype=bits_to_dtype_int(sew2))
         vs1 : vs2.copy()
-        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
 
     test_register_vd_equ_vs1_vs2_without_mask :
       matrix:
         sew : [16, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs2 : np.linspace( 1, get_intmax(sew), vl, dtype=get_intdtype(sew2))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs2 : np.linspace( 1, bits_to_intmax(sew), vl, dtype=bits_to_dtype_int(sew2))
         vs1 : vs2.copy()
-        ori : vs2.astype(get_intdtype(sew))  
+        ori : vs2.astype(bits_to_dtype_int(sew))  
 
     test_rounding_without_mask @ ori, vs1, vs2, sew, sew2, vl, lmul, vxrm:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]: #note 32
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen): 
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen): 
               for vxrm in [ 0, 1, 2, 3 ]:   
                 sew2= 2*sew           
-                vs1 = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-                vs2 = np.linspace( 0, get_intmax(sew)*8, vl, dtype=get_intdtype(sew2))
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+                vs1 = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+                vs2 = np.linspace( 0, bits_to_intmax(sew)*8, vl, dtype=bits_to_dtype_int(sew2))
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
                 params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul, vxrm])
 
     test_exception_sew_equ_64_without_mask:
       matrix: 
         sew : [64]
         sew2: [64]
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs2 : np.linspace( 2, vl, vl, dtype=get_intdtype(sew2))
-        vs1 : np.linspace( 1, vl, vl, dtype=get_intdtype(sew))
-        ori : np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs2 : np.linspace( 2, vl, vl, dtype=bits_to_dtype_int(sew2))
+        vs1 : np.linspace( 1, vl, vl, dtype=bits_to_dtype_int(sew))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
 
 vnclip_wv:
    <<: *default
@@ -426,26 +426,26 @@ _: &unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 16, 32 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen): 
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen): 
               sew2= 2*sew             
-              vs1 = np.linspace( 0, sew,  vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 0, get_uintmax(sew2), vl, dtype=get_uintdtype(sew2))
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+              vs1 = np.linspace( 0, sew,  vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 0, bits_to_uintmax(sew2), vl, dtype=bits_to_dtype_uint(sew2))
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
               params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul])
 
     test_base_with_mask @ ori, vs1, vs2, sew, sew2, vl, lmul, vma, mask:
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["ma", "mu"]:
                 sew2= 2*sew 
-                vs1 = np.linspace( 1, sew2, vl, dtype=get_uintdtype(sew))
-                vs2 = np.linspace( 2, get_uintmax(sew)*4, vl, dtype=get_uintdtype(sew2))
-                ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-                mask= random_mask(vl)
+                vs1 = np.linspace( 1, sew2, vl, dtype=bits_to_dtype_uint(sew))
+                vs2 = np.linspace( 2, bits_to_uintmax(sew)*4, vl, dtype=bits_to_dtype_uint(sew2))
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+                mask= vector_mask_array_random(vl)
                 params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul, vma, mask])
 
   random_cases: 
@@ -453,13 +453,13 @@ _: &unsigned
       setup: |
         params_yml = []
         for sew in [ 8, 32 ]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vstart in [vl//2, sew//3]:
                 sew2= 2*sew 
-                vs1 = np.random.uniform(0, get_uintmax(sew), vl).astype(get_uintdtype(sew))
-                vs2 = np.random.uniform(0, get_uintmax(sew), vl).astype(get_uintdtype(sew2))
-                ori = np.random.uniform(0, get_uintmax(sew), vl).astype(get_uintdtype(sew))
+                vs1 = np.random.uniform(0, bits_to_uintmax(sew), vl).astype(bits_to_dtype_uint(sew))
+                vs2 = np.random.uniform(0, bits_to_uintmax(sew), vl).astype(bits_to_dtype_uint(sew2))
+                ori = np.random.uniform(0, bits_to_uintmax(sew), vl).astype(bits_to_dtype_uint(sew))
                 params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul, vstart])      
 
   cases:
@@ -467,13 +467,13 @@ _: &unsigned
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               sew2= 2*sew 
               tail= get_tailmax(lmul, sew)
-              vs1 = np.linspace( 2, get_uintmax(sew), tail, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(sew)*8, tail, dtype=get_uintdtype(sew2))
-              ori = np.linspace( 0, tail, tail, dtype=get_uintdtype(sew))
+              vs1 = np.linspace( 2, bits_to_uintmax(sew), tail, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(sew)*8, tail, dtype=bits_to_dtype_uint(sew2))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_uint(sew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vs1, sew, sew2, lmul, lmul_tu, vl, tail])
 
@@ -481,87 +481,87 @@ _: &unsigned
       matrix:
         sew : [8, 16, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 2, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
-        vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew2))
-        ori : np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 2, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+        vs2 : np.linspace( 1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew2))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
         vstart: [vl//3]
 
     test_vstart_not_equal_zero_with_mask:
       matrix:
         sew : [8, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 2, vl, vl, dtype=get_uintdtype(sew))
-        vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew2))
-        ori : np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-        mask: random_mask(vl)
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 2, vl, vl, dtype=bits_to_dtype_uint(sew))
+        vs2 : np.linspace( 1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew2))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+        mask: vector_mask_array_random(vl)
         vstart: [sew//2]
 
     test_register_vd_equ_vs1_without_mask :
       matrix:
         sew : [8, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 0, get_uintmax(sew), vl, dtype=get_uintdtype(sew))
-        vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew2))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 0, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew))
+        vs2 : np.linspace( 1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew2))
         ori : vs1
     
     test_register_vd_equ_vs2_without_mask :
       matrix:
         sew : [16, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs1 : np.linspace( 1, vl, vl, dtype=get_uintdtype(sew))
-        vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew2))
-        ori : vs2.astype(get_uintdtype(sew))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs1 : np.linspace( 1, vl, vl, dtype=bits_to_dtype_uint(sew))
+        vs2 : np.linspace( 1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew2))
+        ori : vs2.astype(bits_to_dtype_uint(sew))
 
     test_register_vs1_equ_vs2_without_mask :
       matrix:
         sew : [8, 16]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs2 : np.linspace( 1, get_uintmax(sew2), vl, dtype=get_uintdtype(sew2))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs2 : np.linspace( 1, bits_to_uintmax(sew2), vl, dtype=bits_to_dtype_uint(sew2))
         vs1 : vs2.copy()
-        ori : np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
 
     test_register_vd_equ_vs1_vs2_without_mask :
       matrix:
         sew : [16, 32]
         sew2: 2*sew 
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs2 : np.linspace( 1, get_uintmax(sew), vl, dtype=get_uintdtype(sew2))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs2 : np.linspace( 1, bits_to_uintmax(sew), vl, dtype=bits_to_dtype_uint(sew2))
         vs1 : vs2.copy()
-        ori : vs2.astype(get_uintdtype(sew))  
+        ori : vs2.astype(bits_to_dtype_uint(sew))  
 
     test_rounding_without_mask @ ori, vs1, vs2, sew, sew2, vl, lmul, vxrm:
       setup: |
         params_yml = []
         for sew in [ 8, 16 ]: 
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen): 
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen): 
               for vxrm in [ 0, 1, 2, 3 ]:   
                 sew2= 2*sew           
-                vs1 = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-                vs2 = np.linspace( 0, get_uintmax(sew)*8, vl, dtype=get_uintdtype(sew2))
-                ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+                vs1 = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+                vs2 = np.linspace( 0, bits_to_uintmax(sew)*8, vl, dtype=bits_to_dtype_uint(sew2))
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
                 params_yml.append([ori, vs1, vs2, sew, sew2, vl, lmul, vxrm])
 
     test_exception_sew_equ_64_without_mask:
       matrix: 
         sew : [64]
         sew2: [64]
-        lmul: get_lmul_w(sew)
-        vl  : get_vl(lmul, sew, vlen)
-        vs2 : np.linspace( 2, vl, vl, dtype=get_uintdtype(sew2))
-        vs1 : np.linspace( 1, vl, vl, dtype=get_uintdtype(sew))
-        ori : np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
+        lmul: vector_lmul_list_w(sew)
+        vl  : vector_vl_list(lmul, sew, vlen)
+        vs2 : np.linspace( 2, vl, vl, dtype=bits_to_dtype_uint(sew2))
+        vs1 : np.linspace( 1, vl, vl, dtype=bits_to_dtype_uint(sew))
+        ori : np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
 
 vnclipu_wv:
    <<: *unsigned

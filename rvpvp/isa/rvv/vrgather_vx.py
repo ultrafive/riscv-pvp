@@ -5,7 +5,7 @@ class Vrgather_vi(Inst):
     name = 'vrgather.vi'
     # vrgather.vi vd, vs2, uimm, vm # vd[i] = (uimm >= VLMAX) ? 0 : vs2[uimm]
     def golden(self):
-        vlmax = self.get_VLMAX(self['sew'],self['lmul'])
+        vlmax = self.VLMAX(self['sew'],self['lmul'])
         vlValid  = min(vlmax, self['vl'])
         maskflag = 1 if 'mask' in self else 0 
         vstart   = self['vstart'] if 'vstart' in self else 0 
@@ -30,7 +30,7 @@ class Vrgather_vx(Inst):
     name = 'vrgather.vx'
     # vrgather.vx vd, vs2, rs1, vm # vd[i] = (x[rs1] >= VLMAX) ? 0 : vs2[x[rs1]]
     def golden(self):
-        vlmax = self.get_VLMAX(self['sew'],self['lmul'])
+        vlmax = self.VLMAX(self['sew'],self['lmul'])
         vlValid  = min(vlmax, self['vl'])
         maskflag = 1 if 'mask' in self else 0 
         vstart   = self['vstart'] if 'vstart' in self else 0 
@@ -55,7 +55,7 @@ class Vrgather_vv(Inst):
     name = 'vrgather.vv'
     # vrgather.vv vd, vs2, vs1, vm # vd[i] = (vs1[i] >= VLMAX) ? 0 : vs2[vs1[i]]; 
     def golden(self):
-        vlmax = self.get_VLMAX(self['sew'],self['lmul'])
+        vlmax = self.VLMAX(self['sew'],self['lmul'])
         vlValid  = min(vlmax, self['vl'])
         maskflag = 1 if 'mask' in self else 0 
         vstart   = self['vstart'] if 'vstart' in self else 0 
@@ -80,7 +80,7 @@ class Vrgatherei16_vv(Inst):
     name = 'vrgatherei16.vv'
     # vrgatherei16.vv vd, vs2, vs1, vm # vd[i] = (vs1[i] >= VLMAX) ? 0 : vs2[vs1[i]];
     def golden(self):
-        vlmax = self.get_VLMAX(self['sew'],self['lmul'])
+        vlmax = self.VLMAX(self['sew'],self['lmul'])
         vlValid  = min(vlmax, self['vl'])
         maskflag = 1 if 'mask' in self else 0 
         vstart   = self['vstart'] if 'vstart' in self else 0 

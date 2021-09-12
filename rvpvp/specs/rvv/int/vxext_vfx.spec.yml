@@ -195,25 +195,25 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_base_with_mask @ ori, vs2, vl, sew, eew, lmul, emul, mask:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              mask= random_mask(vl)
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              mask= vector_mask_array_random(vl)
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, mask])
 
   random_cases:
@@ -221,12 +221,12 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(eew))
-              ori = np.random.uniform(0, vl, vl).astype(get_uintdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.random.uniform(1, bits_to_uintmax(eew), vl).astype(bits_to_dtype_uint(eew))
+              ori = np.random.uniform(0, vl, vl).astype(bits_to_dtype_uint(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -235,13 +235,13 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
+              emul= vector_emul(eew, sew, lmul)
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), tail, dtype=get_uintdtype(eew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), tail, dtype=bits_to_dtype_uint(eew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vl, sew, eew, lmul, lmul_tu, emul, tail])
 
@@ -249,12 +249,12 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -262,14 +262,14 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//2
-                emul= get_emul(eew, sew, lmul)
-                ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-                vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-                mask= random_mask(vl)
+                emul= vector_emul(eew, sew, lmul)
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+                vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+                mask= vector_mask_array_random(vl)
                 vstart = vl//2
                 params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vma, vstart, mask])
 
@@ -277,23 +277,23 @@ vzext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              ori = vs2.astype(get_uintdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              ori = vs2.astype(bits_to_dtype_uint(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_exception_illegal_eew_without_mask @ ori, vs2, vl, sew, eew, lmul:
       setup: |
         params_yml = []
         for sew in [8]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              ori = vs2.astype(get_uintdtype(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              ori = vs2.astype(bits_to_dtype_uint(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul])
 
 vsext_vf2:
@@ -303,25 +303,25 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_base_with_mask @ ori, vs2, vl, sew, eew, lmul, emul, mask:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              mask= random_mask(vl)
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              mask= vector_mask_array_random(vl)
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, mask])
 
   random_cases:
@@ -329,12 +329,12 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(eew))
-              ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.random.uniform(bits_to_intmin(eew), bits_to_intmax(eew), vl).astype(bits_to_dtype_int(eew))
+              ori = np.random.uniform(0, vl, vl).astype(bits_to_dtype_int(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -343,13 +343,13 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
+              emul= vector_emul(eew, sew, lmul)
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), tail, dtype=get_intdtype(eew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), tail, dtype=bits_to_dtype_int(eew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vl, sew, eew, lmul, lmul_tu, emul, tail])
 
@@ -357,12 +357,12 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -370,14 +370,14 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//2
-                emul= get_emul(eew, sew, lmul)
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-                vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-                mask= random_mask(vl)
+                emul= vector_emul(eew, sew, lmul)
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+                vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+                mask= vector_mask_array_random(vl)
                 vstart = vl//2
                 params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vma, vstart, mask])
 
@@ -385,23 +385,23 @@ vsext_vf2:
       setup: |
         params_yml = []
         for sew in [16, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//2
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              ori = vs2.astype(get_intdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              ori = vs2.astype(bits_to_dtype_int(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_exception_illegal_eew_without_mask @ ori, vs2, vl, sew, eew, lmul:
       setup: |
         params_yml = []
         for sew in [8]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul])
 
 vzext_vf4:
@@ -411,25 +411,25 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_base_with_mask @ ori, vs2, vl, sew, eew, lmul, emul, mask:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              mask= random_mask(vl)
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              mask= vector_mask_array_random(vl)
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, mask])
 
   random_cases:
@@ -437,12 +437,12 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(eew))
-              ori = np.random.uniform(0, vl, vl).astype(get_uintdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.random.uniform(1, bits_to_uintmax(eew), vl).astype(bits_to_dtype_uint(eew))
+              ori = np.random.uniform(0, vl, vl).astype(bits_to_dtype_uint(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -451,13 +451,13 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
+              emul= vector_emul(eew, sew, lmul)
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), tail, dtype=get_uintdtype(eew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), tail, dtype=bits_to_dtype_uint(eew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vl, sew, eew, lmul, lmul_tu, emul, tail])
 
@@ -465,12 +465,12 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -478,14 +478,14 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//4
-                emul= get_emul(eew, sew, lmul)
-                ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-                vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-                mask= random_mask(vl)
+                emul= vector_emul(eew, sew, lmul)
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+                vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+                mask= vector_mask_array_random(vl)
                 vstart = vl//2
                 params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vma, vstart, mask])
 
@@ -493,23 +493,23 @@ vzext_vf4:
       setup: |
         params_yml = []
         for sew in [64, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              ori = vs2.astype(get_uintdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              ori = vs2.astype(bits_to_dtype_uint(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_exception_illegal_eew_without_mask @ ori, vs2, vl, sew, eew, lmul:
       setup: |
         params_yml = []
         for sew in [8, 16]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              ori = vs2.astype(get_uintdtype(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              ori = vs2.astype(bits_to_dtype_uint(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul])
 
 vsext_vf4:
@@ -519,25 +519,25 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_base_with_mask @ ori, vs2, vl, sew, eew, lmul, emul, mask:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              mask= random_mask(vl)
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              mask= vector_mask_array_random(vl)
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, mask])
 
   random_cases:
@@ -545,12 +545,12 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(eew))
-              ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.random.uniform(bits_to_intmin(eew), bits_to_intmax(eew), vl).astype(bits_to_dtype_int(eew))
+              ori = np.random.uniform(0, vl, vl).astype(bits_to_dtype_int(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -559,13 +559,13 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
+              emul= vector_emul(eew, sew, lmul)
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), tail, dtype=get_intdtype(eew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), tail, dtype=bits_to_dtype_int(eew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vl, sew, eew, lmul, lmul_tu, emul, tail])
 
@@ -573,12 +573,12 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -586,14 +586,14 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [32, 64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//4
-                emul= get_emul(eew, sew, lmul)
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-                vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-                mask= random_mask(vl)
+                emul= vector_emul(eew, sew, lmul)
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+                vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+                mask= vector_mask_array_random(vl)
                 vstart = vl//2
                 params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vma, vstart, mask])
 
@@ -601,23 +601,23 @@ vsext_vf4:
       setup: |
         params_yml = []
         for sew in [64, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//4
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              ori = vs2.astype(get_intdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              ori = vs2.astype(bits_to_dtype_int(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_exception_illegal_eew_without_mask @ ori, vs2, vl, sew, eew, lmul:
       setup: |
         params_yml = []
         for sew in [8, 16]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul])
 
 
@@ -628,25 +628,25 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_base_with_mask @ ori, vs2, vl, sew, eew, lmul, emul, mask:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              mask= random_mask(vl)
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              mask= vector_mask_array_random(vl)
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, mask])
 
   random_cases:
@@ -654,12 +654,12 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(1, get_uintmax(eew), vl).astype(get_uintdtype(eew))
-              ori = np.random.uniform(0, vl, vl).astype(get_uintdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.random.uniform(1, bits_to_uintmax(eew), vl).astype(bits_to_dtype_uint(eew))
+              ori = np.random.uniform(0, vl, vl).astype(bits_to_dtype_uint(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -668,13 +668,13 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
+              emul= vector_emul(eew, sew, lmul)
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), tail, dtype=get_uintdtype(eew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), tail, dtype=bits_to_dtype_uint(eew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vl, sew, eew, lmul, lmul_tu, emul, tail])
 
@@ -682,12 +682,12 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -695,14 +695,14 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//8
-                emul= get_emul(eew, sew, lmul)
-                ori = np.linspace( 0, vl, vl, dtype=get_uintdtype(sew))
-                vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-                mask= random_mask(vl)
+                emul= vector_emul(eew, sew, lmul)
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_uint(sew))
+                vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+                mask= vector_mask_array_random(vl)
                 vstart = vl//2
                 params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vma, vstart, mask])
 
@@ -710,23 +710,23 @@ vzext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              ori = vs2.astype(get_uintdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              ori = vs2.astype(bits_to_dtype_uint(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_exception_illegal_eew_without_mask @ ori, vs2, vl, sew, eew, lmul:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew
-              vs2 = np.linspace( 1, get_uintmax(eew), vl, dtype=get_uintdtype(eew))
-              ori = vs2.astype(get_uintdtype(sew))
+              vs2 = np.linspace( 1, bits_to_uintmax(eew), vl, dtype=bits_to_dtype_uint(eew))
+              ori = vs2.astype(bits_to_dtype_uint(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul])
 
 vsext_vf8:
@@ -736,25 +736,25 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_base_with_mask @ ori, vs2, vl, sew, eew, lmul, emul, mask:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              mask= random_mask(vl)
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              mask= vector_mask_array_random(vl)
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, mask])
 
   random_cases:
@@ -762,12 +762,12 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.random.uniform(get_intmin(eew), get_intmax(eew), vl).astype(get_intdtype(eew))
-              ori = np.random.uniform(0, vl, vl).astype(get_intdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.random.uniform(bits_to_intmin(eew), bits_to_intmax(eew), vl).astype(bits_to_dtype_int(eew))
+              ori = np.random.uniform(0, vl, vl).astype(bits_to_dtype_int(sew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -776,13 +776,13 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
+              emul= vector_emul(eew, sew, lmul)
               tail= get_tailmax(lmul, sew)
-              ori = np.linspace( 0, tail, tail, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), tail, dtype=get_intdtype(eew))
+              ori = np.linspace( 0, tail, tail, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), tail, dtype=bits_to_dtype_int(eew))
               lmul_tu = 1 if isinstance(lmul,str) else lmul
               params_yml.append([ori, vs2, vl, sew, eew, lmul, lmul_tu, emul, tail])
 
@@ -790,12 +790,12 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
+              emul= vector_emul(eew, sew, lmul)
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
               vstart = vl//2
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vstart])
 
@@ -803,14 +803,14 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               for vma in ["mu", "ma"]:
                 eew = sew//8
-                emul= get_emul(eew, sew, lmul)
-                ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
-                vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-                mask= random_mask(vl)
+                emul= vector_emul(eew, sew, lmul)
+                ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
+                vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+                mask= vector_mask_array_random(vl)
                 vstart = vl//2
                 params_yml.append([ori, vs2, vl, sew, eew, lmul, emul, vma, vstart, mask])
 
@@ -818,21 +818,21 @@ vsext_vf8:
       setup: |
         params_yml = []
         for sew in [64]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew//8
-              emul= get_emul(eew, sew, lmul)
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              ori = vs2.astype(get_intdtype(sew))
+              emul= vector_emul(eew, sew, lmul)
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              ori = vs2.astype(bits_to_dtype_int(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul, emul])
 
     test_exception_illegal_eew_without_mask @ ori, vs2, vl, sew, eew, lmul:
       setup: |
         params_yml = []
         for sew in [8, 16, 32]:
-          for lmul in get_lmul_w(sew):
-            for vl in get_vl(lmul, sew, vlen):
+          for lmul in vector_lmul_list_w(sew):
+            for vl in vector_vl_list(lmul, sew, vlen):
               eew = sew
-              vs2 = np.linspace( get_intmin(eew), get_intmax(eew), vl, dtype=get_intdtype(eew))
-              ori = np.linspace( 0, vl, vl, dtype=get_intdtype(sew))
+              vs2 = np.linspace( bits_to_intmin(eew), bits_to_intmax(eew), vl, dtype=bits_to_dtype_int(eew))
+              ori = np.linspace( 0, vl, vl, dtype=bits_to_dtype_int(sew))
               params_yml.append([ori, vs2, vl, sew, eew, lmul])

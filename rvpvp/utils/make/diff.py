@@ -118,7 +118,7 @@ def diff_to_txt(a, b, filename, a_name, b_name):
 
     return diff_result
 
-def trans_dtype( input, dtype ):
+def copy_to_dtype( input, dtype ):
     output = input.copy()
     if output.shape == ():
         output = output.reshape(1,)
@@ -135,7 +135,7 @@ def main():
 
     for test_case in case_list:
 
-        spike_result = trans_dtype( test_case["spike_result_data"], eval(f'jnp.{test_case["spike_result_dtype"]}') )
+        spike_result = copy_to_dtype( test_case["spike_result_data"], eval(f'jnp.{test_case["spike_result_dtype"]}') )
         # get sim result, because many cases in signature file, 
         # so we need the start to know where to find the result
         offset = test_case['start_addr']

@@ -69,7 +69,7 @@ class Vslide1down_vx(Inst):
                 if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
                     result[ii] = self['vs2'][ii+1] 
 
-        vlValid = min(self.get_VLMAX(self['sew'],self['lmul']), self['vl'])   
+        vlValid = min(self.VLMAX(self['sew'],self['lmul']), self['vl'])   
         if vstart <= vlValid-1:
             if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[vlValid-1] ):       
                 result[vlValid-1] = self['rs1'] 
@@ -96,7 +96,7 @@ class Vslidedown_vx(Inst):
                 if (maskflag == 0) or (maskflag == 1 and np.unpackbits(self['mask'], bitorder='little')[ii] ):
                     if (ii+self['rs1']) >= self['vl'] :                    
                         if 'tail' in self:
-                            if (ii+self['rs1']) < self.get_VLMAX(self['sew'],self['lmul']) :
+                            if (ii+self['rs1']) < self.VLMAX(self['sew'],self['lmul']) :
                                 result[ii] = self['vs2'][ii+int(self['rs1'])] 
                             else:
                                 result[ii] = 0x0
