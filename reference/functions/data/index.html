@@ -1,0 +1,3507 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+    
+    
+      
+        <title>Test Data - RISC-V PVP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.be71726b.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../assets/style.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#generate-data-for-test-cases" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="RISC-V PVP" class="md-header__button md-logo" aria-label="RISC-V PVP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RISC-V PVP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Test Data
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/ultrafive/riscv-pvp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ultrafive/riscv-pvp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="RISC-V PVP" class="md-nav__button md-logo" aria-label="RISC-V PVP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    RISC-V PVP
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/ultrafive/riscv-pvp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ultrafive/riscv-pvp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../get-started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../new-target/" class="md-nav__link">
+        Support New Targets
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../developing/" class="md-nav__link">
+        Developing Guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      <label class="md-nav__link" for="__nav_5">
+        Reference
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        Command Line
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../spec/" class="md-nav__link">
+        Cases
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" checked>
+      
+      <label class="md-nav__link" for="__nav_5_3">
+        Functions
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Functions" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Functions
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Test Data
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Test Data
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data" class="md-nav__link">
+    rvpvp.utils.data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_float_list_special" class="md-nav__link">
+    scalar_float_list_special()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_float_random" class="md-nav__link">
+    scalar_float_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_int_random" class="md-nav__link">
+    scalar_int_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_uint_random" class="md-nav__link">
+    scalar_uint_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special" class="md-nav__link">
+    vector_float_array_special()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special_fp16_vv" class="md-nav__link">
+    vector_float_array_special_fp16_vv()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special_fp32_vv" class="md-nav__link">
+    vector_float_array_special_fp32_vv()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special_fp64_vv" class="md-nav__link">
+    vector_float_array_special_fp64_vv()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_illegal_lmul" class="md-nav__link">
+    vector_illegal_lmul()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_illegal_lmul_w" class="md-nav__link">
+    vector_illegal_lmul_w()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_index_array" class="md-nav__link">
+    vector_index_array()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_index_array_consecutive" class="md-nav__link">
+    vector_index_array_consecutive()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_index_array_misaligned" class="md-nav__link">
+    vector_index_array_misaligned()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list" class="md-nav__link">
+    vector_lmul_list()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list_index_seg" class="md-nav__link">
+    vector_lmul_list_index_seg()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list_seg" class="md-nav__link">
+    vector_lmul_list_seg()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list_w" class="md-nav__link">
+    vector_lmul_list_w()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_first_masked" class="md-nav__link">
+    vector_mask_array_first_masked()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_last_masked" class="md-nav__link">
+    vector_mask_array_last_masked()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_random" class="md-nav__link">
+    vector_mask_array_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_zero" class="md-nav__link">
+    vector_mask_array_zero()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_sew_list_neq_eew" class="md-nav__link">
+    vector_sew_list_neq_eew()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_stride_list_random" class="md-nav__link">
+    vector_stride_list_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_stride_list_random_ls_stride" class="md-nav__link">
+    vector_stride_list_random_ls_stride()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list" class="md-nav__link">
+    vector_vl_list()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list_ls" class="md-nav__link">
+    vector_vl_list_ls()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list_ls_random" class="md-nav__link">
+    vector_vl_list_ls_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list_ls_seg" class="md-nav__link">
+    vector_vl_list_ls_seg()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vstart_list_linspace" class="md-nav__link">
+    vector_vstart_list_linspace()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vstart_list_random" class="md-nav__link">
+    vector_vstart_list_random()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utils/" class="md-nav__link">
+        Utilities
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data" class="md-nav__link">
+    rvpvp.utils.data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_float_list_special" class="md-nav__link">
+    scalar_float_list_special()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_float_random" class="md-nav__link">
+    scalar_float_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_int_random" class="md-nav__link">
+    scalar_int_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.scalar_uint_random" class="md-nav__link">
+    scalar_uint_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special" class="md-nav__link">
+    vector_float_array_special()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special_fp16_vv" class="md-nav__link">
+    vector_float_array_special_fp16_vv()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special_fp32_vv" class="md-nav__link">
+    vector_float_array_special_fp32_vv()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_float_array_special_fp64_vv" class="md-nav__link">
+    vector_float_array_special_fp64_vv()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_illegal_lmul" class="md-nav__link">
+    vector_illegal_lmul()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_illegal_lmul_w" class="md-nav__link">
+    vector_illegal_lmul_w()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_index_array" class="md-nav__link">
+    vector_index_array()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_index_array_consecutive" class="md-nav__link">
+    vector_index_array_consecutive()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_index_array_misaligned" class="md-nav__link">
+    vector_index_array_misaligned()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list" class="md-nav__link">
+    vector_lmul_list()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list_index_seg" class="md-nav__link">
+    vector_lmul_list_index_seg()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list_seg" class="md-nav__link">
+    vector_lmul_list_seg()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_lmul_list_w" class="md-nav__link">
+    vector_lmul_list_w()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_first_masked" class="md-nav__link">
+    vector_mask_array_first_masked()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_last_masked" class="md-nav__link">
+    vector_mask_array_last_masked()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_random" class="md-nav__link">
+    vector_mask_array_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_mask_array_zero" class="md-nav__link">
+    vector_mask_array_zero()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_sew_list_neq_eew" class="md-nav__link">
+    vector_sew_list_neq_eew()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_stride_list_random" class="md-nav__link">
+    vector_stride_list_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_stride_list_random_ls_stride" class="md-nav__link">
+    vector_stride_list_random_ls_stride()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list" class="md-nav__link">
+    vector_vl_list()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list_ls" class="md-nav__link">
+    vector_vl_list_ls()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list_ls_random" class="md-nav__link">
+    vector_vl_list_ls_random()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vl_list_ls_seg" class="md-nav__link">
+    vector_vl_list_ls_seg()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vstart_list_linspace" class="md-nav__link">
+    vector_vstart_list_linspace()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rvpvp.utils.data.vector_vstart_list_random" class="md-nav__link">
+    vector_vstart_list_random()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/ultrafive/riscv-pvp/edit/master/docs/reference/functions/data.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="generate-data-for-test-cases">Generate data for test cases</h1>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="rvpvp.utils.data"></a>
+    <div class="doc doc-contents first">
+
+      <p>You can use functions and lists in this module to generate data for cases.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.scalar_float_list_special" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">scalar_float_list_special</span><span class="p">(</span><span class="n">sew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to generate a list special float numbers of which the data type is depended on sew.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>sew decides the element width and data type for special float numbers.
+16 - float16
+32 - float32
+64 - float64</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list of 8 numpy ndarrays. 
+When sew == 16, return the result of special_fp16().
+When sew == 32, return the result of special_fp32().
+When sew == 64, return the result of special_fp64().</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">scalar_float_list_special</span><span class="p">(</span><span class="n">sew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to generate a list special float numbers of which the data type is depended on sew.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int):  sew decides the element width and data type for special float numbers.</span>
+<span class="sd">            16 - float16</span>
+<span class="sd">            32 - float32</span>
+<span class="sd">            64 - float64</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of 8 numpy ndarrays. </span>
+<span class="sd">        When sew == 16, return the result of special_fp16().</span>
+<span class="sd">        When sew == 32, return the result of special_fp32().</span>
+<span class="sd">        When sew == 64, return the result of special_fp64().</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">special_fp16</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">special_fp32</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">64</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">special_fp64</span><span class="p">()</span>   
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.scalar_float_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">scalar_float_random</span><span class="p">(</span><span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to return a numpy ndarray of random float numbers.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, float number width. It can be 16, 32, 64 corresponding to float16,
+float32 and float64.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length, the size of numpy ndarray.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A numpy ndarray with random numbers in the full range of float data type. Its size is vl.
+Its dtype is float16, float32 or float64 corresponding to the input width, sew.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>If sew isn't equal to 16, 32, 64.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">scalar_float_random</span><span class="p">(</span><span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to return a numpy ndarray of random float numbers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): vsew register value, float number width. It can be 16, 32, 64 corresponding to float16,</span>
+<span class="sd">            float32 and float64.</span>
+<span class="sd">        vl (int): vector length, the size of numpy ndarray.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A numpy ndarray with random numbers in the full range of float data type. Its size is vl.</span>
+<span class="sd">        Its dtype is float16, float32 or float64 corresponding to the input width, sew.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If sew isn&#39;t equal to 16, 32, 64.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x10000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float16</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x100000000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">64</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">64</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sew</span><span class="si">}</span><span class="s1"> is not a good option for sew.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">num</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.scalar_int_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">scalar_int_random</span><span class="p">(</span><span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to return a numpy ndarray of random int numbers.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, int number width. It can be 8, 16, 32, 64 corresponding to int8, int16, </p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length, the size of numpy ndarray.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A numpy ndarray with random numbers in the full range of int data type. Its size is vl.
+Its dtype is int8, int16, int32 or int64 corresponding to the input width, sew.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>If sew isn't equal to 8, 16, 32, 64.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">scalar_int_random</span><span class="p">(</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to return a numpy ndarray of random int numbers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): vsew register value, int number width. It can be 8, 16, 32, 64 corresponding to int8, int16, </span>
+<span class="sd">        int32, int64.</span>
+<span class="sd">        vl (int): vector length, the size of numpy ndarray.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A numpy ndarray with random numbers in the full range of int data type. Its size is vl.</span>
+<span class="sd">        Its dtype is int8, int16, int32 or int64 corresponding to the input width, sew.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If sew isn&#39;t equal to 8, 16, 32, 64.</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x100</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x10000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x100000000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">64</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">64</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span> <span class="p">)</span>
+        <span class="n">num</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span>        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sew</span><span class="si">}</span><span class="s1"> is not a good option for sew.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">num</span>    
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.scalar_uint_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">scalar_uint_random</span><span class="p">(</span><span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to return a numpy ndarray of random uint numbers.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, int number width. It can be 8, 16, 32, 64 corresponding to uint8, uint16, </p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length, the size of numpy ndarray.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A numpy ndarray with random numbers in the full range of uint data type. Its size is vl.
+Its dtype is uint8, uint16, uint32 or uint64 corresponding to the input width, sew.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>If sew isn't equal to 8, 16, 32, 64.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">scalar_uint_random</span><span class="p">(</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to return a numpy ndarray of random uint numbers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): vsew register value, int number width. It can be 8, 16, 32, 64 corresponding to uint8, uint16, </span>
+<span class="sd">        uint32, uint64.</span>
+<span class="sd">        vl (int): vector length, the size of numpy ndarray.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A numpy ndarray with random numbers in the full range of uint data type. Its size is vl.</span>
+<span class="sd">        Its dtype is uint8, uint16, uint32 or uint64 corresponding to the input width, sew.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If sew isn&#39;t equal to 8, 16, 32, 64.</span>
+<span class="sd">    &#39;&#39;&#39;</span>      
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x100</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x10000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x100000000</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">64</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">64</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span> <span class="p">)</span>       
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sew</span><span class="si">}</span><span class="s1"> is not a good option for sew.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">num</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_float_array_special" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_float_array_special</span><span class="p">(</span><span class="n">sew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to generate a special float numpy ndarray of which the data type is decided by sew.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>sew decides the element width and data type for special float numbers.
+16 - float16
+32 - float32
+64 - float64</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>When sew == 16, return the result of special_v_fp16().
+When sew == 32, return the result of special_v_fp32().
+When sew == 64, return the result of special_v_fp64().</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_float_array_special</span><span class="p">(</span><span class="n">sew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to generate a special float numpy ndarray of which the data type is decided by sew.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): sew decides the element width and data type for special float numbers.</span>
+<span class="sd">            16 - float16</span>
+<span class="sd">            32 - float32</span>
+<span class="sd">            64 - float64</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: When sew == 16, return the result of special_v_fp16().</span>
+<span class="sd">        When sew == 32, return the result of special_v_fp32().</span>
+<span class="sd">        When sew == 64, return the result of special_v_fp64().</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">special_v_fp16</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">special_v_fp32</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sew</span> <span class="o">==</span> <span class="mi">64</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">special_v_fp64</span><span class="p">()</span> 
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_float_array_special_fp16_vv" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_float_array_special_fp16_vv</span><span class="p">()</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to generate a list of 2 numpy ndarrays which include 32 special float16 numbers.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes 2 numpy ndarrays. There are 32 special float16 numbers in every ndarray.
+The corresponding elements pairs in these ndarrays are different and comprehensive. So users 
+can use these two ndarrays to test the results between two special float16 numbers.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_float_array_special_fp16_vv</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Function to generate a list of 2 numpy ndarrays which include 32 special float16 numbers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes 2 numpy ndarrays. There are 32 special float16 numbers in every ndarray.</span>
+<span class="sd">        The corresponding elements pairs in these ndarrays are different and comprehensive. So users </span>
+<span class="sd">        can use these two ndarrays to test the results between two special float16 numbers.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># special float table          -0   ,  inf  ,  -inf ,  nan  ,  0.1  ,  10  ,  65500 , 6.104e-05, 6.e-08</span>
+    <span class="n">fpt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x0000</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mh">0x8000</span><span class="p">,</span> <span class="mh">0x7c00</span><span class="p">,</span>         <span class="mh">0x7e00</span><span class="p">,</span>                 <span class="mh">0x7bff</span><span class="p">,</span> <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7c00</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="p">[</span>        <span class="mh">0x7c00</span><span class="p">,</span> <span class="mh">0xfc00</span><span class="p">,</span> <span class="mh">0x7e00</span><span class="p">,</span> <span class="mh">0x2e66</span><span class="p">,</span> <span class="mh">0x4900</span><span class="p">,</span> <span class="mh">0x7bff</span><span class="p">,</span> <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7e00</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span>                        <span class="mh">0x7e00</span><span class="p">,</span> <span class="mh">0x2e66</span><span class="p">,</span> <span class="mh">0x4900</span><span class="p">,</span> <span class="mh">0x7bff</span><span class="p">,</span> <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x2e66</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                <span class="mh">0x7bff</span><span class="p">,</span> <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x4900</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                <span class="mh">0x7bff</span><span class="p">,</span> <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7bff</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                <span class="mh">0x7bff</span><span class="p">,</span> <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x0400</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span>                                                        <span class="mh">0x0400</span><span class="p">,</span> <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">fpt7</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x0001</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span>                                                                <span class="mh">0x0001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>   
+
+    <span class="n">fpt_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">fpt0</span><span class="p">,</span> <span class="n">fpt1</span><span class="p">,</span> <span class="n">fpt2</span><span class="p">,</span> <span class="n">fpt3</span><span class="p">,</span> <span class="n">fpt4</span><span class="p">,</span> <span class="n">fpt5</span><span class="p">,</span> <span class="n">fpt6</span><span class="p">,</span> <span class="n">fpt7</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fpt_data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float16</span>
+
+    <span class="k">return</span> <span class="p">[</span> <span class="n">fpt_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fpt_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">]</span> 
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_float_array_special_fp32_vv" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_float_array_special_fp32_vv</span><span class="p">()</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to generate a list of 2 numpy ndarrays which include 32 special float32 numbers.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes 2 numpy ndarrays. There are 32 special float32 numbers in every ndarray.
+The corresponding elements pairs in these ndarrays are different and comprehensive. So users 
+can use these two ndarrays to test the results between two special float32 numbers.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_float_array_special_fp32_vv</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Function to generate a list of 2 numpy ndarrays which include 32 special float32 numbers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes 2 numpy ndarrays. There are 32 special float32 numbers in every ndarray.</span>
+<span class="sd">        The corresponding elements pairs in these ndarrays are different and comprehensive. So users </span>
+<span class="sd">        can use these two ndarrays to test the results between two special float32 numbers.</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="c1"># special float table                  -0   ,       inf  ,       -inf ,       nan  ,      0.1  ,      10  , 3.40282e+38,  1.1755e-38,      1e-45</span>
+    <span class="n">fpt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x00000000</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mh">0x80000000</span><span class="p">,</span>  <span class="mh">0x7f800000</span><span class="p">,</span>               <span class="mh">0x7fc00000</span><span class="p">,</span>                         <span class="mh">0x7f7fffff</span><span class="p">,</span>  <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7f800000</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="p">[</span>             <span class="mh">0x7f800000</span><span class="p">,</span>  <span class="mh">0xff800000</span><span class="p">,</span>  <span class="mh">0x7fc00000</span><span class="p">,</span> <span class="mh">0x3dcccccd</span><span class="p">,</span> <span class="mh">0x41200000</span><span class="p">,</span> <span class="mh">0x7f7fffff</span><span class="p">,</span>  <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7fc00000</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span>                                       <span class="mh">0x7fc00000</span><span class="p">,</span> <span class="mh">0x3dcccccd</span><span class="p">,</span> <span class="mh">0x41200000</span><span class="p">,</span> <span class="mh">0x7f7fffff</span><span class="p">,</span>  <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x3dcccccd</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                                           <span class="mh">0x7f7fffff</span><span class="p">,</span>  <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x41200000</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                                           <span class="mh">0x7f7fffff</span><span class="p">,</span>  <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7f7fffff</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                                           <span class="mh">0x7f7fffff</span><span class="p">,</span>  <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x00800000</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span>                                                                                        <span class="mh">0x00800000</span><span class="p">,</span> <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">fpt7</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x00000001</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span>                                                                                                    <span class="mh">0x00000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>   
+
+    <span class="n">fpt_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">fpt0</span><span class="p">,</span> <span class="n">fpt1</span><span class="p">,</span> <span class="n">fpt2</span><span class="p">,</span> <span class="n">fpt3</span><span class="p">,</span> <span class="n">fpt4</span><span class="p">,</span> <span class="n">fpt5</span><span class="p">,</span> <span class="n">fpt6</span><span class="p">,</span> <span class="n">fpt7</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fpt_data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+
+    <span class="k">return</span> <span class="p">[</span> <span class="n">fpt_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fpt_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">]</span>     
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_float_array_special_fp64_vv" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_float_array_special_fp64_vv</span><span class="p">()</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to generate a list of 2 numpy ndarrays which include 32 special float64 numbers.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes 2 numpy ndarrays. There are 32 special float64 numbers in every ndarray.
+The corresponding elements pairs in these ndarrays are different and comprehensive. So users 
+can use these two ndarrays to test the results between two special float64 numbers.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_float_array_special_fp64_vv</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Function to generate a list of 2 numpy ndarrays which include 32 special float64 numbers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes 2 numpy ndarrays. There are 32 special float64 numbers in every ndarray.</span>
+<span class="sd">        The corresponding elements pairs in these ndarrays are different and comprehensive. So users </span>
+<span class="sd">        can use these two ndarrays to test the results between two special float64 numbers.</span>
+<span class="sd">    &#39;&#39;&#39;</span>      
+    <span class="c1"># special float table                                  -0   ,               inf  ,               -inf ,               nan  ,              0.1  ,               10  ,    1.79769313e+308,     2.22507386e-308,         5.e-324</span>
+    <span class="n">fpt0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x0000000000000000</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mh">0x8000000000000000</span><span class="p">,</span>  <span class="mh">0x7ff0000000000000</span><span class="p">,</span>                       <span class="mh">0x7ff8000000000000</span><span class="p">,</span>                                         <span class="mh">0x7fefffffffffffff</span><span class="p">,</span>  <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7ff0000000000000</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span> <span class="p">[</span>                     <span class="mh">0x7ff0000000000000</span><span class="p">,</span>  <span class="mh">0xfff0000000000000</span><span class="p">,</span>  <span class="mh">0x7ff8000000000000</span><span class="p">,</span> <span class="mh">0x3fb999999999999a</span><span class="p">,</span> <span class="mh">0x4024000000000000</span><span class="p">,</span> <span class="mh">0x7fefffffffffffff</span><span class="p">,</span>  <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7ff8000000000000</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span>                                                               <span class="mh">0x7ff8000000000000</span><span class="p">,</span> <span class="mh">0x3fb999999999999a</span><span class="p">,</span> <span class="mh">0x4024000000000000</span><span class="p">,</span> <span class="mh">0x7fefffffffffffff</span><span class="p">,</span>  <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x3fb999999999999a</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                                                                                           <span class="mh">0x7fefffffffffffff</span><span class="p">,</span>  <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x4024000000000000</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                                                                                           <span class="mh">0x7fefffffffffffff</span><span class="p">,</span>  <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x7fefffffffffffff</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span>                                                                                                                           <span class="mh">0x7fefffffffffffff</span><span class="p">,</span>  <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x0010000000000000</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span>                                                                                                                                                <span class="mh">0x0010000000000000</span><span class="p">,</span> <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>
+    <span class="n">fpt7</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mh">0x0000000000000001</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span>                                                                                                                                                                    <span class="mh">0x0000000000000001</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">)</span>   
+
+    <span class="n">fpt_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">fpt0</span><span class="p">,</span> <span class="n">fpt1</span><span class="p">,</span> <span class="n">fpt2</span><span class="p">,</span> <span class="n">fpt3</span><span class="p">,</span> <span class="n">fpt4</span><span class="p">,</span> <span class="n">fpt5</span><span class="p">,</span> <span class="n">fpt6</span><span class="p">,</span> <span class="n">fpt7</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fpt_data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+
+    <span class="k">return</span> <span class="p">[</span> <span class="n">fpt_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fpt_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">]</span> 
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_illegal_lmul" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_illegal_lmul</span><span class="p">(</span><span class="n">sew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get illegal lmul with input sew.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, which can be 8, 16, 32, 64.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>illegal lmul with input sew, when sew == 8, return None.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_illegal_lmul</span><span class="p">(</span><span class="n">sew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get illegal lmul with input sew.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): vsew register value, which can be 8, 16, 32, 64.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: illegal lmul with input sew, when sew == 8, return None.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;f8&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="s1">&#39;f8&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="s1">&#39;f8&#39;</span><span class="p">]</span>    
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_illegal_lmul_w" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_illegal_lmul_w</span><span class="p">(</span><span class="n">sew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get illegal lmul values with input sew for widening and narrowing instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, which can be 8, 16, 32, 64.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>illegal lmul with input sew for widening and narrowing instructions.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_illegal_lmul_w</span><span class="p">(</span><span class="n">sew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get illegal lmul values with input sew for widening and narrowing instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): vsew register value, which can be 8, 16, 32, 64.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: illegal lmul with input sew for widening and narrowing instructions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="mi">8</span> <span class="p">]</span>
+    <span class="k">if</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;f8&#39;</span><span class="p">,</span> <span class="mi">8</span> <span class="p">]</span>
+    <span class="k">if</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="s1">&#39;f8&#39;</span><span class="p">,</span> <span class="mi">8</span> <span class="p">]</span>
+    <span class="k">if</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="s1">&#39;f8&#39;</span><span class="p">,</span> <span class="mi">8</span> <span class="p">]</span>         
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_index_array" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_index_array</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get a numpy ndarray of vl size to be used as indexes for index instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width, used as index width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, used as operand element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A linspace numpy ndarray between 0 and 2**20 multiplying with sew//8 
+with size equal to vl. Its dtype is uint in eew width.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_index_array</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get a numpy ndarray of vl size to be used as indexes for index instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): effective element width, used as index width.</span>
+<span class="sd">        sew (int): vsew register value, used as operand element width.</span>
+<span class="sd">        vl (int): vector length register value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray:  A linspace numpy ndarray between 0 and 2**20 multiplying with sew//8 </span>
+<span class="sd">        with size equal to vl. Its dtype is uint in eew width.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">20</span><span class="p">,</span> <span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">bits_to_dtype_uint</span><span class="p">(</span><span class="n">eew</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">sew</span><span class="o">//</span><span class="mi">8</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_index_array_consecutive" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_index_array_consecutive</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get consecutive indexes for index instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width, used as index width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, used as operand element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list 2 numpy ndarray. The first array has vl size of uint 0 in eew width.
+So the indexes are 0. The second array has elements of [0, 1, ..., vl-1]*(sew//8) 
+of which the dtype is uint in eew width. They are consecutive indexes.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_index_array_consecutive</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get consecutive indexes for index instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): effective element width, used as index width.</span>
+<span class="sd">        sew (int): vsew register value, used as operand element width.</span>
+<span class="sd">        vl (int): vector length register value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list 2 numpy ndarray. The first array has vl size of uint 0 in eew width.</span>
+<span class="sd">        So the indexes are 0. The second array has elements of [0, 1, ..., vl-1]*(sew//8) </span>
+<span class="sd">        of which the dtype is uint in eew width. They are consecutive indexes.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">bits_to_dtype_uint</span><span class="p">(</span><span class="n">eew</span><span class="p">)))</span>
+    <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vl</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">bits_to_dtype_uint</span><span class="p">(</span><span class="n">eew</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">sew</span><span class="o">//</span><span class="mi">8</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">index</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_index_array_misaligned" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_index_array_misaligned</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get misaligned indexes for index instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width, used as index width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, used as operand element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length register value   </p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A numpy ndarray, its size is vl, its elements is computed by a linspace
+array between 0 and 0xff multiplying with (sew//8)*4 and adding 3, its dtype is uint in 
+eew width.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_index_array_misaligned</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">vl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get misaligned indexes for index instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): effective element width, used as index width.</span>
+<span class="sd">        sew (int): vsew register value, used as operand element width.</span>
+<span class="sd">        vl (int): vector length register value   </span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A numpy ndarray, its size is vl, its elements is computed by a linspace</span>
+<span class="sd">        array between 0 and 0xff multiplying with (sew//8)*4 and adding 3, its dtype is uint in </span>
+<span class="sd">        eew width.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">bits_to_dtype_uint</span><span class="p">(</span><span class="n">eew</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">sew</span><span class="o">//</span><span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="mi">4</span><span class="o">+</span><span class="mi">3</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_lmul_list" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_lmul_list</span><span class="p">(</span><span class="n">sew_t</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get available lmul according to sew or sew and eew.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew_t</code></td>
+        <td><code>int, tuple, list</code></td>
+        <td><p>If the type of sew_t is int, it is used as sew and eew.
+If the type of sew_t is tuple or list, the first element is used as sew, and 
+second element is used as eew.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes avaliable lmul value when sew and eew are set by sew_t.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_lmul_list</span><span class="p">(</span><span class="n">sew_t</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get available lmul according to sew or sew and eew.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew_t (int, tuple, list): If the type of sew_t is int, it is used as sew and eew.</span>
+<span class="sd">            If the type of sew_t is tuple or list, the first element is used as sew, and </span>
+<span class="sd">            second element is used as eew.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes avaliable lmul value when sew and eew are set by sew_t.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sew_t</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">sew</span> <span class="o">=</span> <span class="n">sew_t</span>
+        <span class="n">eew</span> <span class="o">=</span> <span class="n">sew</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">sew_t</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">sew_t</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">sew</span> <span class="o">=</span> <span class="n">sew_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">eew</span> <span class="o">=</span> <span class="n">sew_t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">,</span><span class="s1">&#39;f8&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+
+    <span class="n">lmul_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">eew</span><span class="o">/</span><span class="n">sew</span><span class="o">*</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">8</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eew</span><span class="o">/</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">64</span><span class="p">:</span>
+            <span class="n">lmul_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lmul_list</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_lmul_list_index_seg" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_lmul_list_index_seg</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">nf</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get avaliable lmul for segment index instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>Effective element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>Selected element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>nf</code></td>
+        <td><code>int</code></td>
+        <td><p>nf field of segment instructions.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes avaliable lmul value with input eew, sew and nf for segment index instructions.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_lmul_list_index_seg</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">nf</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get avaliable lmul for segment index instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): Effective element width.</span>
+<span class="sd">        sew (int): Selected element width.</span>
+<span class="sd">        nf (int): nf field of segment instructions.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes avaliable lmul value with input eew, sew and nf for segment index instructions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">,</span><span class="s1">&#39;f8&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+
+    <span class="n">lmul_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">eew</span><span class="o">/</span><span class="n">sew</span><span class="o">*</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">8</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eew</span><span class="o">/</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">64</span> <span class="ow">and</span> <span class="p">(</span><span class="n">nf</span><span class="o">*</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">lmul_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lmul_list</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_lmul_list_seg" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_lmul_list_seg</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">nf</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get avaliable lmul for segment instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>Effective element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>Selected element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>nf</code></td>
+        <td><code>int</code></td>
+        <td><p>nf field of segment instructions.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes avaliable lmul value with input eew, sew and nf for segment instructions.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_lmul_list_seg</span><span class="p">(</span><span class="n">eew</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">nf</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get avaliable lmul for segment instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): Effective element width.</span>
+<span class="sd">        sew (int): Selected element width.</span>
+<span class="sd">        nf (int): nf field of segment instructions.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes avaliable lmul value with input eew, sew and nf for segment instructions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">,</span><span class="s1">&#39;f8&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+
+    <span class="n">lmul_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">eew</span><span class="o">/</span><span class="n">sew</span><span class="o">*</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">8</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eew</span><span class="o">/</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">64</span> <span class="ow">and</span> <span class="p">(</span><span class="n">nf</span><span class="o">*</span><span class="n">eew</span><span class="o">/</span><span class="n">sew</span><span class="o">*</span><span class="n">factor_lmul</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">lmul_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lmul_list</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_lmul_list_w" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_lmul_list_w</span><span class="p">(</span><span class="n">sew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get available lmul with input sew for widening and narrowing instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value, which can be 8, 16, 32, 64.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>The list includes avaliable lmul value with input sew for widening and narrowing instructions.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_lmul_list_w</span><span class="p">(</span><span class="n">sew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get available lmul with input sew for widening and narrowing instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sew (int): vsew register value, which can be 8, 16, 32, 64.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The list includes avaliable lmul value with input sew for widening and narrowing instructions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">,</span><span class="s1">&#39;f8&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">,</span><span class="s1">&#39;f4&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;f2&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">sew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span> 
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_mask_array_first_masked" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_mask_array_first_masked</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function used to generate mask bits of which the first bit is 0, others are 1 for rvv instruction.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vl register value, which defines mask bits amount in this function.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A numpy ndarray of which the first bit of first element is 0, others are 1, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_mask_array_first_masked</span><span class="p">(</span> <span class="n">vl</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function used to generate mask bits of which the first bit is 0, others are 1 for rvv instruction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vl register value, which defines mask bits amount in this function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A numpy ndarray of which the first bit of first element is 0, others are 1, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">mask</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span> <span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="p">)</span>
+    <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">packbits</span><span class="p">(</span> <span class="n">mask</span><span class="p">,</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">mask</span> 
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_mask_array_last_masked" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_mask_array_last_masked</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function used to generate mask bits of which the vlth bit is 0, others are 1 for rvv instruction.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vl register value, which defines mask bits amount in this function.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A numpy ndarray of which the vlth bit is 0, others are 1, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_mask_array_last_masked</span><span class="p">(</span> <span class="n">vl</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function used to generate mask bits of which the vlth bit is 0, others are 1 for rvv instruction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vl register value, which defines mask bits amount in this function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A numpy ndarray of which the vlth bit is 0, others are 1, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</span>
+<span class="sd">    &#39;&#39;&#39;</span>  
+    <span class="n">mask</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span> <span class="n">vl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="p">)</span>
+    <span class="n">mask</span><span class="p">[</span><span class="n">vl</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">packbits</span><span class="p">(</span> <span class="n">mask</span><span class="p">,</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">mask</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_mask_array_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_mask_array_random</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function used to generate random mask bits for rvv instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vl register value, which defines mask bits amount in this function.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A random numpy ndarray, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.
+The bits above vl are 0.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_mask_array_random</span><span class="p">(</span> <span class="n">vl</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function used to generate random mask bits for rvv instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vl register value, which defines mask bits amount in this function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A random numpy ndarray, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</span>
+<span class="sd">        The bits above vl are 0.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">mask</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">vl</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span> <span class="n">mask</span><span class="p">,</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span> <span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">vl</span><span class="p">]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">packbits</span><span class="p">(</span> <span class="n">mask</span><span class="p">,</span> <span class="n">bitorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">mask</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_mask_array_zero" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_mask_array_zero</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function used to generate zero mask bits for rvv instruction.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vl register value, which defines mask bits amount in this function.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>numpy ndarray</code></td>
+      <td><p>A zero numpy ndarray, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_mask_array_zero</span><span class="p">(</span> <span class="n">vl</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function used to generate zero mask bits for rvv instruction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vl register value, which defines mask bits amount in this function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy ndarray: A zero numpy ndarray, its dtype is numpy.uint8, its size is the integer which is rounded up to after vl is divided by 8.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">mask</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">vl</span><span class="o">/</span><span class="mi">8</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">mask</span> 
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_sew_list_neq_eew" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_sew_list_neq_eew</span><span class="p">(</span><span class="n">eew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get available vsew values which don't equal to eew.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>The present eew value, which can be 8, 16, 32, 64.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list of available vsew values which don't equal to eew.
+The available vsew values are 8, 16, 32, 64.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_sew_list_neq_eew</span><span class="p">(</span><span class="n">eew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get available vsew values which don&#39;t equal to eew.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): The present eew value, which can be 8, 16, 32, 64.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of available vsew values which don&#39;t equal to eew.</span>
+<span class="sd">        The available vsew values are 8, 16, 32, 64.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="mi">8</span> <span class="o">==</span> <span class="n">eew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="mi">16</span> <span class="o">==</span> <span class="n">eew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="mi">32</span> <span class="o">==</span> <span class="n">eew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">64</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="mi">64</span> <span class="o">==</span> <span class="n">eew</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_stride_list_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_stride_list_random</span><span class="p">(</span><span class="n">eew</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get a list of 5 random int numbers between 0 and 0xff*eew.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list of 5 random int numbers between 0 and 0xff*eew. Random numbers
+are generated between 0 and 0xff first, then multiply with eew.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_stride_list_random</span><span class="p">(</span><span class="n">eew</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get a list of 5 random int numbers between 0 and 0xff*eew.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eew (int): effective element width.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of 5 random int numbers between 0 and 0xff*eew. Random numbers</span>
+<span class="sd">        are generated between 0 and 0xff first, then multiply with eew.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">*</span><span class="n">eew</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_stride_list_random_ls_stride" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_stride_list_random_ls_stride</span><span class="p">(</span><span class="n">vl</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">nf</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get a list of random int numbers to be used as stride of vector stride instructions.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element length</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>nf</code></td>
+        <td><code>int</code></td>
+        <td><p>nf field in vector instruction for segment instructions, default 1.</p></td>
+        <td><code>1</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>Stride numbers are computed by 0, eew, vl*nf multiplying with eew. If nf &gt; 1, a random int number 
+between 0 and nf and a random int number between nf+1 and 16 multiply with eew and then are appended into
+the list.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_stride_list_random_ls_stride</span><span class="p">(</span><span class="n">vl</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">nf</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get a list of random int numbers to be used as stride of vector stride instructions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vector length register value</span>
+<span class="sd">        eew (int): effective element length</span>
+<span class="sd">        nf (int): nf field in vector instruction for segment instructions, default 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Stride numbers are computed by 0, eew, vl*nf multiplying with eew. If nf &gt; 1, a random int number </span>
+<span class="sd">        between 0 and nf and a random int number between nf+1 and 16 multiply with eew and then are appended into</span>
+<span class="sd">        the list.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">stride_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">eew</span><span class="o">*</span><span class="n">nf</span><span class="p">,</span> <span class="n">vl</span><span class="o">*</span><span class="n">nf</span><span class="o">*</span><span class="n">eew</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">nf</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">stride_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nf</span><span class="p">)</span><span class="o">*</span><span class="n">eew</span><span class="p">)</span>
+        <span class="n">stride_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">nf</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span><span class="o">*</span><span class="n">eew</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stride_list</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_vl_list" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_vl_list</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">ebits</span><span class="p">,</span> <span class="n">vlen</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Functions to get vl value based on vlen, sew, lmul</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>lmul</code></td>
+        <td><code>int or str</code></td>
+        <td><p>vlmul register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>ebits</code></td>
+        <td><code>int</code></td>
+        <td><p>element bits length, which equals to vsew value.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vlen</code></td>
+        <td><code>int</code></td>
+        <td><p>rvv register length</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list including 1, vlmax, vlmax-1 and a value between 1 and vlmax-1.
+If  two values are equal, keep one value in the list.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_vl_list</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">ebits</span><span class="p">,</span> <span class="n">vlen</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Functions to get vl value based on vlen, sew, lmul</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lmul (int or str): vlmul register value</span>
+<span class="sd">        ebits (int): element bits length, which equals to vsew value.</span>
+<span class="sd">        vlen (int): rvv register length</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list including 1, vlmax, vlmax-1 and a value between 1 and vlmax-1.</span>
+<span class="sd">        If  two values are equal, keep one value in the list.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span> <span class="o">/</span> <span class="n">ebits</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">max</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="nb">max</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>    
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_vl_list_ls" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_vl_list_ls</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">vlen</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get vl list for rvv load-store instruction</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>lmul</code></td>
+        <td><code>int or str</code></td>
+        <td><p>vlmul register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width set by load-store instruction</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vlen</code></td>
+        <td><code>int</code></td>
+        <td><p>rvv register length</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list including test vl values for load-store instruction.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_vl_list_ls</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">vlen</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get vl list for rvv load-store instruction</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lmul (int or str): vlmul register value</span>
+<span class="sd">        sew (int): vsew register value</span>
+<span class="sd">        eew (int): effective element width set by load-store instruction</span>
+<span class="sd">        vlen (int): rvv register length</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list including test vl values for load-store instruction.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">emul</span> <span class="o">=</span> <span class="n">sew</span><span class="o">/</span><span class="n">eew</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span>
+    <span class="n">emul</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">emul</span> <span class="k">if</span> <span class="n">emul</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span> <span class="o">/</span> <span class="n">sew</span> <span class="p">)</span>
+    <span class="n">esum</span> <span class="o">=</span> <span class="nb">int</span> <span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">emul</span> <span class="o">/</span> <span class="n">eew</span><span class="p">)</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">sum</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">sum</span> <span class="o">&lt;=</span> <span class="n">esum</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="nb">sum</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">sum</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">esum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span> <span class="o">/</span> <span class="n">eew</span> <span class="p">)</span>
+        <span class="n">vl_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">emul</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">isum</span> <span class="o">=</span> <span class="nb">int</span> <span class="p">(</span><span class="n">vlen</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">eew</span><span class="p">)</span>
+            <span class="n">vl_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">vl_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isum</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vl_list</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_vl_list_ls_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_vl_list_ls_random</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">vlen</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Functions to get random vl list for load&amp;store cases,
+based on lmul, sew, eew, vlen.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>lmul</code></td>
+        <td><code>int or str</code></td>
+        <td><p>vlmul register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vlen</code></td>
+        <td><code>int</code></td>
+        <td><p>rvv vector register length</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list including 10 random int numbers between 1 and vlmax</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_vl_list_ls_random</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">vlen</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Functions to get random vl list for load&amp;store cases,</span>
+<span class="sd">    based on lmul, sew, eew, vlen.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lmul (int or str): vlmul register value</span>
+<span class="sd">        sew (int): vsew register value</span>
+<span class="sd">        eew (int): effective element width</span>
+<span class="sd">        vlen (int): rvv vector register length</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list including 10 random int numbers between 1 and vlmax</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">emul</span> <span class="o">=</span> <span class="n">sew</span><span class="o">/</span><span class="n">eew</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span>
+    <span class="n">emul</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">emul</span> <span class="k">if</span> <span class="n">emul</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span> <span class="o">/</span> <span class="n">sew</span> <span class="p">)</span>
+    <span class="n">esum</span> <span class="o">=</span> <span class="nb">int</span> <span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">emul</span> <span class="o">/</span> <span class="n">eew</span><span class="p">)</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">sum</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">minSum</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">sum</span><span class="p">,</span> <span class="n">esum</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">minSum</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_vl_list_ls_seg" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_vl_list_ls_seg</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">vlen</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get vl list for rvv segment load-store instruction</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>lmul</code></td>
+        <td><code>int or str</code></td>
+        <td><p>vlmul register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>sew</code></td>
+        <td><code>int</code></td>
+        <td><p>vsew register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>eew</code></td>
+        <td><code>int</code></td>
+        <td><p>effective element width set by load-store instruction</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>vlen</code></td>
+        <td><code>int</code></td>
+        <td><p>rvv register length</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list including test vl values for segment load-store instruction.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_vl_list_ls_seg</span><span class="p">(</span><span class="n">lmul</span><span class="p">,</span> <span class="n">sew</span><span class="p">,</span> <span class="n">eew</span><span class="p">,</span> <span class="n">vlen</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get vl list for rvv segment load-store instruction</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lmul (int or str): vlmul register value</span>
+<span class="sd">        sew (int): vsew register value</span>
+<span class="sd">        eew (int): effective element width set by load-store instruction</span>
+<span class="sd">        vlen (int): rvv register length</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list including test vl values for segment load-store instruction.</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="n">emul</span> <span class="o">=</span> <span class="n">sew</span><span class="o">/</span><span class="n">eew</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span> <span class="o">/</span> <span class="n">sew</span> <span class="p">)</span>
+    <span class="n">esum</span> <span class="o">=</span> <span class="nb">int</span> <span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">emul</span> <span class="o">/</span> <span class="n">eew</span><span class="p">)</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">sum</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">sum</span> <span class="o">&lt;=</span> <span class="n">esum</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="nb">sum</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">sum</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">esum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">vlen</span> <span class="o">*</span> <span class="n">factor_lmul</span><span class="p">[</span><span class="n">lmul</span><span class="p">]</span> <span class="o">/</span> <span class="n">eew</span> <span class="p">)</span>
+        <span class="n">vl_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">emul</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">esum</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">esum</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">emul</span><span class="o">+</span><span class="mi">1</span><span class="p">)):</span>
+                <span class="n">isum</span> <span class="o">=</span> <span class="nb">int</span> <span class="p">(</span><span class="n">vlen</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">eew</span><span class="p">)</span>
+                <span class="n">vl_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">vl_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isum</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vl_list</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_vstart_list_linspace" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_vstart_list_linspace</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get a list of int numbers to be used as vstart in test cases.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list of int number between 0 and vl-1. The length of the list is computed
+by vl//10.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_vstart_list_linspace</span><span class="p">(</span><span class="n">vl</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to get a list of int numbers to be used as vstart in test cases.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vector length register value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of int number between 0 and vl-1. The length of the list is computed</span>
+<span class="sd">        by vl//10.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vl</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vl</span><span class="o">//</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>    
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="rvpvp.utils.data.vector_vstart_list_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">vector_vstart_list_random</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Function to get a list of 5 random int numbers between 0 and vl-1 to be used as vstart.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>vl</code></td>
+        <td><code>int</code></td>
+        <td><p>vector length register value</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>A list of 5 random int number between 0 and vl-1.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>rvpvp/utils/data.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">vector_vstart_list_random</span><span class="p">(</span><span class="n">vl</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;Function to get a list of 5 random int numbers between 0 and vl-1 to be used as vstart.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vl (int): vector length register value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of 5 random int number between 0 and vl-1.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vl</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../../spec/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Cases" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Cases
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../utils/" class="md-footer__link md-footer__link--next" aria-label="Next: Utilities" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Utilities
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2021 - 2021 UltraFive Team
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.sections"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../../assets/javascripts/workers/search.409db549.min.js", "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.56a63758.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -14,7 +14,7 @@
     
     
       
-        <title>Getting Started - RISC-V PVP</title>
+        <title>Support New Targets - RISC-V PVP</title>
       
     
     
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#support-new-targets" class="md-skip">
           Skip to content
         </a>
       
@@ -95,7 +95,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              Support New Targets
             
           </span>
         </div>
@@ -218,6 +218,21 @@
 
   
   
+  
+    <li class="md-nav__item">
+      <a href="../get-started/" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
     
   
   
@@ -230,12 +245,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Getting Started
+          Support New Targets
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Getting Started
+        Support New Targets
       </a>
       
         
@@ -253,42 +268,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#create-a-new-target" class="md-nav__link">
+    Create a New Target
   </a>
-  
-    <nav class="md-nav" aria-label="Prerequisites">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#toolchains" class="md-nav__link">
-    Toolchains
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#instruction-set-simulators" class="md-nav__link">
-    Instruction Set Simulators
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rtl-simulators" class="md-nav__link">
-    RTL Simulators
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-riscv-pvp" class="md-nav__link">
-    Use RISCV-PVP
+  <a href="#target-configuration-file" class="md-nav__link">
+    Target Configuration File
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-new-instructions" class="md-nav__link">
+    Add New Instructions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-verification-cases" class="md-nav__link">
+    Add Verification Cases
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generate-and-run" class="md-nav__link">
+    Generate and Run
   </a>
   
 </li>
@@ -297,21 +306,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../new-target/" class="md-nav__link">
-        Support New Targets
-      </a>
     </li>
   
 
@@ -464,42 +458,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#create-a-new-target" class="md-nav__link">
+    Create a New Target
   </a>
-  
-    <nav class="md-nav" aria-label="Prerequisites">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#toolchains" class="md-nav__link">
-    Toolchains
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#instruction-set-simulators" class="md-nav__link">
-    Instruction Set Simulators
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rtl-simulators" class="md-nav__link">
-    RTL Simulators
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-riscv-pvp" class="md-nav__link">
-    Use RISCV-PVP
+  <a href="#target-configuration-file" class="md-nav__link">
+    Target Configuration File
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-new-instructions" class="md-nav__link">
+    Add New Instructions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-verification-cases" class="md-nav__link">
+    Add Verification Cases
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generate-and-run" class="md-nav__link">
+    Generate and Run
   </a>
   
 </li>
@@ -516,71 +504,106 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/ultrafive/riscv-pvp/edit/master/docs/get-started.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/ultrafive/riscv-pvp/edit/master/docs/new-target.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="getting-started">Getting Started</h1>
-<h2 id="prerequisites">Prerequisites</h2>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">RISCV</span><span class="o">=</span>~/opt/riscv
+                <h1 id="support-new-targets">Support New Targets</h1>
+<h2 id="create-a-new-target">Create a New Target</h2>
+<p>We could use rvpvp cli tool to create a new target.</p>
+<div class="highlight"><pre><span></span><code>$ rvpvp new new-target
 </code></pre></div>
-<h3 id="toolchains">Toolchains</h3>
-<p>For latest rvv-0.10/1.0 support, we use llvm as the default toolchain.
-We could build it from source and install to $RISCV. </p>
-<div class="highlight"><pre><span></span><code>$ git clone https://github.com/ultrafive/llvm-project
-$ <span class="nb">cd</span> llvm-project
-$ git checkout uf-master
-$ mkdir -p build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build <span class="o">&amp;&amp;</span> cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="nv">$RISCV</span> <span class="se">\</span>
-    -DCMAKE_BUILD_TYPE<span class="o">=</span>Release -DLLVM_OPTIMIZED_TABLEGEN<span class="o">=</span>On <span class="se">\</span>
-    -DLLVM_ENABLE_PROJECTS<span class="o">=</span><span class="s2">&quot;clang;compiler-rt;lld&quot;</span> <span class="se">\</span>
-    -DLLVM_LINK_LLVM_DYLIB<span class="o">=</span>On ../llvm
-$ make -j<span class="sb">`</span>nproc<span class="sb">`</span> <span class="o">&amp;&amp;</span> make install
+<p>It will create template files in the new created directory.</p>
+<div class="highlight"><pre><span></span><code>$ <span class="nb">cd</span> new-target
+$ tree
+.
+├── isa
+│   └── custom
+│       └── insts.py
+├── specs
+│   └── custom
+│       └── vmod_vv.spec.yml
+└── target.yml
 </code></pre></div>
-<p>llvm's libc development is still in the planning phase. To support c compiling,
-we still need a external libc. 
-Let‘s build riscv-gnu-toolchain from source and install to $RISCV.</p>
-<div class="highlight"><pre><span></span><code>$ git clone https://github.com/riscv/riscv-gnu-toolchain
-$ <span class="nb">cd</span> riscv-gnu-toolchain
-$ git checkout rvv-0.9.x
-$ git submodule update --init --recursive
-$ mkdir -p build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build <span class="o">&amp;&amp;</span> ../configure --prefix<span class="o">=</span><span class="nv">$RISCV</span>
-$ make -j<span class="sb">`</span>nproc<span class="sb">`</span>
+<ul>
+<li><code>target.yml</code>: target configuration file.</li>
+<li><code>isa</code>: directory to define new instruction model</li>
+<li><code>specs</code>: directory to define new verification cases</li>
+</ul>
+<p>Please read sections below for more information.</p>
+<h2 id="target-configuration-file">Target Configuration File</h2>
+<p>The target configuration file is used to tell rvpvp how to generate, compile and
+run verifcation cases.</p>
+<p>The default file is defined as below, we could override variables for new targets.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">processor</span><span class="p">:</span>
+  <span class="nt">xlen</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">64</span>
+  <span class="nt">flen</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">64</span>
+  <span class="nt">vlen</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1024</span>
+  <span class="nt">elen</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">64</span>
+  <span class="nt">slen</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1024</span>
+
+<span class="nt">compile</span><span class="p">:</span>
+  <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">clang</span>
+  <span class="nt">cc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">f&#39;{path} --target=riscv{xlen}-unknown-elf -mno-relax -fuse-ld=lld -march=rv{xlen}gv0p10zfh0p1 -menable-experimental-extensions&#39;</span>
+  <span class="nt">defines</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">f&#39;-DXLEN={xlen} -DVLEN={vlen}&#39;</span>
+  <span class="nt">cflags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-g -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles</span>
+  <span class="nt">linkflags</span><span class="p">:</span> <span class="s">&#39;&#39;</span>
+
+<span class="nt">spike</span><span class="p">:</span>
+  <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">spike</span>
+
+<span class="c1"># gem5:</span>
+<span class="c1">#   path: ~/work/gem5/gem5/build/RISCV/gem5.opt</span>
+<span class="c1">#   config: ~/work/gem5/gem5/configs/example/fs.py</span>
 </code></pre></div>
-<h3 id="instruction-set-simulators">Instruction Set Simulators</h3>
-<p>The default Instruction Set Simulator (ISS) is spike. We are working in progress
-to support more ISSs.</p>
-<div class="highlight"><pre><span></span><code>$ git clone https://github.com/riscv/riscv-tools
-$ cd riscv-tools
-$ git submodule update --init --recursive
-$ cd riscv-isa-sim &amp;&amp; git checkout master &amp;&amp; git pull &amp;&amp; cd ..
-$ ./build-spike-only.sh
+<h2 id="add-new-instructions">Add New Instructions</h2>
+<p>To support new instructions, we should create a new <code>Inst</code> python class in <code>isa/</code>
+directory.</p>
+<p>The new class inherits from the <code>Inst</code> class and should override these members
+and methods:</p>
+<ul>
+<li><code>name</code> : the instruction assembly name string</li>
+<li><code>golden()</code>: return the inst running result, usually the dest operator value
+   computed from the source operators.</li>
+</ul>
+<p>This is a simple <code>add</code> instruction example:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># isa/rvi/add.py</span>
+<span class="kn">from</span> <span class="nn">rvpvp.isa.inst</span> <span class="kn">import</span> <span class="n">Inst</span>
+
+<span class="k">class</span> <span class="nc">Add</span><span class="p">(</span><span class="n">Inst</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;add&#39;</span>
+
+    <span class="k">def</span> <span class="nf">golden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rd</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;rs1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;rs2&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">rd</span>
 </code></pre></div>
-<h3 id="rtl-simulators">RTL Simulators</h3>
-<p>To use the co-simulation flow, you need to have an RTL simulator which supports
-RISC-V Vector Extension 0.10/1.0. The RTL simulator also need to use
-"+signature=" argument provide a way to dump the "begin_signature" section to
-a file, this machanism is also used by riscv-torture or other RISC-V
-co-simulation flows.</p>
-<p>We have verified with Synopsys VCS, verilator in chipyard framework. Please make
-sure the EDA tool environment is properly setup before running the co-simulation
-flow.</p>
-<h2 id="use-riscv-pvp">Use RISCV-PVP</h2>
-<p>Getting the source from github.</p>
-<div class="highlight"><pre><span></span><code>git clone https://github.com/ultrafive/riscv-pvp.git
-git submodule update --init
+<p>To support risc-v vector instructions, our vector inst model will receive
+numpy's ndarray for vector operators. For example, a <code>vadd.vv</code> model without
+mask could be defined as below.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># isa/rvv/vadd_vv.py</span>
+<span class="kn">from</span> <span class="nn">rvpvp.isa.inst</span> <span class="kn">import</span> <span class="n">Inst</span>
+
+<span class="k">class</span> <span class="nc">Vadd_vv</span><span class="p">(</span><span class="n">Inst</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;vadd.vv&#39;</span>
+
+    <span class="c1"># vadd.vv vd, vs2, vs1</span>
+    <span class="k">def</span> <span class="nf">golden</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vd</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;vs2&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;vs1&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">vd</span>
 </code></pre></div>
-<p>Install dependencies and run.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> riscv-pvp
-pip3 install -U pip                 <span class="c1"># update pip version</span>
-pip3 install -r requirements.txt    <span class="c1"># install dependencies (only once)</span>
-pip3 install .                      <span class="c1"># install riscv-pvp package and cli</span>
+<h2 id="add-verification-cases">Add Verification Cases</h2>
+<p>Verification cases should be added in the <code>spec/</code> directory.</p>
+<p>The detailed syntax is defined in <a href="../reference/spec">Verification Case Specification</a>.</p>
+<h2 id="generate-and-run">Generate and Run</h2>
+<p>The target verification cases could be generated once the target cases are ready.</p>
+<div class="highlight"><pre><span></span><code>$ rvpvp gen
 </code></pre></div>
-<p>Generate and run verification with default spike ISS target:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> targets/spike-rv64gcv
-rvpvp gen
-rvpvp run -n <span class="sb">`</span>nproc<span class="sb">`</span>
+<p>And then, we could run the generated cases.</p>
+<div class="highlight"><pre><span></span><code>$ rvpvp run -n <span class="m">80</span>
 </code></pre></div>
+<p>The ISS and RTL simulator co-simulation flow are shown below.</p>
+<p><img alt="flow" src="../images/cosim-flow.svg" /></p>
                 
               
               
@@ -600,7 +623,7 @@ rvpvp run -n <span class="sb">`</span>nproc<span class="sb">`</span>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
+        <a href="../get-started/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting Started" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -609,20 +632,20 @@ rvpvp run -n <span class="sb">`</span>nproc<span class="sb">`</span>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Overview
+              Getting Started
             </div>
           </div>
         </a>
       
       
         
-        <a href="../new-target/" class="md-footer__link md-footer__link--next" aria-label="Next: Support New Targets" rel="next">
+        <a href="../developing/" class="md-footer__link md-footer__link--next" aria-label="Next: Developing Guide" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Support New Targets
+              Developing Guide
             </div>
           </div>
           <div class="md-footer__button md-icon">
